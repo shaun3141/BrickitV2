@@ -33,6 +33,9 @@ export function EditTab({ mosaicData, onMosaicUpdate }: EditTabProps) {
   // Replace mode state
   const [showReplaceMode, setShowReplaceMode] = useState(false);
   const [replaceFromColor, setReplaceFromColor] = useState<LegoColor | null>(null);
+  
+  // Hover state for color palette
+  const [hoveredColor, setHoveredColor] = useState<LegoColor | null>(null);
 
   // Add to history when mosaic changes
   const addToHistory = useCallback((newMosaicData: MosaicData) => {
@@ -666,20 +669,32 @@ export function EditTab({ mosaicData, onMosaicUpdate }: EditTabProps) {
                 </div>
 
                 {/* Color Palette */}
-                <div className="grid grid-cols-4 gap-1 max-h-[400px] overflow-y-auto p-1">
-                  {LEGO_COLORS.map((color) => (
-                    <button
-                      key={color.id}
-                      className={`w-full aspect-square rounded border-2 transition-all hover:scale-110 ${
-                        selectedColor.id === color.id
-                          ? 'ring-2 ring-primary ring-offset-2'
-                          : 'border-border'
-                      }`}
-                      style={{ backgroundColor: color.hex }}
-                      title={color.name}
-                      onClick={() => setSelectedColor(color)}
-                    />
-                  ))}
+                <div className="relative">
+                  {/* Hover tooltip */}
+                  {hoveredColor && (
+                    <div className="absolute -top-8 left-0 right-0 z-10 flex justify-center">
+                      <div className="bg-popover text-popover-foreground px-3 py-1 rounded-md text-xs font-medium shadow-md border">
+                        {hoveredColor.name}
+                      </div>
+                    </div>
+                  )}
+                  
+                  <div className="grid grid-cols-4 gap-1 max-h-[400px] overflow-y-auto p-1">
+                    {LEGO_COLORS.map((color) => (
+                      <button
+                        key={color.id}
+                        className={`w-full aspect-square rounded border-2 transition-all hover:scale-110 ${
+                          selectedColor.id === color.id
+                            ? 'ring-2 ring-primary ring-offset-2'
+                            : 'border-border'
+                        }`}
+                        style={{ backgroundColor: color.hex }}
+                        onMouseEnter={() => setHoveredColor(color)}
+                        onMouseLeave={() => setHoveredColor(null)}
+                        onClick={() => setSelectedColor(color)}
+                      />
+                    ))}
+                  </div>
                 </div>
               </div>
             </CardContent>

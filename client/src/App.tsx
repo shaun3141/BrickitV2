@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Blocks, Github } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Button } from '@/components/ui/button';
 import { PhotoSelectionTab } from '@/components/tabs/PhotoSelectionTab';
 import { EditTab } from '@/components/tabs/EditTab';
 import { DownloadTab } from '@/components/tabs/DownloadTab';
@@ -117,11 +116,6 @@ function App() {
                   Instructions
                 </TabsTrigger>
               </TabsList>
-              <div className="flex items-center gap-4">
-                <Button variant="outline" size="sm">
-                  Log in
-                </Button>
-              </div>
             </div>
           </div>
         </header>

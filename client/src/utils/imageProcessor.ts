@@ -285,6 +285,31 @@ export async function processImage(
   // Convert original image to data URL for display (after basic filters)
   const originalImage = canvas.toDataURL('image/png');
 
+  // Apply artistic filter to full-resolution image if selected
+  let filteredImage: string | undefined;
+  if (options.filters?.selectedFilter) {
+    // Get full-resolution image data
+    const fullResImageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+    
+    // Apply artistic filter at full resolution
+    const filteredData = applyFilter(
+      { width: canvas.width, height: canvas.height, data: fullResImageData.data },
+      options.filters.selectedFilter.filterId,
+      options.filters.selectedFilter.params
+    );
+    
+    // Convert filtered data to canvas for display
+    const filteredCanvas = document.createElement('canvas');
+    filteredCanvas.width = canvas.width;
+    filteredCanvas.height = canvas.height;
+    const filteredCtx = filteredCanvas.getContext('2d');
+    if (filteredCtx) {
+      const displayImageData = new ImageData(filteredData.data, canvas.width, canvas.height);
+      filteredCtx.putImageData(displayImageData, 0, 0);
+      filteredImage = filteredCanvas.toDataURL('image/png');
+    }
+  }
+
   // Create a working canvas for mosaic processing
   const workCanvas = document.createElement('canvas');
   workCanvas.width = mosaicWidth;
@@ -298,28 +323,16 @@ export async function processImage(
   // Draw the filtered image scaled down to mosaic size
   workCtx.drawImage(canvas, 0, 0, mosaicWidth, mosaicHeight);
 
-  // Get image data for filter processing
+  // Get image data for mosaic processing
   let imageData = workCtx.getImageData(0, 0, mosaicWidth, mosaicHeight);
 
-  // Apply artistic filter if selected
-  let filteredImage: string | undefined;
+  // Apply artistic filter to mosaic-sized data for color quantization
   if (options.filters?.selectedFilter) {
     const filteredData = applyFilter(
       { width: mosaicWidth, height: mosaicHeight, data: imageData.data },
       options.filters.selectedFilter.filterId,
       options.filters.selectedFilter.params
     );
-    
-    // Convert filtered data back to canvas for display
-    const filteredCanvas = document.createElement('canvas');
-    filteredCanvas.width = mosaicWidth;
-    filteredCanvas.height = mosaicHeight;
-    const filteredCtx = filteredCanvas.getContext('2d');
-    if (filteredCtx) {
-      const displayImageData = new ImageData(filteredData.data, mosaicWidth, mosaicHeight);
-      filteredCtx.putImageData(displayImageData, 0, 0);
-      filteredImage = filteredCanvas.toDataURL('image/png');
-    }
     
     imageData = new ImageData(filteredData.data, mosaicWidth, mosaicHeight);
   }

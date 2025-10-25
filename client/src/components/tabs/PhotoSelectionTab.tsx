@@ -152,7 +152,7 @@ export function PhotoSelectionTab({
             <CardContent>
               <div className="border rounded-md overflow-hidden bg-muted/20">
                 <img
-                  src={mosaicData.originalImage}
+                  src={mosaicData.filteredImage || mosaicData.originalImage}
                   alt="Original with filters applied"
                   className="w-full h-auto"
                   style={{ maxHeight: '400px', objectFit: 'contain' }}
