@@ -1,6 +1,7 @@
 import { Download } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { BrickSwatch } from '@/components/BrickSwatch';
 import { generatePartsList, generateOptimizedPartsList } from '@/utils/imageProcessor';
 import type { MosaicData } from '@/utils/imageProcessor';
 import type { BrickPlacement } from '@/types';
@@ -130,10 +131,11 @@ export function PartsList({ mosaicData, placements, showOptimized = false }: Par
                 key={`${part.brickTypeId}-${part.colorId}-${index}`}
                 className="flex items-center gap-3 p-3 rounded-md border bg-card hover:bg-accent/50 transition-colors"
               >
-                <div
-                  className="w-10 h-10 rounded border-2 border-border shrink-0"
-                  style={{ backgroundColor: part.hex }}
-                  title={part.hex}
+                <BrickSwatch 
+                  hex={part.hex}
+                  brickWidth={part.brickWidth}
+                  brickHeight={part.brickHeight}
+                  className="shrink-0"
                 />
                 <div className="flex-1 min-w-0">
                   <div className="font-medium">{part.colorName}</div>
@@ -156,10 +158,11 @@ export function PartsList({ mosaicData, placements, showOptimized = false }: Par
                   key={part.color.id}
                   className="flex items-center gap-3 p-3 rounded-md border bg-card hover:bg-accent/50 transition-colors"
                 >
-                  <div
-                    className="w-10 h-10 rounded border-2 border-border shrink-0"
-                    style={{ backgroundColor: part.color.hex }}
-                    title={part.color.hex}
+                  <BrickSwatch 
+                    hex={part.color.hex}
+                    brickWidth={1}
+                    brickHeight={1}
+                    className="shrink-0"
                   />
                   <div className="flex-1 min-w-0">
                     <div className="font-medium">{part.color.name}</div>

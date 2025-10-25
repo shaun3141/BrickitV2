@@ -125,10 +125,7 @@ export function PhotoSelectionTab({
   return (
     <div className="space-y-6">
       <div className="flex flex-col items-center space-y-2">
-        <h2 className="text-2xl font-bold">Adjust Your Photo</h2>
-        <p className="text-muted-foreground">
-          Apply filters to enhance the LEGO conversion, then continue to edit
-        </p>
+    
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">

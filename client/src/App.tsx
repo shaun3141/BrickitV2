@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Blocks, Github } from 'lucide-react';
+import { Github } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { PhotoSelectionTab } from '@/components/tabs/PhotoSelectionTab';
 import { EditTab } from '@/components/tabs/EditTab';
@@ -100,9 +100,9 @@ function App() {
         <header className="border-b">
           <div className="container mx-auto px-4 py-4">
             <div className="flex items-center justify-between gap-8">
-              <div className="flex items-center gap-2">
-                <Blocks className="h-8 w-8 text-primary" />
-                <h1 className="text-2xl font-bold">Brickit</h1>
+              <div className="flex items-center gap-3">
+                <img src="/brickit_logo.png" alt="BrickIt Logo" className="h-10 w-10 object-contain" />
+                <h1 className="text-2xl font-bold">BrickIt</h1>
               </div>
               <TabsList className="grid grid-cols-4 flex-1 max-w-2xl">
                 <TabsTrigger value="photo-selection">Photo Selection</TabsTrigger>

@@ -1,5 +1,6 @@
 import { useEffect, useRef } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
+import { BrickSwatch } from '@/components/BrickSwatch';
 import type { InstructionStep } from '@/utils/instructionGenerator';
 import type { MosaicData } from '@/utils/imageProcessor';
 
@@ -147,11 +148,12 @@ export function InstructionStepComponent({
                   key={`${group.color.id}-${group.brickType.id}-${idx}`}
                   className="flex items-center gap-3 p-3 rounded-md border bg-card hover:bg-accent/50 transition-colors"
                 >
-                  {/* Color Swatch */}
-                  <div
-                    className="w-12 h-12 rounded border-2 border-border shrink-0"
-                    style={{ backgroundColor: group.color.hex }}
-                    title={group.color.hex}
+                  {/* Brick Swatch */}
+                  <BrickSwatch 
+                    hex={group.color.hex}
+                    brickWidth={group.brickType.width}
+                    brickHeight={group.brickType.height}
+                    className="shrink-0"
                   />
                   
                   {/* Brick Details */}

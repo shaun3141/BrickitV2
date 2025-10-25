@@ -423,6 +423,8 @@ export function generatePartsList(mosaicData: MosaicData): Map<number, { color: 
 export interface OptimizedPart {
   brickTypeId: string;
   brickTypeName: string;
+  brickWidth: number;
+  brickHeight: number;
   colorId: number;
   colorName: string;
   color: LegoColor;
@@ -445,6 +447,8 @@ export function generateOptimizedPartsList(
       partsMap.set(key, {
         brickTypeId: placement.brickType.id,
         brickTypeName: placement.brickType.displayName,
+        brickWidth: placement.brickType.width,
+        brickHeight: placement.brickType.height,
         colorId: placement.color.id,
         colorName: placement.color.name,
         color: placement.color,
