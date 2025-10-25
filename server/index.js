@@ -9,7 +9,7 @@ const app = express();
 const PORT = process.env.PORT || 8080;
 
 // Serve static files from the client dist directory
-app.use(express.static(path.join(__dirname, '../client/dist')));
+app.use(express.static(path.join(__dirname, 'client/dist')));
 
 // Health check endpoint
 app.get('/health', (_req, res) => {
@@ -18,7 +18,7 @@ app.get('/health', (_req, res) => {
 
 // Handle client-side routing - always return index.html
 app.get('*', (_req, res) => {
-  res.sendFile(path.join(__dirname, '../client/dist/index.html'));
+  res.sendFile(path.join(__dirname, 'client/dist/index.html'));
 });
 
 app.listen(PORT, () => {

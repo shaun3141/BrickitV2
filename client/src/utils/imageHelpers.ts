@@ -590,6 +590,6 @@ export function imageDataTo2D(imageData: ImageData): { width: number; height: nu
  * Convert our 2D format to ImageData
  */
 export function imageData2DToImageData(data2D: { width: number; height: number; data: Uint8ClampedArray }): ImageData {
-  return new ImageData(data2D.data, data2D.width, data2D.height);
+  return new ImageData(new Uint8ClampedArray(data2D.data), data2D.width, data2D.height);
 }
 

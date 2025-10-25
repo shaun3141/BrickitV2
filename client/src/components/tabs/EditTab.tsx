@@ -91,6 +91,69 @@ export function EditTab({ mosaicData, onMosaicUpdate }: EditTabProps) {
     }
   }, []);
 
+  // Helper function to draw a LEGO stud with 3D shading effect
+  const drawLegoStud = (
+    ctx: CanvasRenderingContext2D,
+    x: number,
+    y: number,
+    size: number,
+    baseColor: string
+  ) => {
+    const centerX = x + size / 2;
+    const centerY = y + size / 2;
+    const studRadius = size * 0.35; // Stud takes up 70% of the brick width
+
+    // Draw the stud with gradient for 3D effect
+    const gradient = ctx.createRadialGradient(
+      centerX - studRadius * 0.3, // Offset for highlight
+      centerY - studRadius * 0.3,
+      0,
+      centerX,
+      centerY,
+      studRadius
+    );
+
+    // Parse the base color and create lighter/darker variations
+    const hexToRgb = (hex: string) => {
+      const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+      return result ? {
+        r: parseInt(result[1], 16),
+        g: parseInt(result[2], 16),
+        b: parseInt(result[3], 16)
+      } : { r: 0, g: 0, b: 0 };
+    };
+
+    const rgb = hexToRgb(baseColor);
+    const lighter = `rgb(${Math.min(255, rgb.r + 40)}, ${Math.min(255, rgb.g + 40)}, ${Math.min(255, rgb.b + 40)})`;
+    const darker = `rgb(${Math.max(0, rgb.r - 30)}, ${Math.max(0, rgb.g - 30)}, ${Math.max(0, rgb.b - 30)})`;
+
+    gradient.addColorStop(0, lighter); // Highlight
+    gradient.addColorStop(0.6, baseColor); // Base color
+    gradient.addColorStop(1, darker); // Shadow
+
+    ctx.fillStyle = gradient;
+    ctx.beginPath();
+    ctx.arc(centerX, centerY, studRadius, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Add a subtle highlight on top
+    const highlightGradient = ctx.createRadialGradient(
+      centerX - studRadius * 0.4,
+      centerY - studRadius * 0.4,
+      0,
+      centerX - studRadius * 0.4,
+      centerY - studRadius * 0.4,
+      studRadius * 0.5
+    );
+    highlightGradient.addColorStop(0, 'rgba(255, 255, 255, 0.4)');
+    highlightGradient.addColorStop(1, 'rgba(255, 255, 255, 0)');
+
+    ctx.fillStyle = highlightGradient;
+    ctx.beginPath();
+    ctx.arc(centerX, centerY, studRadius, 0, Math.PI * 2);
+    ctx.fill();
+  };
+
   useEffect(() => {
     drawMosaic();
     drawPreview();
@@ -107,12 +170,34 @@ export function EditTab({ mosaicData, onMosaicUpdate }: EditTabProps) {
     canvas.width = mosaicData.width * pixelSize;
     canvas.height = mosaicData.height * pixelSize;
 
-    // Draw each pixel
+    // Draw each pixel with brick base and stud
     for (let row = 0; row < mosaicData.height; row++) {
       for (let col = 0; col < mosaicData.width; col++) {
         const color = mosaicData.pixels[row][col];
+        const x = col * pixelSize;
+        const y = row * pixelSize;
+        
+        // Draw brick base
         ctx.fillStyle = color.hex;
-        ctx.fillRect(col * pixelSize, row * pixelSize, pixelSize, pixelSize);
+        ctx.fillRect(x, y, pixelSize, pixelSize);
+        
+        // Add subtle edge shading to brick base
+        if (pixelSize >= 8) {
+          // Top-left lighter edge
+          ctx.fillStyle = 'rgba(255, 255, 255, 0.15)';
+          ctx.fillRect(x, y, pixelSize, 1);
+          ctx.fillRect(x, y, 1, pixelSize);
+          
+          // Bottom-right darker edge
+          ctx.fillStyle = 'rgba(0, 0, 0, 0.2)';
+          ctx.fillRect(x, y + pixelSize - 1, pixelSize, 1);
+          ctx.fillRect(x + pixelSize - 1, y, 1, pixelSize);
+        }
+        
+        // Draw the LEGO stud if pixel size is large enough
+        if (pixelSize >= 10) {
+          drawLegoStud(ctx, x, y, pixelSize, color.hex);
+        }
       }
     }
 

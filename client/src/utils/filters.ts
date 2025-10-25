@@ -121,7 +121,8 @@ export const posterPopFilter: FilterDefinition = {
     
     // Optional edge-preserving smoothing
     if (smoothing) {
-      data = bilateralFilter(data, imageData.width, imageData.height, 2, 30);
+      const filtered = bilateralFilter(data, imageData.width, imageData.height, 2, 30);
+      data = new Uint8ClampedArray(filtered);
     }
     
     // K-means to reduce to N colors

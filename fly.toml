@@ -7,6 +7,7 @@ app = 'brickitv2'
 primary_region = 'sjc'
 
 [build]
+  dockerfile = 'Dockerfile'
 
 [http_service]
   internal_port = 8080

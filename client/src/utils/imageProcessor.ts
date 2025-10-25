@@ -304,7 +304,7 @@ export async function processImage(
     filteredCanvas.height = canvas.height;
     const filteredCtx = filteredCanvas.getContext('2d');
     if (filteredCtx) {
-      const displayImageData = new ImageData(filteredData.data, canvas.width, canvas.height);
+      const displayImageData = new ImageData(new Uint8ClampedArray(filteredData.data), canvas.width, canvas.height);
       filteredCtx.putImageData(displayImageData, 0, 0);
       filteredImage = filteredCanvas.toDataURL('image/png');
     }
@@ -334,7 +334,7 @@ export async function processImage(
       options.filters.selectedFilter.params
     );
     
-    imageData = new ImageData(filteredData.data, mosaicWidth, mosaicHeight);
+    imageData = new ImageData(new Uint8ClampedArray(filteredData.data), mosaicWidth, mosaicHeight);
   }
 
   // Create the mosaic pixel grid from the processed image data

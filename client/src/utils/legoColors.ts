@@ -47,9 +47,6 @@ export const LEGO_COLORS: LegoColor[] = [
   { id: 38, name: "Tan", rgb: [151, 105, 79], hex: "#97694F" },
   { id: 39, name: "White", rgb: [255, 255, 255], hex: "#FFFFFF" },
   { id: 40, name: "Yellow", rgb: [255, 255, 0], hex: "#FFFF00" },
-  { id: 41, name: "Trans-Clear", rgb: [255, 255, 255], hex: "#FFFFFF" },
-  { id: 42, name: "Chrome Gold", rgb: [217, 217, 25], hex: "#D9D919" },
-  { id: 43, name: "Metallic Gold", rgb: [205, 127, 50], hex: "#CD7F32" },
 ];
 
 /**
