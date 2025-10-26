@@ -9,13 +9,16 @@ import type { MosaicData, BrickPlacement } from '@/types';
 interface ShareTabProps {
   mosaicData: MosaicData;
   placements: BrickPlacement[];
+  creationId?: string | null;
 }
 
-export function ShareTab({ mosaicData, placements }: ShareTabProps) {
+export function ShareTab({ mosaicData, placements, creationId }: ShareTabProps) {
   const [copied, setCopied] = useState(false);
   
-  // Generate a shareable URL (this could be enhanced with actual URL shortening or cloud storage)
-  const shareUrl = window.location.href;
+  // Generate shareable URL - if creation is saved and has ID, use that, otherwise use current URL
+  const shareUrl = creationId 
+    ? `${window.location.origin}/creation/${creationId}` 
+    : window.location.href;
 
   const handleCopyLink = async () => {
     try {
@@ -40,8 +43,8 @@ export function ShareTab({ mosaicData, placements }: ShareTabProps) {
     // Draw the mosaic
     for (let y = 0; y < mosaicData.height; y++) {
       for (let x = 0; x < mosaicData.width; x++) {
-        const colorData = mosaicData.grid[y][x];
-        ctx.fillStyle = colorData.hex;
+        const colorData = mosaicData.pixels[y][x];
+        ctx.fillStyle = colorData.getHex();
         ctx.fillRect(x * pixelSize, y * pixelSize, pixelSize, pixelSize);
       }
     }
@@ -59,7 +62,8 @@ export function ShareTab({ mosaicData, placements }: ShareTabProps) {
   };
 
   const handleShareSocial = (platform: 'twitter' | 'facebook' | 'reddit') => {
-    const text = `Check out my LEGO mosaic created with BrickIt! ${mosaicData.width}x${mosaicData.height} studs, ${mosaicData.totalBricks} bricks`;
+    const totalBricks = mosaicData.width * mosaicData.height;
+    const text = `Check out my LEGO mosaic created with BrickIt! ${mosaicData.width}x${mosaicData.height} studs, ${totalBricks} bricks`;
     const url = shareUrl;
 
     let shareLink = '';
@@ -93,7 +97,7 @@ export function ShareTab({ mosaicData, placements }: ShareTabProps) {
           <CardHeader>
             <CardTitle>Your Mosaic</CardTitle>
             <CardDescription>
-              {mosaicData.width} × {mosaicData.height} studs ({mosaicData.totalBricks} bricks)
+              {mosaicData.width} × {mosaicData.height} studs ({mosaicData.width * mosaicData.height} bricks)
             </CardDescription>
           </CardHeader>
           <CardContent>

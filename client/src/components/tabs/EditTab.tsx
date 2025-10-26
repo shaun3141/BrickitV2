@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect, useCallback, useMemo } from 'react';
-import { ZoomIn, ZoomOut, Pipette, Pencil, PaintBucket, Minus, Square, Circle, Undo2, Redo2, Replace } from 'lucide-react';
+import { ZoomIn, ZoomOut, Pipette, Pencil, PaintBucket, Minus, Square, Circle, Undo2, Redo2, Replace, Save } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { LEGO_COLORS } from '@/utils/legoColors';
@@ -12,9 +12,10 @@ type ShapeMode = 'filled' | 'outline';
 interface EditTabProps {
   mosaicData: MosaicData;
   onMosaicUpdate: (updatedMosaic: MosaicData) => void;
+  onSave?: () => void;
 }
 
-export function EditTab({ mosaicData, onMosaicUpdate }: EditTabProps) {
+export function EditTab({ mosaicData, onMosaicUpdate, onSave }: EditTabProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const previewCanvasRef = useRef<HTMLCanvasElement>(null);
   const [pixelSize, setPixelSize] = useState(16);
@@ -821,6 +822,19 @@ export function EditTab({ mosaicData, onMosaicUpdate }: EditTabProps) {
                   </p>
                 </div>
                 <div className="flex gap-2">
+                  {onSave && (
+                    <>
+                      <Button
+                        variant="default"
+                        size="sm"
+                        onClick={onSave}
+                      >
+                        <Save className="h-4 w-4 mr-2" />
+                        Save
+                      </Button>
+                      <div className="border-l mx-1" />
+                    </>
+                  )}
                   <Button
                     variant="outline"
                     size="icon"

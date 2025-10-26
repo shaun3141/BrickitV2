@@ -11,7 +11,7 @@ build/
 # Environment variables
 .env
 .env.local
-.env.production
+# .env.production is tracked (contains only public keys)
 
 # Logs
 *.log

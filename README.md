@@ -35,18 +35,58 @@ git clone https://github.com/Shaun3141/BrickitV2.git
 cd BrickitV2
 ```
 
-2. Install client dependencies:
+2. Install dependencies:
 ```bash
+# Install client dependencies
 cd client
 npm install
+
+# Install server dependencies
+cd ../server
+npm install
+cd ..
 ```
 
-3. Run the development server:
+3. Configure environment variables:
+
+**Client** (`client/.env`):
+```env
+VITE_SUPABASE_URL=your_supabase_url
+VITE_SUPABASE_ANON_KEY=your_supabase_anon_key
+VITE_STRIPE_PUBLISHABLE_KEY=pk_test_your_stripe_publishable_key
+VITE_API_URL=http://localhost:8080
+```
+
+**Server** (`server/.env`):
+```env
+STRIPE_SECRET_KEY=sk_test_your_stripe_secret_key
+CLIENT_URL=http://localhost:5173
+PORT=8080
+```
+
+4. Run the development server:
 ```bash
+# Terminal 1 - Run client
+cd client
 npm run dev
+
+# Terminal 2 - Run server
+cd server
+npm start
 ```
 
-The app will be available at `http://localhost:5173`
+The client will be available at `http://localhost:5173` and the server at `http://localhost:8080`
+
+### Stripe Setup (Optional - for donations)
+
+To enable donation functionality:
+
+1. Create a [Stripe account](https://dashboard.stripe.com/register)
+2. Get your API keys from the [Stripe Dashboard](https://dashboard.stripe.com/test/apikeys)
+3. Add the **publishable key** to `client/.env` as `VITE_STRIPE_PUBLISHABLE_KEY`
+4. Add the **secret key** to `server/.env` as `STRIPE_SECRET_KEY`
+5. For testing, use test mode keys (start with `pk_test_` and `sk_test_`)
+6. For production, switch to live mode keys
 
 ### Building for Production
 

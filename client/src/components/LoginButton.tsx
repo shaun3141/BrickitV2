@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { LogIn, LogOut, Mail } from 'lucide-react';
+import { LogIn, Mail, User } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import {
@@ -11,10 +11,17 @@ import {
   DialogTrigger,
 } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
+import { ProfilePage } from './ProfilePage';
+import type { Creation } from '@/types';
 
-export function LoginButton() {
-  const { user, signInWithEmail, signOut } = useAuth();
+interface LoginButtonProps {
+  onLoadCreation?: (creation: Creation) => void;
+}
+
+export function LoginButton({ onLoadCreation }: LoginButtonProps) {
+  const { user, signInWithEmail } = useAuth();
   const [open, setOpen] = useState(false);
+  const [profileOpen, setProfileOpen] = useState(false);
   const [email, setEmail] = useState('');
   const [loading, setLoading] = useState(false);
   const [submitted, setSubmitted] = useState(false);
@@ -36,10 +43,6 @@ export function LoginButton() {
     }
   };
 
-  const handleSignOut = async () => {
-    await signOut();
-  };
-
   const handleOpenChange = (newOpen: boolean) => {
     setOpen(newOpen);
     if (!newOpen) {
@@ -52,10 +55,17 @@ export function LoginButton() {
 
   if (user) {
     return (
-      <Button onClick={handleSignOut} variant="outline" size="sm">
-        <LogOut className="h-4 w-4 mr-2" />
-        Sign Out
-      </Button>
+      <>
+        <Button onClick={() => setProfileOpen(true)} variant="outline" size="sm">
+          <User className="h-4 w-4 mr-2" />
+          Profile
+        </Button>
+        <ProfilePage 
+          open={profileOpen} 
+          onOpenChange={setProfileOpen}
+          onLoadCreation={onLoadCreation}
+        />
+      </>
     );
   }
 
