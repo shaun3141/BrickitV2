@@ -21,7 +21,6 @@ export function initPostHog() {
       recordCrossOriginIframes: false, // Don't record cross-origin iframes
       maskAllInputs: true, // Mask sensitive input fields by default
       maskTextSelector: '[data-private]', // Mask elements with data-private attribute
-      sampleRate: 1.0, // Record 100% of sessions (adjust if needed)
     },
     autocapture: false, // Disable automatic capture for performance
     capture_performance: false, // Disable performance monitoring (already handled by other tools)
