@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect, useCallback } from 'react';
+import { useState, useRef, useEffect, useCallback, useMemo } from 'react';
 import { ZoomIn, ZoomOut, Pipette, Pencil, PaintBucket, Minus, Square, Circle, Undo2, Redo2, Replace } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -36,6 +36,20 @@ export function EditTab({ mosaicData, onMosaicUpdate }: EditTabProps) {
   
   // Hover state for color palette
   const [hoveredColor, setHoveredColor] = useState<LegoColor | null>(null);
+
+  // Calculate color counts
+  const colorCounts = useMemo(() => {
+    const counts: { [colorId: string]: number } = {};
+    
+    for (let row = 0; row < mosaicData.height; row++) {
+      for (let col = 0; col < mosaicData.width; col++) {
+        const color = mosaicData.pixels[row][col];
+        counts[color.id] = (counts[color.id] || 0) + 1;
+      }
+    }
+    
+    return counts;
+  }, [mosaicData]);
 
   // Add to history when mosaic changes
   const addToHistory = useCallback((newMosaicData: MosaicData) => {
@@ -765,20 +779,29 @@ export function EditTab({ mosaicData, onMosaicUpdate }: EditTabProps) {
                   )}
                   
                   <div className="grid grid-cols-4 gap-1 max-h-[400px] overflow-y-auto p-1">
-                    {LEGO_COLORS.map((color) => (
-                      <button
-                        key={color.id}
-                        className={`w-full aspect-square rounded border-2 transition-all hover:scale-110 ${
-                          selectedColor.id === color.id
-                            ? 'ring-2 ring-primary ring-offset-2'
-                            : 'border-border'
-                        }`}
-                        style={{ backgroundColor: color.hex }}
-                        onMouseEnter={() => setHoveredColor(color)}
-                        onMouseLeave={() => setHoveredColor(null)}
-                        onClick={() => setSelectedColor(color)}
-                      />
-                    ))}
+                    {LEGO_COLORS.map((color) => {
+                      const count = colorCounts[color.id] || 0;
+                      return (
+                        <button
+                          key={color.id}
+                          className={`relative w-full aspect-square rounded border-2 transition-all hover:scale-110 ${
+                            selectedColor.id === color.id
+                              ? 'ring-2 ring-primary ring-offset-2'
+                              : 'border-border'
+                          }`}
+                          style={{ backgroundColor: color.hex }}
+                          onMouseEnter={() => setHoveredColor(color)}
+                          onMouseLeave={() => setHoveredColor(null)}
+                          onClick={() => setSelectedColor(color)}
+                        >
+                          {count > 0 && (
+                            <span className="absolute top-0 right-0 bg-black/70 text-white text-[9px] font-bold px-1 rounded-bl rounded-tr leading-tight">
+                              x{count}
+                            </span>
+                          )}
+                        </button>
+                      );
+                    })}
                   </div>
                 </div>
               </div>

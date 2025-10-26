@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import { Image as ImageIcon } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { MosaicPreview } from '@/components/MosaicPreview';
@@ -13,7 +12,6 @@ interface DownloadTabProps {
 }
 
 export function DownloadTab({ mosaicData, placements }: DownloadTabProps) {
-  const [showOptimized, setShowOptimized] = useState(true);
   const downloadMosaicImage = () => {
     try {
       // Generate high-res mosaic preview
@@ -30,26 +28,6 @@ export function DownloadTab({ mosaicData, placements }: DownloadTabProps) {
 
   return (
     <div className="space-y-6">
-      {/* Toggle for optimized view */}
-      <div className="flex justify-center">
-        <div className="inline-flex rounded-md shadow-sm" role="group">
-          <Button
-            variant={!showOptimized ? 'default' : 'outline'}
-            onClick={() => setShowOptimized(false)}
-            className="rounded-r-none"
-          >
-            1×1 Plates Only
-          </Button>
-          <Button
-            variant={showOptimized ? 'default' : 'outline'}
-            onClick={() => setShowOptimized(true)}
-            className="rounded-l-none"
-          >
-            Optimized Pieces
-          </Button>
-        </div>
-      </div>
-
       {/* Preview and Parts List */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <div className="space-y-4">
@@ -60,14 +38,14 @@ export function DownloadTab({ mosaicData, placements }: DownloadTabProps) {
           <MosaicPreview 
             mosaicData={mosaicData} 
             placements={placements}
-            showOptimized={showOptimized}
+            showOptimized={true}
           />
         </div>
         <div>
           <PartsList 
             mosaicData={mosaicData} 
             placements={placements}
-            showOptimized={showOptimized}
+            showOptimized={true}
           />
         </div>
       </div>

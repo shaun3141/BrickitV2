@@ -9,11 +9,12 @@ interface MosaicPreviewProps {
   mosaicData: MosaicData;
   placements?: BrickPlacement[];
   showOptimized?: boolean;
+  initialPixelSize?: number;
 }
 
-export function MosaicPreview({ mosaicData, placements, showOptimized = false }: MosaicPreviewProps) {
+export function MosaicPreview({ mosaicData, placements, showOptimized = false, initialPixelSize = 12 }: MosaicPreviewProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const [pixelSize, setPixelSize] = useState(12);
+  const [pixelSize, setPixelSize] = useState(initialPixelSize);
   const [showGrid, setShowGrid] = useState(true);
 
   // Helper function to draw a LEGO stud with 3D shading effect

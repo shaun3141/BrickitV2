@@ -105,9 +105,9 @@ export function PartsList({ mosaicData, placements, showOptimized = false }: Par
       <CardHeader>
         <div className="flex items-center justify-between">
           <div>
-            <CardTitle>Parts List {showOptimized && '(Optimized)'}</CardTitle>
+            <CardTitle>Parts List</CardTitle>
             <p className="text-sm text-muted-foreground mt-1">
-              Total pieces needed: {totalBricks}
+              Total pieces needed: {totalBricks.toLocaleString()}
             </p>
           </div>
           <div className="flex gap-2">

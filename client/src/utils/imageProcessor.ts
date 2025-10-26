@@ -205,33 +205,30 @@ function applySaturation(
 }
 
 /**
- * Samples the average color from a region of the canvas
+ * Samples a single pixel color from the center of a region
+ * This preserves exact colors instead of creating blended intermediate colors
  */
-function sampleRegionColor(
-  ctx: CanvasRenderingContext2D,
-  x: number,
-  y: number,
-  width: number,
-  height: number
+function sampleCenterPixel(
+  imageData: ImageData,
+  regionX: number,
+  regionY: number,
+  regionWidth: number,
+  regionHeight: number
 ): [number, number, number] {
-  const imageData = ctx.getImageData(x, y, width, height);
-  const pixels = imageData.data;
+  // Sample from the center of the region
+  const centerX = Math.floor(regionX + regionWidth / 2);
+  const centerY = Math.floor(regionY + regionHeight / 2);
   
-  let r = 0, g = 0, b = 0;
-  let count = 0;
-
-  // Sample every pixel in the region
-  for (let i = 0; i < pixels.length; i += 4) {
-    r += pixels[i];
-    g += pixels[i + 1];
-    b += pixels[i + 2];
-    count++;
-  }
-
+  // Ensure we're within bounds
+  const x = Math.min(Math.max(0, centerX), imageData.width - 1);
+  const y = Math.min(Math.max(0, centerY), imageData.height - 1);
+  
+  const i = (y * imageData.width + x) * 4;
+  
   return [
-    Math.round(r / count),
-    Math.round(g / count),
-    Math.round(b / count),
+    imageData.data[i],
+    imageData.data[i + 1],
+    imageData.data[i + 2],
   ];
 }
 
@@ -310,49 +307,46 @@ export async function processImage(
     }
   }
 
-  // Create a working canvas for mosaic processing
-  const workCanvas = document.createElement('canvas');
-  workCanvas.width = mosaicWidth;
-  workCanvas.height = mosaicHeight;
-  const workCtx = workCanvas.getContext('2d', { willReadFrequently: true });
+  // Get the full-resolution image data (with basic filters already applied)
+  let fullResImageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
 
-  if (!workCtx) {
-    throw new Error('Could not get working canvas context');
-  }
-
-  // Draw the filtered image scaled down to mosaic size
-  workCtx.drawImage(canvas, 0, 0, mosaicWidth, mosaicHeight);
-
-  // Get image data for mosaic processing
-  let imageData = workCtx.getImageData(0, 0, mosaicWidth, mosaicHeight);
-
-  // Apply artistic filter to mosaic-sized data for color quantization
+  // Apply artistic filter to full-resolution data if selected
   if (options.filters?.selectedFilter) {
     const filteredData = applyFilter(
-      { width: mosaicWidth, height: mosaicHeight, data: imageData.data },
+      { width: canvas.width, height: canvas.height, data: fullResImageData.data },
       options.filters.selectedFilter.filterId,
       options.filters.selectedFilter.params
     );
     
-    imageData = new ImageData(new Uint8ClampedArray(filteredData.data), mosaicWidth, mosaicHeight);
+    fullResImageData = new ImageData(new Uint8ClampedArray(filteredData.data), canvas.width, canvas.height);
   }
 
-  // Create the mosaic pixel grid from the processed image data
+  // Create the mosaic pixel grid by sampling from the full-resolution image
   const pixels: LegoColor[][] = [];
-  const data = imageData.data;
+  
+  // Calculate the size of each mosaic "brick" in the original image
+  const brickWidth = canvas.width / mosaicWidth;
+  const brickHeight = canvas.height / mosaicHeight;
 
   for (let row = 0; row < mosaicHeight; row++) {
     const pixelRow: LegoColor[] = [];
     
     for (let col = 0; col < mosaicWidth; col++) {
-      const i = (row * mosaicWidth + col) * 4;
-      const color: [number, number, number] = [data[i], data[i + 1], data[i + 2]];
+      // Calculate the region in the original image that this mosaic brick represents
+      const regionX = col * brickWidth;
+      const regionY = row * brickHeight;
       
-      // If no artistic filter was applied, quantize to LEGO colors
-      // (artistic filters already do this internally)
-      const legoColor = options.filters?.selectedFilter 
-        ? findClosestLegoColor(color)
-        : findClosestLegoColor(color);
+      // Sample a single pixel from the center of this region (no averaging!)
+      const color = sampleCenterPixel(
+        fullResImageData,
+        regionX,
+        regionY,
+        brickWidth,
+        brickHeight
+      );
+      
+      // Find the closest LEGO color
+      const legoColor = findClosestLegoColor(color);
       
       pixelRow.push(legoColor);
     }

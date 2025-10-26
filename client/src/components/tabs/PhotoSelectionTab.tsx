@@ -3,9 +3,7 @@ import { MosaicPreview } from '@/components/MosaicPreview';
 import { FilterSelector } from '@/components/FilterSelector';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Slider } from '@/components/ui/slider';
 import { Upload } from 'lucide-react';
-import { MOSAIC_SIZES } from '@/types';
 import type { MosaicSize } from '@/types';
 import type { MosaicData, FilterOptions } from '@/utils/imageProcessor';
 
@@ -61,75 +59,17 @@ export function PhotoSelectionTab({
           </p>
         </div>
 
-        {/* Size Selection */}
-        <Card>
-          <CardContent className="pt-6">
-            <div className="space-y-4">
-              <div>
-                <label className="text-sm font-medium mb-2 block">Mosaic Size</label>
-                <div className="grid grid-cols-3 gap-2">
-                  {(Object.keys(MOSAIC_SIZES) as MosaicSize[]).map((size) => (
-                    <Button
-                      key={size}
-                      variant={selectedSize === size ? 'default' : 'outline'}
-                      onClick={() => onSizeChange(size)}
-                      className="w-full"
-                    >
-                      {MOSAIC_SIZES[size].label}
-                    </Button>
-                  ))}
-                </div>
-              </div>
-
-              {selectedSize === 'medium' && (
-                <div>
-                  <label className="text-sm font-medium mb-2 block">
-                    Custom Width: {customWidth} bricks
-                  </label>
-                  <Slider
-                    value={[customWidth]}
-                    onValueChange={(value: number[]) => onCustomWidthChange(value[0])}
-                    min={16}
-                    max={96}
-                    step={4}
-                    className="w-full"
-                  />
-                </div>
-              )}
-            </div>
-          </CardContent>
-        </Card>
-
         {/* Upload Area */}
         <ImageUploader onImageSelect={onImageSelect} isProcessing={isProcessing} />
-
-        {/* Instructions */}
-        <Card className="bg-muted/50">
-          <CardContent className="pt-6">
-            <h3 className="font-semibold mb-2">How it works</h3>
-            <ol className="text-sm text-muted-foreground space-y-1 list-decimal list-inside">
-              <li>Upload a photo you want to convert</li>
-              <li>Adjust filters to enhance the LEGO conversion</li>
-              <li>Preview the LEGO-ified result in real-time</li>
-              <li>Edit individual pixels to customize your design</li>
-              <li>Get a complete parts list with brick counts by color</li>
-              <li>Export the parts list as JSON or CSV</li>
-            </ol>
-          </CardContent>
-        </Card>
       </div>
     );
   }
 
-  // Show dual-panel layout with original image and LEGO preview
+  // Show 3-column layout with filters in the middle
   return (
     <div className="space-y-6">
-      <div className="flex flex-col items-center space-y-2">
-    
-      </div>
-
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Left Panel - Original Image with Filters */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Left Column - Original Image */}
         <div className="space-y-4">
           <Card>
             <CardHeader>
@@ -157,17 +97,23 @@ export function PhotoSelectionTab({
               </div>
             </CardContent>
           </Card>
+        </div>
 
-          {/* Unified Filter Interface */}
+        {/* Middle Column - Settings & Filters */}
+        <div className="space-y-4">
           <FilterSelector
             filterOptions={filterOptions}
             onFilterOptionsChange={onFilterChange}
+            selectedSize={selectedSize}
+            customWidth={customWidth}
+            onSizeChange={onSizeChange}
+            onCustomWidthChange={onCustomWidthChange}
           />
         </div>
 
-        {/* Right Panel - LEGO Preview */}
+        {/* Right Column - LEGO Preview */}
         <div className="space-y-4">
-          <MosaicPreview mosaicData={mosaicData} />
+          <MosaicPreview mosaicData={mosaicData} initialPixelSize={6} />
           
           <div className="flex justify-end">
             <Button

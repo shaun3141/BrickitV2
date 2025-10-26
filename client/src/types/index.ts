@@ -1,12 +1,13 @@
 import type { BrickType } from './bricks';
 import type { LegoColor } from '@/utils/legoColors';
 
-export type MosaicSize = 'small' | 'medium' | 'large';
+export type MosaicSize = 'small' | 'medium' | 'large' | 'xl';
 
 export const MOSAIC_SIZES: Record<MosaicSize, { width: number; label: string }> = {
   small: { width: 32, label: '32x32 (Small)' },
-  medium: { width: 48, label: '48x48 (Medium)' },
-  large: { width: 64, label: '64x64 (Large)' },
+  medium: { width: 64, label: '64x64 (Medium)' },
+  large: { width: 128, label: '128x128 (Large)' },
+  xl: { width: 256, label: '256x256 (X-Large)' },
 };
 
 export interface BrickPlacement {

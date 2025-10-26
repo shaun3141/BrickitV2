@@ -5,6 +5,8 @@ import { PhotoSelectionTab } from '@/components/tabs/PhotoSelectionTab';
 import { EditTab } from '@/components/tabs/EditTab';
 import { DownloadTab } from '@/components/tabs/DownloadTab';
 import { InstructionsTab } from '@/components/tabs/InstructionsTab';
+import { ShareTab } from '@/components/tabs/ShareTab';
+import { LoginButton } from '@/components/LoginButton';
 import { processImage } from '@/utils/imageProcessor';
 import type { MosaicData, FilterOptions } from '@/utils/imageProcessor';
 import { MOSAIC_SIZES } from '@/types';
@@ -16,7 +18,7 @@ function App() {
   const [placements, setPlacements] = useState<BrickPlacement[]>([]);
   const [isProcessing, setIsProcessing] = useState(false);
   const [selectedSize, setSelectedSize] = useState<MosaicSize>('medium');
-  const [customWidth, setCustomWidth] = useState(48);
+  const [customWidth, setCustomWidth] = useState(64);
   const [activeTab, setActiveTab] = useState('photo-selection');
   const [uploadedImage, setUploadedImage] = useState<File | null>(null);
   const [filterOptions, setFilterOptions] = useState<FilterOptions>({
@@ -40,11 +42,8 @@ function App() {
     setUploadedImage(file);
     setIsProcessing(true);
     try {
-      const targetWidth =
-        selectedSize === 'medium' ? customWidth : MOSAIC_SIZES[selectedSize].width;
-
       const data = await processImage(file, {
-        targetWidth,
+        targetWidth: customWidth,
         maintainAspectRatio: true,
         filters: filterOptions,
       });
@@ -66,11 +65,8 @@ function App() {
     setIsProcessing(true);
     
     try {
-      const targetWidth =
-        selectedSize === 'medium' ? customWidth : MOSAIC_SIZES[selectedSize].width;
-
       const data = await processImage(uploadedImage, {
-        targetWidth,
+        targetWidth: customWidth,
         maintainAspectRatio: true,
         filters: newFilters,
       });
@@ -79,6 +75,52 @@ function App() {
     } catch (error) {
       console.error('Error processing image with filters:', error);
       alert('Failed to apply filters. Please try again.');
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
+  const handleSizeChange = async (size: MosaicSize) => {
+    setSelectedSize(size);
+    const newWidth = MOSAIC_SIZES[size].width;
+    setCustomWidth(newWidth);
+    
+    if (!uploadedImage) return;
+    
+    setIsProcessing(true);
+    try {
+      const data = await processImage(uploadedImage, {
+        targetWidth: newWidth,
+        maintainAspectRatio: true,
+        filters: filterOptions,
+      });
+
+      setMosaicData(data);
+    } catch (error) {
+      console.error('Error processing image with new size:', error);
+      alert('Failed to process image with new size. Please try again.');
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
+  const handleCustomWidthChange = async (width: number) => {
+    setCustomWidth(width);
+    
+    if (!uploadedImage) return;
+    
+    setIsProcessing(true);
+    try {
+      const data = await processImage(uploadedImage, {
+        targetWidth: width,
+        maintainAspectRatio: true,
+        filters: filterOptions,
+      });
+
+      setMosaicData(data);
+    } catch (error) {
+      console.error('Error processing image with new width:', error);
+      alert('Failed to process image with new width. Please try again.');
     } finally {
       setIsProcessing(false);
     }
@@ -104,18 +146,22 @@ function App() {
                 <img src="/brickit_logo.png" alt="BrickIt Logo" className="h-10 w-10 object-contain" />
                 <h1 className="text-2xl font-bold">BrickIt</h1>
               </div>
-              <TabsList className="grid grid-cols-4 flex-1 max-w-2xl">
-                <TabsTrigger value="photo-selection">Photo Selection</TabsTrigger>
+              <TabsList className="grid grid-cols-5 flex-1 max-w-3xl">
+                <TabsTrigger value="photo-selection">1. Photo Selection</TabsTrigger>
                 <TabsTrigger value="edit" disabled={!mosaicData}>
-                  Edit
-                </TabsTrigger>
-                <TabsTrigger value="download" disabled={!mosaicData}>
-                  Download
+                  2. Edit
                 </TabsTrigger>
                 <TabsTrigger value="instructions" disabled={!mosaicData}>
-                  Instructions
+                  3. Instructions
+                </TabsTrigger>
+                <TabsTrigger value="download" disabled={!mosaicData}>
+                  4. Get the pieces
+                </TabsTrigger>
+                <TabsTrigger value="share" disabled={!mosaicData}>
+                  5. Share
                 </TabsTrigger>
               </TabsList>
+              <LoginButton />
             </div>
           </div>
         </header>
@@ -130,8 +176,8 @@ function App() {
               customWidth={customWidth}
               mosaicData={mosaicData}
               filterOptions={filterOptions}
-              onSizeChange={setSelectedSize}
-              onCustomWidthChange={setCustomWidth}
+              onSizeChange={handleSizeChange}
+              onCustomWidthChange={handleCustomWidthChange}
               onImageSelect={handleImageSelect}
               onFilterChange={handleFilterChange}
               onContinueToEdit={handleContinueToEdit}
@@ -147,15 +193,21 @@ function App() {
             )}
           </TabsContent>
 
+          <TabsContent value="instructions" className="mt-0">
+            {mosaicData && (
+              <InstructionsTab mosaicData={mosaicData} placements={placements} />
+            )}
+          </TabsContent>
+
           <TabsContent value="download" className="mt-0">
             {mosaicData && (
               <DownloadTab mosaicData={mosaicData} placements={placements} />
             )}
           </TabsContent>
 
-          <TabsContent value="instructions" className="mt-0">
+          <TabsContent value="share" className="mt-0">
             {mosaicData && (
-              <InstructionsTab mosaicData={mosaicData} placements={placements} />
+              <ShareTab mosaicData={mosaicData} placements={placements} />
             )}
           </TabsContent>
         </main>
