@@ -2,15 +2,13 @@ import { useState, useMemo } from 'react';
 import { ChevronLeft, ChevronRight, Download, Grid3x3 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { InstructionStepComponent } from '@/components/InstructionStep';
+import { InstructionStep as InstructionStepComponent } from '@/components/bricks/InstructionStep';
 import {
   divideIntoRegions,
   generateInstructions,
   generateInstructionHTML,
-  type Region,
-  type InstructionStep,
-} from '@/utils/instructionGenerator';
-import type { MosaicData } from '@/utils/imageProcessor';
+} from '@/utils/bricks/instructions';
+import type { MosaicData } from '@/types/mosaic.types';
 import type { BrickPlacement } from '@/types';
 
 interface InstructionsTabProps {
@@ -83,12 +81,12 @@ export function InstructionsTab({ mosaicData, placements }: InstructionsTabProps
           </p>
         </div>
         <div className="flex gap-2">
-          <Button variant="outline" size="sm" onClick={toggleGridSize}>
-            <Grid3x3 className="h-4 w-4 mr-2" />
+          <Button variant="outline" size="sm" onClick={toggleGridSize} aria-label={`Toggle grid size between 2x2 and 3x3, currently ${gridSize}x${gridSize}`}>
+            <Grid3x3 className="h-4 w-4 mr-2" aria-hidden="true" />
             {gridSize}×{gridSize} Grid
           </Button>
-          <Button onClick={handleExportHTML}>
-            <Download className="h-4 w-4 mr-2" />
+          <Button onClick={handleExportHTML} aria-label="Export instructions as HTML file">
+            <Download className="h-4 w-4 mr-2" aria-hidden="true" />
             Export as HTML
           </Button>
         </div>
@@ -155,21 +153,23 @@ export function InstructionsTab({ mosaicData, placements }: InstructionsTabProps
           variant="outline"
           onClick={handlePrevious}
           disabled={currentStepIndex === 0}
+          aria-label="Go to previous step"
         >
-          <ChevronLeft className="h-4 w-4 mr-2" />
+          <ChevronLeft className="h-4 w-4 mr-2" aria-hidden="true" />
           Previous
         </Button>
         
-        <div className="text-sm text-muted-foreground">
-          {currentStepIndex + 1} / {steps.length}
+        <div className="text-sm text-muted-foreground" role="status" aria-live="polite">
+          Step {currentStepIndex + 1} of {steps.length}
         </div>
 
         <Button
           onClick={handleNext}
           disabled={currentStepIndex === steps.length - 1}
+          aria-label="Go to next step"
         >
           Next
-          <ChevronRight className="h-4 w-4 ml-2" />
+          <ChevronRight className="h-4 w-4 ml-2" aria-hidden="true" />
         </Button>
       </div>
     </div>

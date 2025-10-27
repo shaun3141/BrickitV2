@@ -15,7 +15,6 @@
     <title>BrickIt - Turn Photos into LEGO Mosaics</title>
     <meta name="title" content="BrickIt - Turn Photos into LEGO Mosaics" />
     <meta name="description" content="Convert your photos into buildable LEGO mosaics with a complete parts list. Free, client-side processing, with interactive pixel editor and export options." />
-    <meta name="keywords" content="LEGO, mosaic, photo to LEGO, brick art, LEGO builder, pixel art, LEGO colors, parts list, brick inventory" />
     <meta name="author" content="Shaun van Weelden" />
     <meta name="theme-color" content="#dc2626" />
     
@@ -42,7 +41,6 @@
     <link rel="canonical" href="https://brickit.build/" />
     <meta name="robots" content="index, follow" />
     <meta name="language" content="English" />
-    <meta name="revisit-after" content="7 days" />
     
     <!-- Structured Data / JSON-LD -->
     <script type="application/ld+json">
@@ -77,6 +75,39 @@
         "Parts list generation",
         "Export as JSON or CSV"
       ]
+    }
+    </script>
+    
+    <!-- Organization Schema -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "Organization",
+      "name": "BrickIt",
+      "url": "https://brickit.build",
+      "logo": "https://brickit.build/brickit_logo.png",
+      "description": "Free tool to convert photos into buildable LEGO mosaics",
+      "founder": {
+        "@type": "Person",
+        "name": "Shaun van Weelden",
+        "url": "https://github.com/Shaun3141"
+      },
+      "sameAs": [
+        "https://github.com/Shaun3141"
+      ]
+    }
+    </script>
+    
+    <!-- WebSite Schema -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebSite",
+      "name": "BrickIt",
+      "url": "https://brickit.build",
+      "description": "Convert your photos into buildable LEGO mosaics with a complete parts list",
+      "inLanguage": "en-US",
+      "isAccessibleForFree": true
     }
     </script>
   </head>

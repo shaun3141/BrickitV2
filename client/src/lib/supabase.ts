@@ -12,6 +12,10 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
     persistSession: true,
     storageKey: 'brickit-auth',
     storage: window.localStorage,
+    autoRefreshToken: true,
+    detectSessionInUrl: true,
   },
 });
+
+// Auth session is now the responsibility of features/auth/AuthContext and session store
 

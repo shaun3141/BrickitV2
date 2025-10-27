@@ -7,7 +7,7 @@ export function getBaseUrl(): string {
     return 'https://brickit.build';
   }
   
-  // In development, use current origin (handles localhost:5173, localhost:3000, etc.)
+  // In development, use current origin (handles localhost:3000, etc.)
   return window.location.origin;
 }
 

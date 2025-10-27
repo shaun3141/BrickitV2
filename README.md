@@ -60,7 +60,7 @@ VITE_API_URL=http://localhost:8080
 **Server** (`server/.env`):
 ```env
 STRIPE_SECRET_KEY=sk_test_your_stripe_secret_key
-CLIENT_URL=http://localhost:5173
+CLIENT_URL=http://localhost:3000
 PORT=8080
 ```
 
@@ -75,7 +75,7 @@ cd server
 npm start
 ```
 
-The client will be available at `http://localhost:5173` and the server at `http://localhost:8080`
+The client will be available at `http://localhost:3000` and the server at `http://localhost:8080`
 
 ### Stripe Setup (Optional - for donations)
 

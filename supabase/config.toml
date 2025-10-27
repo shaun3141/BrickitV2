@@ -3,7 +3,6 @@ enabled = true
 site_url = "https://brickit.build"
 additional_redirect_urls = [
   "http://localhost:3000",
-  "http://localhost:5173",
   "https://brickit.build",
   "https://www.brickit.build"
 ]

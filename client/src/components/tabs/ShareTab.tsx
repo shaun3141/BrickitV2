@@ -3,7 +3,7 @@ import { Share2, Copy, Download, Check } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { MosaicPreview } from '@/components/MosaicPreview';
+import { MosaicPreview } from '@/components/editor/MosaicPreview';
 import type { MosaicData, BrickPlacement } from '@/types';
 
 interface ShareTabProps {
@@ -12,12 +12,12 @@ interface ShareTabProps {
   creationId?: string | null;
 }
 
-export function ShareTab({ mosaicData, placements, creationId }: ShareTabProps) {
+export function ShareTab({ mosaicData, creationId }: ShareTabProps) {
   const [copied, setCopied] = useState(false);
   
   // Generate shareable URL - if creation is saved and has ID, use that, otherwise use current URL
   const shareUrl = creationId 
-    ? `${window.location.origin}/creation/${creationId}` 
+    ? `${window.location.origin}/creations/${creationId}` 
     : window.location.href;
 
   const handleCopyLink = async () => {
@@ -129,15 +129,16 @@ export function ShareTab({ mosaicData, placements, creationId }: ShareTabProps) 
                   onClick={handleCopyLink}
                   variant="outline"
                   className="gap-2"
+                  aria-label={copied ? 'Link copied to clipboard' : 'Copy share link'}
                 >
                   {copied ? (
                     <>
-                      <Check className="h-4 w-4" />
+                      <Check className="h-4 w-4" aria-hidden="true" />
                       Copied!
                     </>
                   ) : (
                     <>
-                      <Copy className="h-4 w-4" />
+                      <Copy className="h-4 w-4" aria-hidden="true" />
                       Copy
                     </>
                   )}
@@ -162,8 +163,9 @@ export function ShareTab({ mosaicData, placements, creationId }: ShareTabProps) 
                 onClick={handleDownloadImage}
                 className="w-full"
                 variant="outline"
+                aria-label="Download mosaic as PNG image"
               >
-                <Download className="h-4 w-4 mr-2" />
+                <Download className="h-4 w-4 mr-2" aria-hidden="true" />
                 Download PNG
               </Button>
             </CardContent>
@@ -182,6 +184,7 @@ export function ShareTab({ mosaicData, placements, creationId }: ShareTabProps) 
                 onClick={() => handleShareSocial('twitter')}
                 className="w-full"
                 variant="outline"
+                aria-label="Share on X (Twitter)"
               >
                 Share on X (Twitter)
               </Button>
@@ -189,6 +192,7 @@ export function ShareTab({ mosaicData, placements, creationId }: ShareTabProps) 
                 onClick={() => handleShareSocial('facebook')}
                 className="w-full"
                 variant="outline"
+                aria-label="Share on Facebook"
               >
                 Share on Facebook
               </Button>
@@ -196,6 +200,7 @@ export function ShareTab({ mosaicData, placements, creationId }: ShareTabProps) 
                 onClick={() => handleShareSocial('reddit')}
                 className="w-full"
                 variant="outline"
+                aria-label="Share on Reddit"
               >
                 Share on Reddit
               </Button>

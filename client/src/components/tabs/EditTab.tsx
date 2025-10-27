@@ -2,9 +2,11 @@ import { useState, useRef, useEffect, useCallback, useMemo } from 'react';
 import { ZoomIn, ZoomOut, Pipette, Pencil, PaintBucket, Minus, Square, Circle, Undo2, Redo2, Replace, Save } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { LEGO_COLORS } from '@/utils/legoColors';
-import type { MosaicData } from '@/utils/imageProcessor';
-import type { LegoColor } from '@/utils/legoColors';
+import { LEGO_COLORS } from '@/utils/bricks/colors';
+import type { MosaicData } from '@/types/mosaic.types';
+import type { LegoColor } from '@/utils/bricks/colors';
+import MobileEditToolbar from '@/components/editor/MobileEditToolbar';
+import MobileControlsSheet from '@/components/editor/MobileControlsSheet';
 
 type Tool = 'pencil' | 'fill' | 'eyedropper' | 'line' | 'rectangle' | 'circle' | 'replace';
 type ShapeMode = 'filled' | 'outline';
@@ -26,6 +28,51 @@ export function EditTab({ mosaicData, onMosaicUpdate, onSave }: EditTabProps) {
   const [shapeMode, setShapeMode] = useState<ShapeMode>('filled');
   const [startPoint, setStartPoint] = useState<{row: number, col: number} | null>(null);
   const [currentPoint, setCurrentPoint] = useState<{row: number, col: number} | null>(null);
+  const [isMobileControlsOpen, setIsMobileControlsOpen] = useState(false);
+  // View transform state for pan/zoom on mobile (and desktop)
+  const [viewScale, setViewScale] = useState(1);
+  const [viewOffset, setViewOffset] = useState<{ x: number; y: number }>({ x: 0, y: 0 });
+  const activePointers = useRef<Map<number, { x: number; y: number }>>(new Map());
+  const panZoomState = useRef<{
+    isPanZoom: boolean;
+    initialDistance: number;
+    initialScale: number;
+    initialCenter: { x: number; y: number };
+    initialOffset: { x: number; y: number };
+  }>({ isPanZoom: false, initialDistance: 0, initialScale: 1, initialCenter: { x: 0, y: 0 }, initialOffset: { x: 0, y: 0 } });
+  const lastPaintedCell = useRef<{ row: number; col: number } | null>(null);
+  const rafScheduled = useRef(false);
+  const nextTransform = useRef<{ scale: number; offset: { x: number; y: number } } | null>(null);
+  const nextPaintCell = useRef<{ row: number; col: number } | null>(null);
+
+  const scheduleTransformUpdate = (scale: number, offset: { x: number; y: number }) => {
+    nextTransform.current = { scale, offset };
+    if (rafScheduled.current) return;
+    rafScheduled.current = true;
+    requestAnimationFrame(() => {
+      rafScheduled.current = false;
+      if (nextTransform.current) {
+        setViewScale(nextTransform.current.scale);
+        setViewOffset(nextTransform.current.offset);
+        nextTransform.current = null;
+      }
+    });
+  };
+
+  const schedulePaint = () => {
+    if (rafScheduled.current) return;
+    rafScheduled.current = true;
+    requestAnimationFrame(() => {
+      rafScheduled.current = false;
+      const cell = nextPaintCell.current;
+      if (!cell) return;
+      if (!lastPaintedCell.current || cell.row !== lastPaintedCell.current.row || cell.col !== lastPaintedCell.current.col) {
+        paintPixel(cell.row, cell.col);
+        lastPaintedCell.current = cell;
+      }
+      nextPaintCell.current = null;
+    });
+  };
   
   // History management
   const [history, setHistory] = useState<MosaicData[]>([mosaicData]);
@@ -104,6 +151,7 @@ export function EditTab({ mosaicData, onMosaicUpdate, onSave }: EditTabProps) {
       setHistory([mosaicData]);
       setHistoryIndex(0);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // Helper function to draw a LEGO stud with 3D shading effect
@@ -172,7 +220,8 @@ export function EditTab({ mosaicData, onMosaicUpdate, onSave }: EditTabProps) {
   useEffect(() => {
     drawMosaic();
     drawPreview();
-  }, [mosaicData, pixelSize, showGrid, startPoint, currentPoint, activeTool, selectedColor, shapeMode]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [mosaicData, pixelSize, showGrid, startPoint, currentPoint, activeTool, selectedColor, shapeMode, viewScale, viewOffset]);
 
   const drawMosaic = () => {
     const canvas = canvasRef.current;
@@ -184,6 +233,12 @@ export function EditTab({ mosaicData, onMosaicUpdate, onSave }: EditTabProps) {
     // Set canvas size
     canvas.width = mosaicData.width * pixelSize;
     canvas.height = mosaicData.height * pixelSize;
+
+    // Reset and clear
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    // Apply view transform
+    ctx.setTransform(viewScale, 0, 0, viewScale, viewOffset.x, viewOffset.y);
 
     // Draw each pixel with brick base and stud
     for (let row = 0; row < mosaicData.height; row++) {
@@ -245,7 +300,9 @@ export function EditTab({ mosaicData, onMosaicUpdate, onSave }: EditTabProps) {
     if (!ctx) return;
 
     // Clear preview
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
     ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.setTransform(viewScale, 0, 0, viewScale, viewOffset.x, viewOffset.y);
 
     if (!startPoint || !currentPoint || !['line', 'rectangle', 'circle'].includes(activeTool)) {
       return;
@@ -442,16 +499,19 @@ export function EditTab({ mosaicData, onMosaicUpdate, onSave }: EditTabProps) {
     });
   };
 
-  const getPixelCoordinates = (e: React.MouseEvent<HTMLCanvasElement>) => {
+  const getPixelCoordinatesFromClient = (clientX: number, clientY: number) => {
     const canvas = canvasRef.current;
     if (!canvas) return null;
 
     const rect = canvas.getBoundingClientRect();
-    const x = e.clientX - rect.left;
-    const y = e.clientY - rect.top;
+    const x = clientX - rect.left;
+    const y = clientY - rect.top;
 
-    const col = Math.floor(x / pixelSize);
-    const row = Math.floor(y / pixelSize);
+    // Invert view transform
+    const worldX = (x - viewOffset.x) / viewScale;
+    const worldY = (y - viewOffset.y) / viewScale;
+    const col = Math.floor(worldX / pixelSize);
+    const row = Math.floor(worldY / pixelSize);
 
     if (col >= 0 && col < mosaicData.width && row >= 0 && row < mosaicData.height) {
       return { row, col };
@@ -487,8 +547,8 @@ export function EditTab({ mosaicData, onMosaicUpdate, onSave }: EditTabProps) {
     });
   };
 
-  const handleCanvasMouseDown = (e: React.MouseEvent<HTMLCanvasElement>) => {
-    const coords = getPixelCoordinates(e);
+  const handleCanvasPrimaryDownAt = (clientX: number, clientY: number) => {
+    const coords = getPixelCoordinatesFromClient(clientX, clientY);
     if (!coords) return;
 
     const { row, col } = coords;
@@ -525,18 +585,19 @@ export function EditTab({ mosaicData, onMosaicUpdate, onSave }: EditTabProps) {
     }
   };
 
-  const handleCanvasMouseMove = (e: React.MouseEvent<HTMLCanvasElement>) => {
-    const coords = getPixelCoordinates(e);
+  const handleCanvasPrimaryMoveAt = (clientX: number, clientY: number) => {
+    const coords = getPixelCoordinatesFromClient(clientX, clientY);
     if (!coords || !isDrawing) return;
 
     if (activeTool === 'pencil') {
-      paintPixel(coords.row, coords.col);
+      nextPaintCell.current = { row: coords.row, col: coords.col };
+      schedulePaint();
     } else if (['line', 'rectangle', 'circle'].includes(activeTool)) {
       setCurrentPoint(coords);
     }
   };
 
-  const handleCanvasMouseUp = (e: React.MouseEvent<HTMLCanvasElement>) => {
+  const handleCanvasPrimaryUp = () => {
     if (!isDrawing) return;
 
     if (['line', 'rectangle', 'circle'].includes(activeTool) && startPoint && currentPoint) {
@@ -552,14 +613,92 @@ export function EditTab({ mosaicData, onMosaicUpdate, onSave }: EditTabProps) {
     }
 
     setIsDrawing(false);
+    lastPaintedCell.current = null;
   };
 
-  const handleCanvasMouseLeave = () => {
+  const handleCanvasPointerLeaveDrawing = () => {
     if (isDrawing && ['line', 'rectangle', 'circle'].includes(activeTool)) {
       setStartPoint(null);
       setCurrentPoint(null);
     }
     setIsDrawing(false);
+  };
+
+  // Pointer events for touch and mouse (unified)
+  const getCanvasRelative = (clientX: number, clientY: number) => {
+    const canvas = canvasRef.current;
+    if (!canvas) return { x: clientX, y: clientY };
+    const rect = canvas.getBoundingClientRect();
+    return { x: clientX - rect.left, y: clientY - rect.top };
+  };
+
+  const onPointerDown = (e: React.PointerEvent<HTMLCanvasElement>) => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    canvas.setPointerCapture(e.pointerId);
+    const rel = getCanvasRelative(e.clientX, e.clientY);
+    activePointers.current.set(e.pointerId, { x: rel.x, y: rel.y });
+
+    if (activePointers.current.size === 2) {
+      // Begin pan/zoom
+      const pts = Array.from(activePointers.current.values());
+      const dx = pts[1].x - pts[0].x;
+      const dy = pts[1].y - pts[0].y;
+      const distance = Math.hypot(dx, dy);
+      const center = { x: (pts[0].x + pts[1].x) / 2, y: (pts[0].y + pts[1].y) / 2 };
+      panZoomState.current = {
+        isPanZoom: true,
+        initialDistance: distance,
+        initialScale: viewScale,
+        initialCenter: center,
+        initialOffset: { ...viewOffset },
+      };
+    } else if (activePointers.current.size === 1) {
+      // Primary draw interaction
+      handleCanvasPrimaryDownAt(e.clientX, e.clientY);
+    }
+  };
+
+  const clamp = (val: number, min: number, max: number) => Math.min(max, Math.max(min, val));
+
+  const onPointerMove = (e: React.PointerEvent<HTMLCanvasElement>) => {
+    const rel = getCanvasRelative(e.clientX, e.clientY);
+    if (activePointers.current.has(e.pointerId)) {
+      activePointers.current.set(e.pointerId, { x: rel.x, y: rel.y });
+    }
+
+    if (panZoomState.current.isPanZoom && activePointers.current.size >= 2) {
+      const pts = Array.from(activePointers.current.values());
+      const dx = pts[1].x - pts[0].x;
+      const dy = pts[1].y - pts[0].y;
+      const distance = Math.hypot(dx, dy);
+      const center = { x: (pts[0].x + pts[1].x) / 2, y: (pts[0].y + pts[1].y) / 2 };
+
+      const s0 = panZoomState.current.initialScale;
+      const newScale = clamp(s0 * (distance / Math.max(1, panZoomState.current.initialDistance)), 0.5, 4);
+      const worldAtCenterX = (panZoomState.current.initialCenter.x - panZoomState.current.initialOffset.x) / s0;
+      const worldAtCenterY = (panZoomState.current.initialCenter.y - panZoomState.current.initialOffset.y) / s0;
+      const newOffsetX = center.x - newScale * worldAtCenterX;
+      const newOffsetY = center.y - newScale * worldAtCenterY;
+
+      scheduleTransformUpdate(newScale, { x: newOffsetX, y: newOffsetY });
+    } else if (activePointers.current.size === 1 && !panZoomState.current.isPanZoom) {
+      handleCanvasPrimaryMoveAt(e.clientX, e.clientY);
+    }
+  };
+
+  const onPointerUpOrCancel = (e: React.PointerEvent<HTMLCanvasElement>) => {
+    const canvas = canvasRef.current;
+    if (canvas && canvas.hasPointerCapture(e.pointerId)) {
+      canvas.releasePointerCapture(e.pointerId);
+    }
+    activePointers.current.delete(e.pointerId);
+    if (activePointers.current.size < 2) {
+      panZoomState.current.isPanZoom = false;
+    }
+    if (activePointers.current.size === 0) {
+      handleCanvasPrimaryUp();
+    }
   };
 
   const handleZoomIn = () => {
@@ -580,10 +719,20 @@ export function EditTab({ mosaicData, onMosaicUpdate, onSave }: EditTabProps) {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 pb-24 lg:pb-0">
+      <div role="status" aria-live="polite" className="sr-only">
+        {activeTool === 'pencil' && 'Pencil tool selected'}
+        {activeTool === 'fill' && 'Fill tool selected'}
+        {activeTool === 'eyedropper' && 'Eyedropper tool selected'}
+        {activeTool === 'replace' && 'Replace color tool selected'}
+        {activeTool === 'line' && 'Line tool selected'}
+        {activeTool === 'rectangle' && 'Rectangle tool selected'}
+        {activeTool === 'circle' && 'Circle tool selected'}
+        {activeTool === 'replace' && replaceFromColor && `Replacing color ${replaceFromColor.name}`}
+      </div>
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
         {/* Tools & Color Palette */}
-        <div className="lg:col-span-1">
+        <div className="lg:col-span-1 hidden lg:block">
           <Card>
             <CardHeader>
               <CardTitle>Tools & Colors</CardTitle>
@@ -607,8 +756,10 @@ export function EditTab({ mosaicData, onMosaicUpdate, onSave }: EditTabProps) {
                         setShowReplaceMode(false);
                       }}
                       title="Pencil - Paint pixels by dragging"
+                      aria-label="Pencil tool - Paint pixels by dragging"
+                      aria-pressed={activeTool === 'pencil'}
                     >
-                      <Pencil className="h-4 w-4" />
+                      <Pencil className="h-4 w-4" aria-hidden="true" />
                     </Button>
                     <Button
                       variant={activeTool === 'line' ? 'default' : 'outline'}
@@ -620,8 +771,10 @@ export function EditTab({ mosaicData, onMosaicUpdate, onSave }: EditTabProps) {
                         setShowReplaceMode(false);
                       }}
                       title="Line - Draw straight lines"
+                      aria-label="Line tool - Draw straight lines"
+                      aria-pressed={activeTool === 'line'}
                     >
-                      <Minus className="h-4 w-4" />
+                      <Minus className="h-4 w-4" aria-hidden="true" />
                     </Button>
                     <Button
                       variant={activeTool === 'rectangle' ? 'default' : 'outline'}
@@ -633,8 +786,10 @@ export function EditTab({ mosaicData, onMosaicUpdate, onSave }: EditTabProps) {
                         setShowReplaceMode(false);
                       }}
                       title="Rectangle - Draw rectangles"
+                      aria-label="Rectangle tool - Draw rectangles"
+                      aria-pressed={activeTool === 'rectangle'}
                     >
-                      <Square className="h-4 w-4" />
+                      <Square className="h-4 w-4" aria-hidden="true" />
                     </Button>
                   </div>
                   <div className="grid grid-cols-3 gap-1">
@@ -648,8 +803,10 @@ export function EditTab({ mosaicData, onMosaicUpdate, onSave }: EditTabProps) {
                         setShowReplaceMode(false);
                       }}
                       title="Circle - Draw circles"
+                      aria-label="Circle tool - Draw circles"
+                      aria-pressed={activeTool === 'circle'}
                     >
-                      <Circle className="h-4 w-4" />
+                      <Circle className="h-4 w-4" aria-hidden="true" />
                     </Button>
                     <Button
                       variant={activeTool === 'fill' ? 'default' : 'outline'}
@@ -661,8 +818,10 @@ export function EditTab({ mosaicData, onMosaicUpdate, onSave }: EditTabProps) {
                         setShowReplaceMode(false);
                       }}
                       title="Fill - Replace connected pixels of same color"
+                      aria-label="Fill tool - Replace connected pixels of same color"
+                      aria-pressed={activeTool === 'fill'}
                     >
-                      <PaintBucket className="h-4 w-4" />
+                      <PaintBucket className="h-4 w-4" aria-hidden="true" />
                     </Button>
                     <Button
                       variant={activeTool === 'eyedropper' ? 'default' : 'outline'}
@@ -674,8 +833,10 @@ export function EditTab({ mosaicData, onMosaicUpdate, onSave }: EditTabProps) {
                         setShowReplaceMode(false);
                       }}
                       title="Eyedropper - Pick a color from canvas"
+                      aria-label="Eyedropper tool - Pick a color from canvas"
+                      aria-pressed={activeTool === 'eyedropper'}
                     >
-                      <Pipette className="h-4 w-4" />
+                      <Pipette className="h-4 w-4" aria-hidden="true" />
                     </Button>
                   </div>
                 </div>
@@ -841,8 +1002,9 @@ export function EditTab({ mosaicData, onMosaicUpdate, onSave }: EditTabProps) {
                     onClick={undo}
                     disabled={historyIndex <= 0}
                     title="Undo (Cmd/Ctrl+Z)"
+                    aria-label="Undo last action (Cmd/Ctrl+Z)"
                   >
-                    <Undo2 className="h-4 w-4" />
+                    <Undo2 className="h-4 w-4" aria-hidden="true" />
                   </Button>
                   <Button
                     variant="outline"
@@ -850,14 +1012,16 @@ export function EditTab({ mosaicData, onMosaicUpdate, onSave }: EditTabProps) {
                     onClick={redo}
                     disabled={historyIndex >= history.length - 1}
                     title="Redo (Cmd/Ctrl+Shift+Z)"
+                    aria-label="Redo last undone action (Cmd/Ctrl+Shift+Z)"
                   >
-                    <Redo2 className="h-4 w-4" />
+                    <Redo2 className="h-4 w-4" aria-hidden="true" />
                   </Button>
-                  <div className="border-l mx-1" />
+                  <div className="border-l mx-1" aria-hidden="true" />
                   <Button
                     variant="outline"
                     size="sm"
                     onClick={() => setShowGrid(!showGrid)}
+                    aria-label={showGrid ? 'Hide grid' : 'Show grid'}
                   >
                     {showGrid ? 'Hide' : 'Show'} Grid
                   </Button>
@@ -866,16 +1030,18 @@ export function EditTab({ mosaicData, onMosaicUpdate, onSave }: EditTabProps) {
                     size="icon"
                     onClick={handleZoomOut}
                     disabled={pixelSize <= 8}
+                    aria-label="Zoom out"
                   >
-                    <ZoomOut className="h-4 w-4" />
+                    <ZoomOut className="h-4 w-4" aria-hidden="true" />
                   </Button>
                   <Button
                     variant="outline"
                     size="icon"
                     onClick={handleZoomIn}
                     disabled={pixelSize >= 32}
+                    aria-label="Zoom in"
                   >
-                    <ZoomIn className="h-4 w-4" />
+                    <ZoomIn className="h-4 w-4" aria-hidden="true" />
                   </Button>
                 </div>
               </div>
@@ -886,11 +1052,30 @@ export function EditTab({ mosaicData, onMosaicUpdate, onSave }: EditTabProps) {
                   <canvas
                     ref={canvasRef}
                     className={getCursorClass()}
-                    style={{ imageRendering: 'pixelated' }}
-                    onMouseDown={handleCanvasMouseDown}
-                    onMouseMove={handleCanvasMouseMove}
-                    onMouseUp={handleCanvasMouseUp}
-                    onMouseLeave={handleCanvasMouseLeave}
+                    style={{ imageRendering: 'pixelated', touchAction: 'none' }}
+                    onPointerDown={onPointerDown}
+                    onPointerMove={onPointerMove}
+                    onPointerUp={onPointerUpOrCancel}
+                    onPointerCancel={onPointerUpOrCancel}
+                    onPointerLeave={onPointerUpOrCancel}
+                    onWheel={(e) => {
+                      e.preventDefault();
+                      const rect = (e.currentTarget as HTMLCanvasElement).getBoundingClientRect();
+                      const x = e.clientX - rect.left;
+                      const y = e.clientY - rect.top;
+                      const zoomIntensity = 0.0015;
+                      const delta = -e.deltaY; // wheel up -> zoom in
+                      const newScale = Math.min(4, Math.max(0.5, viewScale * (1 + delta * zoomIntensity)));
+                      const worldX = (x - viewOffset.x) / viewScale;
+                      const worldY = (y - viewOffset.y) / viewScale;
+                      const newOffsetX = x - newScale * worldX;
+                      const newOffsetY = y - newScale * worldY;
+                      setViewScale(newScale);
+                      setViewOffset({ x: newOffsetX, y: newOffsetY });
+                    }}
+                    aria-label={`Mosaic editor canvas, ${mosaicData.width} by ${mosaicData.height} studs`}
+                    role="img"
+                    tabIndex={0}
                   />
                   <canvas
                     ref={previewCanvasRef}
@@ -902,6 +1087,7 @@ export function EditTab({ mosaicData, onMosaicUpdate, onSave }: EditTabProps) {
                     }}
                     width={mosaicData.width * pixelSize}
                     height={mosaicData.height * pixelSize}
+                    aria-hidden="true"
                   />
                 </div>
               </div>
@@ -909,6 +1095,169 @@ export function EditTab({ mosaicData, onMosaicUpdate, onSave }: EditTabProps) {
           </Card>
         </div>
       </div>
+
+      {/* Mobile toolbar */}
+      <MobileEditToolbar
+        activeTool={activeTool}
+        onToolChange={(tool) => { setActiveTool(tool); setReplaceFromColor(null); setShowReplaceMode(false); }}
+        onUndo={undo}
+        onRedo={redo}
+        canUndo={historyIndex > 0}
+        canRedo={historyIndex < history.length - 1}
+        showGrid={showGrid}
+        onToggleGrid={() => setShowGrid(!showGrid)}
+        onZoomIn={handleZoomIn}
+        onZoomOut={handleZoomOut}
+        selectedColor={selectedColor}
+        onColorSelect={(c) => setSelectedColor(c)}
+        onOpenControls={() => setIsMobileControlsOpen(true)}
+      />
+
+      {/* Mobile controls sheet */}
+      <MobileControlsSheet open={isMobileControlsOpen} onOpenChange={setIsMobileControlsOpen} title="Tools & Colors">
+        <div className="space-y-3">
+          {/* Mirror the desktop card content in a compact layout */}
+          <div className="border rounded-md p-2 bg-card">
+            <div className="text-xs font-medium mb-2">Draw Tools:</div>
+            <div className="grid grid-cols-3 gap-1 mb-2">
+              <Button
+                variant={activeTool === 'pencil' ? 'default' : 'outline'}
+                size="sm"
+                className="w-full"
+                onClick={() => { setActiveTool('pencil'); setReplaceFromColor(null); setShowReplaceMode(false); }}
+                title="Pencil - Paint pixels by dragging"
+                aria-label="Pencil tool - Paint pixels by dragging"
+                aria-pressed={activeTool === 'pencil'}
+              >
+                <Pencil className="h-4 w-4" aria-hidden="true" />
+              </Button>
+              <Button
+                variant={activeTool === 'line' ? 'default' : 'outline'}
+                size="sm"
+                className="w-full"
+                onClick={() => { setActiveTool('line'); setReplaceFromColor(null); setShowReplaceMode(false); }}
+                title="Line - Draw straight lines"
+                aria-label="Line tool - Draw straight lines"
+                aria-pressed={activeTool === 'line'}
+              >
+                <Minus className="h-4 w-4" aria-hidden="true" />
+              </Button>
+              <Button
+                variant={activeTool === 'rectangle' ? 'default' : 'outline'}
+                size="sm"
+                className="w-full"
+                onClick={() => { setActiveTool('rectangle'); setReplaceFromColor(null); setShowReplaceMode(false); }}
+                title="Rectangle - Draw rectangles"
+                aria-label="Rectangle tool - Draw rectangles"
+                aria-pressed={activeTool === 'rectangle'}
+              >
+                <Square className="h-4 w-4" aria-hidden="true" />
+              </Button>
+            </div>
+            <div className="grid grid-cols-3 gap-1">
+              <Button
+                variant={activeTool === 'circle' ? 'default' : 'outline'}
+                size="sm"
+                className="w-full"
+                onClick={() => { setActiveTool('circle'); setReplaceFromColor(null); setShowReplaceMode(false); }}
+                title="Circle - Draw circles"
+                aria-label="Circle tool - Draw circles"
+                aria-pressed={activeTool === 'circle'}
+              >
+                <Circle className="h-4 w-4" aria-hidden="true" />
+              </Button>
+              <Button
+                variant={activeTool === 'fill' ? 'default' : 'outline'}
+                size="sm"
+                className="w-full"
+                onClick={() => { setActiveTool('fill'); setReplaceFromColor(null); setShowReplaceMode(false); }}
+                title="Fill - Replace connected pixels of same color"
+                aria-label="Fill tool - Replace connected pixels of same color"
+                aria-pressed={activeTool === 'fill'}
+              >
+                <PaintBucket className="h-4 w-4" aria-hidden="true" />
+              </Button>
+              <Button
+                variant={activeTool === 'eyedropper' ? 'default' : 'outline'}
+                size="sm"
+                className="w-full"
+                onClick={() => { setActiveTool('eyedropper'); setReplaceFromColor(null); setShowReplaceMode(false); }}
+                title="Eyedropper - Pick a color from canvas"
+                aria-label="Eyedropper tool - Pick a color from canvas"
+                aria-pressed={activeTool === 'eyedropper'}
+              >
+                <Pipette className="h-4 w-4" aria-hidden="true" />
+              </Button>
+            </div>
+          </div>
+
+          {['rectangle', 'circle'].includes(activeTool) && (
+            <div className="border rounded-md p-2 bg-card">
+              <div className="text-xs font-medium mb-2">Shape Mode:</div>
+              <div className="grid grid-cols-2 gap-1">
+                <Button variant={shapeMode === 'filled' ? 'default' : 'outline'} size="sm" onClick={() => setShapeMode('filled')}>Filled</Button>
+                <Button variant={shapeMode === 'outline' ? 'default' : 'outline'} size="sm" onClick={() => setShapeMode('outline')}>Outline</Button>
+              </div>
+            </div>
+          )}
+
+          <div className="border rounded-md p-2 bg-card">
+            <div className="text-xs font-medium mb-2">Color Tools:</div>
+            <Button
+              variant={activeTool === 'replace' ? 'default' : 'outline'}
+              size="sm"
+              className="w-full"
+              onClick={() => { setActiveTool('replace'); setShowReplaceMode(true); setReplaceFromColor(null); }}
+              title="Replace - Change all instances of a color"
+            >
+              <Replace className="h-4 w-4 mr-2" />
+              Replace Color
+            </Button>
+            {showReplaceMode && (
+              <div className="mt-2 text-xs text-muted-foreground">
+                {!replaceFromColor ? (
+                  <p>Click a pixel to select the color to replace</p>
+                ) : (
+                  <div className="space-y-2">
+                    <div className="flex items-center gap-2">
+                      <span>Replacing:</span>
+                      <div className="w-4 h-4 rounded border" style={{ backgroundColor: replaceFromColor.hex }} />
+                      <span className="font-medium">{replaceFromColor.name}</span>
+                    </div>
+                    <p>Click again to replace with selected color</p>
+                    <Button variant="ghost" size="sm" className="w-full" onClick={() => { setReplaceFromColor(null); setActiveTool('pencil'); setShowReplaceMode(false); }}>Cancel</Button>
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+
+          <div className="border rounded-md p-2 bg-card">
+            <div className="text-xs font-medium mb-1">Selected Color:</div>
+            <div className="flex items-center gap-2 p-2 border rounded">
+              <div className="w-8 h-8 rounded border-2" style={{ backgroundColor: selectedColor.hex }} />
+              <div className="text-xs">
+                <div className="font-medium">{selectedColor.name}</div>
+                <div className="text-muted-foreground">{selectedColor.hex}</div>
+              </div>
+            </div>
+          </div>
+
+          <div className="relative">
+            <div className="grid grid-cols-5 gap-1 max-h-[280px] overflow-y-auto p-1">
+              {LEGO_COLORS.map((color) => (
+                <button
+                  key={color.id}
+                  className={`relative w-full aspect-square rounded border-2 transition-all ${selectedColor.id === color.id ? 'ring-2 ring-primary ring-offset-2' : 'border-border'}`}
+                  style={{ backgroundColor: color.hex }}
+                  onClick={() => setSelectedColor(color)}
+                  aria-label={`Select ${color.name}`}
+                />
+              ))}
+            </div>
+          </div>
+        </div>
+      </MobileControlsSheet>
     </div>
   );
 }

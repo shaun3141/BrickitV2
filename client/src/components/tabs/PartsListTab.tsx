@@ -1,6 +1,6 @@
-import { MosaicPreview } from '@/components/MosaicPreview';
-import { PartsList } from '@/components/PartsList';
-import type { MosaicData } from '@/utils/imageProcessor';
+import { MosaicPreview } from '@/components/editor/MosaicPreview';
+import { PartsList } from '@/components/bricks/PartsList';
+import type { MosaicData } from '@/types/mosaic.types';
 import type { BrickPlacement } from '@/types';
 
 interface PartsListTabProps {

@@ -1,11 +1,9 @@
 // @ts-ignore: Deno imports
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
-// @ts-ignore: npm imports in Deno
-import { Resend } from 'npm:resend@2.0.0';
 import { generateThankYouEmail } from './_shared/email-template.ts';
 import { addToDonorAudience } from '../_shared/resend-audiences.ts';
-
-const resend = new Resend(Deno.env.get('RESEND_API_KEY'));
+import { sendEmail } from '../_shared/resend-client.ts';
+import { getCorsHeaders, corsResponse } from '../_shared/cors.ts';
 
 interface DonationEmailRequest {
   donorEmail: string;
@@ -15,41 +13,44 @@ interface DonationEmailRequest {
 }
 
 serve(async (req: Request) => {
-  // Handle CORS preflight
+  const origin = req.headers.get('origin');
+
+  // Handle CORS preflight - restrict to known origins (backend only)
   if (req.method === 'OPTIONS') {
-    return new Response('ok', {
-      headers: {
-        'Access-Control-Allow-Origin': '*',
-        'Access-Control-Allow-Methods': 'POST',
-        'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-      },
-    });
+    return new Response('ok', { headers: getCorsHeaders(origin) });
   }
 
   try {
+    // This function should only be called from the backend (after webhook validation)
+    // Validate that an Authorization header is present (either anon key or service role)
+    const authHeader = req.headers.get('Authorization');
+    if (!authHeader) {
+      return corsResponse(
+        { error: 'Unauthorized: Missing Authorization header' },
+        401,
+        origin
+      );
+    }
+
     // Parse request body
     const { donorEmail, donorName, amount, userId }: DonationEmailRequest = await req.json();
 
     // Validate required fields
     if (!donorEmail || !amount) {
-      return new Response(
-        JSON.stringify({ error: 'Missing required fields: donorEmail, amount' }),
-        {
-          status: 400,
-          headers: { 'Content-Type': 'application/json' },
-        }
+      return corsResponse(
+        { error: 'Missing required fields: donorEmail, amount' },
+        400,
+        origin
       );
     }
 
     // Validate email format
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(donorEmail)) {
-      return new Response(
-        JSON.stringify({ error: 'Invalid email format' }),
-        {
-          status: 400,
-          headers: { 'Content-Type': 'application/json' },
-        }
+      return corsResponse(
+        { error: 'Invalid email format' },
+        400,
+        origin
       );
     }
 
@@ -67,31 +68,28 @@ serve(async (req: Request) => {
     });
 
     // Send email via Resend
-    const { data, error } = await resend.emails.send({
-      from: 'BrickIt <noreply@brickit.build>',
+    const emailResult = await sendEmail({
       to: donorEmail,
       subject: 'Thank you for supporting BrickIt! ❤️',
       html: htmlContent,
-      reply_to: 'shaun.t.vanweelden@gmail.com',
       tags: [
         { name: 'category', value: 'donation-thank-you' },
         { name: 'amount', value: String(amount) },
+        { name: 'user_id', value: userId || 'anonymous' },
       ],
     });
 
-    if (error) {
-      console.error('Resend error:', error);
-      return new Response(
-        JSON.stringify({ error: 'Failed to send email', details: error }),
-        {
-          status: 500,
-          headers: { 'Content-Type': 'application/json' },
-        }
+    if (!emailResult.success) {
+      console.error('Failed to send donation email:', emailResult.error);
+      return corsResponse(
+        { error: 'Failed to send email', details: emailResult.error },
+        500,
+        origin
       );
     }
 
-    console.log('Email sent successfully:', {
-      emailId: data?.id,
+    console.log('Donation email sent successfully:', {
+      emailId: emailResult.emailId,
       recipient: donorEmail,
       amount: amount / 100,
       userId,
@@ -110,25 +108,22 @@ serve(async (req: Request) => {
       console.log('✅ Donor added to donor audience:', { contactId: audienceResult.contactId });
     }
 
-    return new Response(
-      JSON.stringify({
-        success: true,
-        emailId: data?.id,
-        message: 'Thank you email sent successfully',
-      }),
+    return corsResponse(
       {
-        status: 200,
-        headers: { 'Content-Type': 'application/json' },
-      }
+        success: true,
+        emailId: emailResult.emailId,
+        donorAddedToAudience: audienceResult.success,
+        message: 'Thank you email sent successfully',
+      },
+      200,
+      origin
     );
   } catch (error) {
     console.error('Error in send-donation-email function:', error);
-    return new Response(
-      JSON.stringify({ error: 'Internal server error', details: error.message }),
-      {
-        status: 500,
-        headers: { 'Content-Type': 'application/json' },
-      }
+    return corsResponse(
+      { error: 'Internal server error', details: error.message },
+      500,
+      origin
     );
   }
 });
