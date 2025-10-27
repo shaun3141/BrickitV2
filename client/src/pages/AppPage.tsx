@@ -344,7 +344,25 @@ export function AppPage() {
         Skip to main content
       </a>
       <main id="main-content" className="mt-0" role="main">
+          {/* Mobile prompt */}
+          <div className="lg:hidden bg-primary/10 border border-primary/20 rounded-lg p-6 mx-4 my-8 text-center">
+            <h2 className="text-xl font-semibold mb-2">Mobile Editing Not Available</h2>
+            <p className="text-muted-foreground mb-4">
+              Creating and editing LEGO mosaics requires precise controls best suited for larger screens. 
+              Please use a tablet or desktop computer for the best experience.
+            </p>
+            <p className="text-sm text-muted-foreground mb-4">
+              Check out the Gallery for inspiration and to browse amazing creations from other builders!
+            </p>
+            <Link 
+              to="/gallery" 
+              className="inline-flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 transition-colors"
+            >
+              Browse Gallery
+            </Link>
+          </div>
 
+          <div className="hidden lg:block">
           <TabsContent value="photo-selection" id="photo-selection-panel" className="mt-0" role="tabpanel" aria-labelledby="photo-selection-tab">
             <PhotoSelectionTab
               isProcessing={isProcessing}
@@ -391,6 +409,7 @@ export function AppPage() {
               />
             )}
           </TabsContent>
+          </div>
       </main>
 
       {/* Save Creation Dialog */}
