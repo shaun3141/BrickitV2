@@ -48,7 +48,7 @@ export function Gallery() {
   return (
     <SiteLayout
       headerActions={
-        <Link to="/app">
+        <Link to="/">
           <Button variant="outline">
             <ArrowLeft className="mr-2 h-4 w-4" />
             Back to Home

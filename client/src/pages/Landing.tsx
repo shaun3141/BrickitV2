@@ -20,13 +20,13 @@ export function Landing() {
     <SiteLayout
       headerActions={<LoginButton />}
     >
-      <div className="bg-gradient-to-b from-blue-50 via-white to-orange-50 w-screen -mx-[calc((100vw-100%)/2)] -mt-8 -mb-8 min-h-[calc(100vh-320px)] sm:min-h-[calc(100vh-290px)] md:min-h-[calc(100vh-270px)] lg:min-h-[calc(100vh-250px)]">
+      <div className="bg-gradient-to-b from-blue-50 via-white to-orange-50 w-screen -mx-[calc((100vw-100%)/2)] -mt-8 -mb-16">
 
         {/* Hero Section */}
         <section className="container mx-auto px-4 sm:px-6 py-12 sm:py-16 md:py-20 text-center relative overflow-hidden">
           {/* Background Image */}
           <div 
-            className="absolute inset-0 bg-cover bg-center bg-no-repeat opacity-20"
+            className="absolute inset-0 mt-8 sm:mt-10 md:mt-12 bg-cover bg-center bg-no-repeat opacity-20 rounded-3xl"
             style={{ backgroundImage: 'url(/hero_img1.png)' }}
           />
           

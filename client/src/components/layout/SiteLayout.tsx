@@ -25,20 +25,6 @@ export function SiteLayout({ children, headerActions, tabsList, activeTab, onTab
             <h1 className="text-xl md:text-2xl font-bold">BrickIt</h1>
           </Link>
           
-          {/* Main navigation links - hidden on mobile, visible on md and up */}
-          <nav className="hidden md:flex items-center gap-2 md:gap-4" aria-label="Main navigation">
-            <Link to="/gallery" className="text-xs md:text-sm hover:text-primary transition-colors whitespace-nowrap">
-              Gallery
-            </Link>
-            <Link to="/app" className="text-xs md:text-sm hover:text-primary transition-colors whitespace-nowrap">
-              Create
-            </Link>
-            <Link to="/donate" className="text-xs md:text-sm hover:text-primary transition-colors whitespace-nowrap flex items-center gap-1">
-              <Heart className="h-3 w-3 md:h-4 md:w-4" />
-              Donate
-            </Link>
-          </nav>
-          
           {isHomePage && tabsList && (
             <nav className="flex-1 max-w-3xl hidden lg:block" role="navigation" aria-label="Editor navigation">
               {tabsList}
@@ -91,6 +77,10 @@ export function SiteLayout({ children, headerActions, tabsList, activeTab, onTab
                 </Link>
                 <Link to="/app" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
                   Create Mosaic
+                </Link>
+                <Link to="/donate" className="text-sm text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1">
+                  <Heart className="h-4 w-4" />
+                  Donate
                 </Link>
               </nav>
             </div>
