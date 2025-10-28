@@ -19,6 +19,7 @@ import { useAuth } from '@/features/auth/AuthContext';
 import { trackEvent, posthog } from '@/services/analytics.service';
 import { toast } from '@/lib/toast';
 import { Button } from '@/components/ui/button';
+import { Monitor, Sparkles } from 'lucide-react';
 
 export function AppPage() {
   const { user } = useAuth();
@@ -345,18 +346,29 @@ export function AppPage() {
       </a>
       <main id="main-content" className="mt-0" role="main">
           {/* Mobile prompt */}
-          <div className="lg:hidden bg-primary/10 border border-primary/20 rounded-lg p-6 mx-4 my-8 text-center">
+          <div className="lg:hidden bg-gradient-to-br from-primary/10 via-primary/5 to-background border border-primary/20 rounded-lg p-6 mx-4 my-8 text-center shadow-lg">
+            <img 
+              src="/DesktopOnly.png" 
+              alt="Desktop-only editing" 
+              className="mx-auto mb-4 max-w-xs w-full h-auto"
+            />
             <h2 className="text-xl font-semibold mb-2">Mobile Editing Not Available</h2>
-            <p className="text-muted-foreground mb-4">
-              Creating and editing LEGO mosaics requires precise controls best suited for larger screens. 
-              Please use a tablet or desktop computer for the best experience.
-            </p>
-            <p className="text-sm text-muted-foreground mb-4">
-              Check out the Gallery for inspiration and to browse amazing creations from other builders!
-            </p>
+            <div className="flex items-start gap-2 mb-3 justify-center">
+              <Monitor className="h-5 w-5 text-primary mt-0.5 shrink-0" />
+              <p className="text-muted-foreground text-left">
+                Creating and editing LEGO mosaics requires precise controls best suited for larger screens. 
+                Please use a tablet or desktop computer for the best experience.
+              </p>
+            </div>
+            <div className="flex items-start gap-2 mb-4 justify-center">
+              <Sparkles className="h-5 w-5 text-primary mt-0.5 shrink-0" />
+              <p className="text-sm text-muted-foreground text-left">
+                Check out the Gallery for inspiration and to browse amazing creations from other builders!
+              </p>
+            </div>
             <Link 
               to="/gallery" 
-              className="inline-flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 transition-colors"
+              className="inline-flex items-center gap-2 px-6 py-3 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 transition-all shadow-md hover:shadow-lg transform hover:scale-105"
             >
               Browse Gallery
             </Link>
