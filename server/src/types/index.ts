@@ -19,6 +19,7 @@ export interface Creation extends CreationData {
   user_id: string;
   created_at: string;
   updated_at: string;
+  display_name?: string; // From user_profiles join, "Anonymous" if null
 }
 
 export interface ApiError {

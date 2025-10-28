@@ -55,11 +55,27 @@ export class CreationService {
   /**
    * Get a public creation by ID (no authentication required)
    * Returns null if creation is not public
+   * Joins with user_profiles to include display name
    */
   async getPublicCreationById(creationId: string): Promise<Creation | null> {
     const { data, error } = await this.supabase
       .from('creations')
-      .select('id, user_id, title, description, width, height, original_image_url, preview_image_url, rendered_image_url, is_public, filter_options, created_at, updated_at')
+      .select(`
+        id, 
+        user_id, 
+        title, 
+        description, 
+        width, 
+        height, 
+        original_image_url, 
+        preview_image_url, 
+        rendered_image_url, 
+        is_public, 
+        filter_options, 
+        created_at, 
+        updated_at,
+        user_profiles(display_name)
+      `)
       .eq('id', creationId)
       .eq('is_public', true)
       .single();
@@ -71,12 +87,29 @@ export class CreationService {
       throw new Error(`Failed to fetch creation: ${error.message}`);
     }
 
-    return data;
+    // Flatten the nested user_profiles object
+    return {
+      id: data.id,
+      user_id: data.user_id,
+      title: data.title,
+      description: data.description,
+      width: data.width,
+      height: data.height,
+      original_image_url: data.original_image_url,
+      preview_image_url: data.preview_image_url,
+      rendered_image_url: data.rendered_image_url,
+      is_public: data.is_public,
+      filter_options: data.filter_options,
+      created_at: data.created_at,
+      updated_at: data.updated_at,
+      display_name: (data as any).user_profiles?.display_name || 'Anonymous'
+    };
   }
 
   /**
    * Get all public creations (no authentication required)
    * Returns list of public creations with pagination
+   * Joins with user_profiles to include display name
    */
   async getPublicCreations(page: number = 1, limit: number = 20): Promise<{ creations: Creation[]; total: number }> {
     const offset = (page - 1) * limit;
@@ -91,10 +124,25 @@ export class CreationService {
       throw new Error(`Failed to count creations: ${countError.message}`);
     }
 
-    // Get creations
+    // Get creations with user profile display name via PostgREST join
     const { data, error } = await this.supabase
       .from('creations')
-      .select('id, user_id, title, description, width, height, original_image_url, preview_image_url, rendered_image_url, is_public, filter_options, created_at, updated_at')
+      .select(`
+        id, 
+        user_id, 
+        title, 
+        description, 
+        width, 
+        height, 
+        original_image_url, 
+        preview_image_url, 
+        rendered_image_url, 
+        is_public, 
+        filter_options, 
+        created_at, 
+        updated_at,
+        user_profiles(display_name)
+      `)
       .eq('is_public', true)
       .order('created_at', { ascending: false })
       .range(offset, offset + limit - 1);
@@ -103,9 +151,113 @@ export class CreationService {
       throw new Error(`Failed to fetch creations: ${error.message}`);
     }
 
+    // Flatten the nested user_profiles object
+    const creations = (data || []).map((creation: any) => ({
+      id: creation.id,
+      user_id: creation.user_id,
+      title: creation.title,
+      description: creation.description,
+      width: creation.width,
+      height: creation.height,
+      original_image_url: creation.original_image_url,
+      preview_image_url: creation.preview_image_url,
+      rendered_image_url: creation.rendered_image_url,
+      is_public: creation.is_public,
+      filter_options: creation.filter_options,
+      created_at: creation.created_at,
+      updated_at: creation.updated_at,
+      display_name: creation.user_profiles?.display_name || 'Anonymous'
+    }));
+
     return {
-      creations: data || [],
+      creations,
       total: count || 0,
+    };
+  }
+
+  /**
+   * Get all public creations for a specific creator/user (no authentication required)
+   * Returns list of public creations with pagination filtered by creator
+   * Joins with user_profiles to include display name
+   */
+  async getCreatorPublicCreations(creatorId: string, page: number = 1, limit: number = 20): Promise<{ creations: Creation[]; total: number; displayName: string | null }> {
+    const offset = (page - 1) * limit;
+
+    // Get total count for this creator
+    const { count, error: countError } = await this.supabase
+      .from('creations')
+      .select('*', { count: 'exact', head: true })
+      .eq('is_public', true)
+      .eq('user_id', creatorId);
+
+    if (countError) {
+      throw new Error(`Failed to count creations: ${countError.message}`);
+    }
+
+    // Get creations with user profile display name via PostgREST join
+    const { data, error } = await this.supabase
+      .from('creations')
+      .select(`
+        id, 
+        user_id, 
+        title, 
+        description, 
+        width, 
+        height, 
+        original_image_url, 
+        preview_image_url, 
+        rendered_image_url, 
+        is_public, 
+        filter_options, 
+        created_at, 
+        updated_at,
+        user_profiles(display_name)
+      `)
+      .eq('is_public', true)
+      .eq('user_id', creatorId)
+      .order('created_at', { ascending: false })
+      .range(offset, offset + limit - 1);
+
+    if (error) {
+      throw new Error(`Failed to fetch creations: ${error.message}`);
+    }
+
+    // Flatten the nested user_profiles object
+    const creations = (data || []).map((creation: any) => ({
+      id: creation.id,
+      user_id: creation.user_id,
+      title: creation.title,
+      description: creation.description,
+      width: creation.width,
+      height: creation.height,
+      original_image_url: creation.original_image_url,
+      preview_image_url: creation.preview_image_url,
+      rendered_image_url: creation.rendered_image_url,
+      is_public: creation.is_public,
+      filter_options: creation.filter_options,
+      created_at: creation.created_at,
+      updated_at: creation.updated_at,
+      display_name: creation.user_profiles?.display_name || 'Anonymous'
+    }));
+
+    // Get display name from first creation or fetch it separately
+    let displayName: string | null = null;
+    if (creations.length > 0) {
+      displayName = creations[0].display_name;
+    } else {
+      // If no creations, fetch user profile directly
+      const { data: profile } = await this.supabase
+        .from('user_profiles')
+        .select('display_name')
+        .eq('user_id', creatorId)
+        .single();
+      displayName = profile?.display_name || null;
+    }
+
+    return {
+      creations,
+      total: count || 0,
+      displayName,
     };
   }
 

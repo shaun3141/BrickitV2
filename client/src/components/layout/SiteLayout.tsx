@@ -62,11 +62,11 @@ export function SiteLayout({ children, headerActions, tabsList, activeTab, onTab
         <DonationBanner />
         <Tabs value={activeTab} onValueChange={onTabChange} className="w-full flex-1 flex flex-col">
           {headerContent}
-          <main className="container mx-auto px-4 py-8 flex-1" role="main">
+          <main className="container mx-auto px-4 py-8 flex-1 min-h-[calc(100vh-280px)] sm:min-h-[calc(100vh-250px)] md:min-h-[calc(100vh-240px)] lg:min-h-[calc(100vh-220px)]" role="main">
             {children}
           </main>
         </Tabs>
-        <footer className="border-t mt-auto" role="contentinfo">
+        <footer className="border-t mt-8" role="contentinfo">
           <div className="container mx-auto px-4 py-6">
             <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
               {/* Left side - Logo, name, and attribution */}
@@ -105,10 +105,10 @@ export function SiteLayout({ children, headerActions, tabsList, activeTab, onTab
     <div className="min-h-screen bg-background flex flex-col">
       <DonationBanner />
       {headerContent}
-      <main className="container mx-auto px-4 py-8 flex-1" role="main">
+      <main className="container mx-auto px-4 py-8 flex-1 min-h-[calc(100vh-280px)] sm:min-h-[calc(100vh-250px)] md:min-h-[calc(100vh-240px)] lg:min-h-[calc(100vh-220px)]" role="main">
         {children}
       </main>
-      <footer className="border-t mt-auto" role="contentinfo">
+      <footer className="border-t mt-8" role="contentinfo">
         <div className="container mx-auto px-4 py-6">
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
             {/* Left side - Logo, name, and attribution */}

@@ -459,6 +459,45 @@ export async function getPublicCreations(
 }
 
 /**
+ * Get all public creations for a specific creator (no authentication required)
+ */
+export async function getCreatorPublicCreations(
+  creatorId: string,
+  page: number = 1,
+  limit: number = 20
+): Promise<{ data: { creations: Creation[]; total: number; displayName: string | null } | null; error: Error | null }> {
+  console.log('[getCreatorPublicCreations] Loading creator public creations, creatorId:', creatorId, 'page:', page);
+  try {
+    const response = await fetch(`${API_URL}/api/creations/public/creator/${creatorId}?page=${page}&limit=${limit}`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+
+    console.log('[getCreatorPublicCreations] API response status:', response.status);
+
+    if (!response.ok) {
+      const error = await response.json().catch(() => ({ error: 'Failed to load creator creations' }));
+      throw new Error(error.error || 'Failed to load creator creations');
+    }
+
+    const result = await response.json();
+    
+    console.log('[getCreatorPublicCreations] Creator public creations fetched:', {
+      count: result.creations?.length,
+      total: result.total,
+      displayName: result.displayName,
+    });
+
+    return { data: result, error: null };
+  } catch (error) {
+    console.error('[getCreatorPublicCreations] Error:', error);
+    return { data: null, error: error as Error };
+  }
+}
+
+/**
  * Ensure pixel data has proper LegoColor structure
  * JSONB deserialization may lose the prototype/methods
  */

@@ -39,6 +39,28 @@ router.get(
 );
 
 /**
+ * Get all public creations for a specific creator (no authentication required)
+ * GET /api/creations/public/creator/:creatorId
+ * Query params: page, limit
+ */
+router.get(
+  '/public/creator/:creatorId',
+  asyncHandler(async (req, res: Response) => {
+    const creatorId = req.params.creatorId;
+    const page = parseInt(req.query.page as string) || 1;
+    const limit = parseInt(req.query.limit as string) || 20;
+    
+    if (!creatorId) {
+      throw new ApiException('Missing creator ID', 400);
+    }
+    
+    const result = await creationService.getCreatorPublicCreations(creatorId, page, limit);
+    
+    res.json(result);
+  })
+);
+
+/**
  * Get a public creation by ID (no authentication required)
  * GET /api/creations/public/:id
  */

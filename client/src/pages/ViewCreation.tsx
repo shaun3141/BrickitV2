@@ -233,6 +233,16 @@ export function ViewCreation() {
             <p className="text-muted-foreground text-lg">{creation.description}</p>
           )}
           <div className="flex items-center gap-4 mt-4 text-sm text-muted-foreground">
+            <span>
+              by{' '}
+              <Link 
+                to={`/creators/${creation.user_id}`}
+                className="text-primary hover:underline font-medium"
+              >
+                {creation.display_name || 'Anonymous'}
+              </Link>
+            </span>
+            <span>•</span>
             <span>{creation.width} × {creation.height} bricks</span>
             <span>•</span>
             <span>{new Date(creation.created_at).toLocaleDateString()}</span>

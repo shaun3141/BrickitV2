@@ -346,32 +346,80 @@ export function AppPage() {
       </a>
       <main id="main-content" className="mt-0" role="main">
           {/* Mobile prompt */}
-          <div className="lg:hidden bg-gradient-to-br from-primary/10 via-primary/5 to-background border border-primary/20 rounded-lg p-6 mx-4 my-8 text-center shadow-lg">
-            <img 
-              src="/DesktopOnly.png" 
-              alt="Desktop-only editing" 
-              className="mx-auto mb-4 max-w-xs w-full h-auto"
-            />
-            <h2 className="text-xl font-semibold mb-2">Mobile Editing Not Available</h2>
-            <div className="flex items-start gap-2 mb-3 justify-center">
-              <Monitor className="h-5 w-5 text-primary mt-0.5 shrink-0" />
-              <p className="text-muted-foreground text-left">
-                Creating and editing LEGO mosaics requires precise controls best suited for larger screens. 
-                Please use a tablet or desktop computer for the best experience.
-              </p>
+          <div className="lg:hidden min-h-[calc(100vh-320px)] sm:min-h-[calc(100vh-290px)] md:min-h-[calc(100vh-270px)] flex items-center justify-center px-4 py-8 sm:py-12">
+            <div className="max-w-2xl w-full bg-white rounded-2xl shadow-2xl border border-gray-100 overflow-hidden">
+              {/* Header with gradient */}
+              <div className="bg-gradient-to-br from-orange-500 via-orange-600 to-red-500 px-8 py-8 text-center relative overflow-hidden">
+                <div className="absolute inset-0 bg-[url('/hero_img1.png')] opacity-10 bg-cover bg-center" />
+                <div className="relative z-10">
+                  <h2 className="text-2xl sm:text-3xl font-bold text-white mb-2">
+                    Desktop Experience Required
+                  </h2>
+                  <p className="text-orange-50 text-sm sm:text-base max-w-md mx-auto">
+                    Creating LEGO mosaics requires precise controls and a larger screen
+                  </p>
+                </div>
+              </div>
+
+              {/* Image section */}
+              <div className="px-8 py-6 bg-gradient-to-b from-gray-50 to-white">
+                <img 
+                  src="/DesktopOnly.png" 
+                  alt="Desktop-only editing" 
+                  className="w-full h-auto rounded-lg"
+                />
+              </div>
+
+              {/* Content section */}
+              <div className="px-8 py-6 space-y-6">
+                {/* Why desktop section */}
+                <div className="bg-blue-50 rounded-xl p-5 border border-blue-100">
+                  <div className="flex items-start gap-3">
+                    <div className="flex-shrink-0 w-10 h-10 bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg flex items-center justify-center">
+                      <Monitor className="w-5 h-5 text-white" />
+                    </div>
+                    <div className="flex-1 pt-0.5">
+                      <h3 className="font-semibold text-gray-900 mb-1.5 text-sm sm:text-base">
+                        Why Desktop?
+                      </h3>
+                      <p className="text-gray-600 text-sm leading-relaxed">
+                        Our pixel-perfect editor, real-time preview, and precise color controls work best on tablets and desktop computers.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Gallery CTA section */}
+                <div className="bg-gradient-to-br from-purple-50 to-pink-50 rounded-xl p-5 border border-purple-100">
+                  <div className="flex items-start gap-3 mb-4">
+                    <div className="flex-shrink-0 w-10 h-10 bg-gradient-to-br from-purple-500 to-pink-500 rounded-lg flex items-center justify-center">
+                      <Sparkles className="w-5 h-5 text-white" />
+                    </div>
+                    <div className="flex-1 pt-0.5">
+                      <h3 className="font-semibold text-gray-900 mb-1.5 text-sm sm:text-base">
+                        Get Inspired!
+                      </h3>
+                      <p className="text-gray-600 text-sm leading-relaxed">
+                      Meanwhile, browse amazing LEGO mosaics created by our community. You can view the gallery on any device!
+                      </p>
+                    </div>
+                  </div>
+                  <Link 
+                    to="/gallery" 
+                    className="inline-flex w-full items-center justify-center gap-2 px-6 py-3 bg-gradient-to-r from-purple-600 to-pink-600 text-white font-medium rounded-lg hover:from-purple-700 hover:to-pink-700 transition-all shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 active:translate-y-0"
+                  >
+                    Browse Gallery
+                  </Link>
+                </div>
+              </div>
+
+              {/* Footer */}
+              <div className="px-8 py-6 bg-gray-50 border-t border-gray-100">
+                <p className="text-center text-xs sm:text-sm text-gray-500">
+                  Access the creator on a tablet or desktop to start building your mosaic
+                </p>
+              </div>
             </div>
-            <div className="flex items-start gap-2 mb-4 justify-center">
-              <Sparkles className="h-5 w-5 text-primary mt-0.5 shrink-0" />
-              <p className="text-sm text-muted-foreground text-left">
-                Check out the Gallery for inspiration and to browse amazing creations from other builders!
-              </p>
-            </div>
-            <Link 
-              to="/gallery" 
-              className="inline-flex items-center gap-2 px-6 py-3 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 transition-all shadow-md hover:shadow-lg transform hover:scale-105"
-            >
-              Browse Gallery
-            </Link>
           </div>
 
           <div className="hidden lg:block">

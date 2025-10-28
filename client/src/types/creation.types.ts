@@ -16,6 +16,7 @@ export interface Creation {
   filter_options?: FilterOptions;
   created_at: string;
   updated_at: string;
+  display_name?: string; // From user_profiles join, "Anonymous" if null
 }
 
 export interface SaveCreationData {
