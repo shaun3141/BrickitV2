@@ -118,6 +118,13 @@ export function SiteLayout({ children, headerActions, tabsList, activeTab, onTab
                   >
                     Shaun VanWeelden
                   </a>
+                  {' '}•{' '}
+                  <Link
+                    to="/how-it-was-built"
+                    className="hover:text-foreground transition-colors underline underline-offset-2 decoration-dotted"
+                  >
+                    This website was built entirely with AI, see how
+                  </Link>
                 </p>
                 <p className="mt-1">
                   LEGO® is a trademark of the LEGO Group of companies which does not

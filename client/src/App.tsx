@@ -5,6 +5,7 @@ import { ViewCreation } from './pages/ViewCreation';
 import { Gallery } from './pages/Gallery';
 import { CreatorPage } from './pages/CreatorPage';
 import { Donate } from './pages/Donate';
+import HowItWasBuilt from './pages/HowItWasBuilt';
 
 function App() {
   return (
@@ -14,6 +15,7 @@ function App() {
         <Route path="/app" element={<AppPage />} />
         <Route path="/gallery" element={<Gallery />} />
         <Route path="/donate" element={<Donate />} />
+        <Route path="/how-it-was-built" element={<HowItWasBuilt />} />
         <Route path="/creators/:creatorId" element={<CreatorPage />} />
         <Route path="/creations/:creationId" element={<ViewCreation />} />
       </Routes>
