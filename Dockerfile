@@ -48,6 +48,9 @@ RUN npm ci --only=production
 # Copy built server files from builder stage
 COPY --from=server-builder /app/server/dist ./dist
 
+# Copy server public files (conversations data)
+COPY server/public ./public
+
 # Copy built client files from client builder stage
 COPY --from=client-builder /app/client/dist ./client/dist
 
