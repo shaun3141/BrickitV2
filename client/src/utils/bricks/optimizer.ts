@@ -33,7 +33,7 @@ function canPlaceBrick(
       }
 
       // Check if color matches
-      if (mosaicData.pixels[row][col].id !== targetColor.id) {
+      if (mosaicData.pixels[row][col].name !== targetColor.name) {
         return { canPlace: false, color: null };
       }
     }
@@ -136,7 +136,7 @@ export function countCoveredCells(placements: BrickPlacement[]): number {
  */
 export interface PieceSummary {
   brickTypeId: string;
-  colorId: number;
+  colorId: string;
   color: LegoColor;
   brickType: string;
   count: number;
@@ -146,7 +146,7 @@ export function generatePieceSummary(placements: BrickPlacement[]): PieceSummary
   const summaryMap = new Map<string, PieceSummary>();
 
   for (const placement of placements) {
-    const key = `${placement.brickType.id}-${placement.color.id}`;
+    const key = `${placement.brickType.id}-${placement.color.name}`;
     
     const existing = summaryMap.get(key);
     if (existing) {
@@ -154,7 +154,7 @@ export function generatePieceSummary(placements: BrickPlacement[]): PieceSummary
     } else {
       summaryMap.set(key, {
         brickTypeId: placement.brickType.id,
-        colorId: placement.color.id,
+        colorId: placement.color.name,
         color: placement.color,
         brickType: placement.brickType.displayName,
         count: 1,

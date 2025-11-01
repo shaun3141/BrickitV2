@@ -1,14 +1,12 @@
 /**
- * Represents a LEGO color with ID, name, and RGB values.
+ * Represents a LEGO color with name and RGB values.
  * Provides helper methods for color format conversions.
  */
 export class LegoColor {
-  id: number;
   name: string;
   rgb: [number, number, number];
   
-  constructor(id: number, name: string, rgb: [number, number, number]) {
-    this.id = id;
+  constructor(name: string, rgb: [number, number, number]) {
     this.name = name;
     this.rgb = rgb;
   }
@@ -62,42 +60,37 @@ export class LegoColor {
   }
 }
 
-// Official LEGO colors commonly available in 1x1 plates
+// Official LEGO colors - will be loaded dynamically from API
+// This is a fallback palette for offline/error scenarios
 // Sorted intelligently: grayscale colors first (by brightness), then chromatic colors (by hue)
-export const LEGO_COLORS: LegoColor[] = [
+export let LEGO_COLORS: LegoColor[] = [
   // Grayscale colors (saturation ≤ 10%), sorted by brightness
-  new LegoColor(1, "Black", [25, 25, 25]),
-  new LegoColor(11, "Dark Bluish Gray", [111,110,115]),
-  new LegoColor(24, "Light Bluish Gray", [187,186,191]),
-  new LegoColor(39, "White", [255, 255, 255]),
+  new LegoColor("Black", [25, 25, 25]),
+  new LegoColor("Dark Bluish Gray", [111,110,115]),
+  new LegoColor("Light Bluish Gray", [187,186,191]),
+  new LegoColor("White", [255, 255, 255]),
   
   // Chromatic colors, sorted by hue (red → orange → yellow → green → cyan → blue → purple → pink)
-  new LegoColor(34, "Red", [179,14,13]),
-  new LegoColor(18, "Dark Red", [131,33,31]),
-  new LegoColor(35, "Reddish Brown", [103,49,26]),
-  // new LegoColor(12, "Dark Brown", [92, 64, 51]),
-  new LegoColor(19, "Dark Tan", [171,145,107]),
-  // new LegoColor(31, "Medium Nougat", [166, 125, 61]),
-  new LegoColor(38, "Tan", [228,213,159]),
-  new LegoColor(5, "Bright Light Orange", [255, 184, 22]),
-  new LegoColor(33, "Orange", [254, 135, 42]),
-  new LegoColor(40, "Yellow", [247, 201, 4]),
-  new LegoColor(26, "Lime", [176,225,57]),
-  new LegoColor(21, "Green", [33,143,71]),
-  new LegoColor(37, "Dark Green", [47,88,56]),
-  // new LegoColor(23, "Light Aqua", [0, 170, 164]),
-  // new LegoColor(36, "Sand Blue", [95, 159, 159]),
-  // new LegoColor(20, "Dark Turquoise", [0, 206, 209]),
-  new LegoColor(9, "Dark Azure", [44,173,229]),
-  // new LegoColor(4, "Bright Light Blue", [151, 203, 217]),
-  new LegoColor(28, "Medium Azure", [134,225,249]),
-  new LegoColor(2, "Blue", [34,107,180]),
-  new LegoColor(29, "Medium Blue", [0, 0, 205]),
-  new LegoColor(10, "Dark Blue", [0, 0, 139]),
-  new LegoColor(30, "Medium Lavender", [190,144,208]),
-  new LegoColor(17, "Dark Purple", [110,80,180]),
-  new LegoColor(7, "Bright Pink", [211, 53, 157]),
-  new LegoColor(16, "Dark Pink", [211, 53, 157]),
+  new LegoColor("Red", [179,14,13]),
+  new LegoColor("Dark Red", [131,33,31]),
+  new LegoColor("Reddish Brown", [103,49,26]),
+  new LegoColor("Dark Tan", [171,145,107]),
+  new LegoColor("Tan", [228,213,159]),
+  new LegoColor("Bright Light Orange", [255, 184, 22]),
+  new LegoColor("Orange", [254, 135, 42]),
+  new LegoColor("Yellow", [247, 201, 4]),
+  new LegoColor("Lime", [176,225,57]),
+  new LegoColor("Green", [33,143,71]),
+  new LegoColor("Dark Green", [47,88,56]),
+  new LegoColor("Dark Azure", [44,173,229]),
+  new LegoColor("Medium Azure", [134,225,249]),
+  new LegoColor("Blue", [34,107,180]),
+  new LegoColor("Medium Blue", [0, 0, 205]),
+  new LegoColor("Dark Blue", [0, 0, 139]),
+  new LegoColor("Medium Lavender", [190,144,208]),
+  new LegoColor("Dark Purple", [110,80,180]),
+  new LegoColor("Bright Pink", [211, 53, 157]),
+  new LegoColor("Dark Pink", [211, 53, 157]),
 ];
 
 /**
@@ -283,5 +276,34 @@ export function sortColorsByHue(colors: LegoColor[], grayscaleThreshold: number 
   });
   
   return [...grayscale, ...chromatic];
+}
+
+/**
+ * Dynamically loads LEGO colors from the API
+ * Updates the LEGO_COLORS array with the fetched colors
+ * 
+ * @returns Promise that resolves to the loaded colors
+ */
+export async function loadLegoColors(): Promise<LegoColor[]> {
+  try {
+    const { fetchColorPalette } = await import('@/services/colors.service');
+    const colors = await fetchColorPalette();
+    
+    // Update the LEGO_COLORS array
+    LEGO_COLORS = colors;
+    
+    return colors;
+  } catch (error) {
+    console.error('Failed to load colors from API, using fallback palette:', error);
+    // Return the existing fallback colors
+    return LEGO_COLORS;
+  }
+}
+
+/**
+ * Gets the current LEGO colors (will be fallback colors until loadLegoColors is called)
+ */
+export function getLegoColors(): LegoColor[] {
+  return LEGO_COLORS;
 }
 

@@ -510,7 +510,7 @@ function ensureLegoColorStructure(pixelData: unknown[][]): LegoColor[][] {
       }
       // Otherwise, something went wrong - return a default black color
       console.warn('Invalid pixel data detected, using fallback color');
-      return new LegoColor(0, 'Black', [0, 0, 0]);
+      return new LegoColor('Black', [0, 0, 0]);
     })
   );
 }

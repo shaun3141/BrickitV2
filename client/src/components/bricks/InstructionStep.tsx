@@ -127,7 +127,7 @@ export function InstructionStep({
               }>();
               
               step.placements.forEach(placement => {
-                const key = `${placement.color.id}-${placement.brickType.id}`;
+                const key = `${placement.color.name}-${placement.brickType.id}`;
                 const existing = grouped.get(key);
                 if (existing) {
                   existing.count++;
@@ -145,7 +145,7 @@ export function InstructionStep({
               
               return sortedGroups.map((group, idx) => (
                 <div 
-                  key={`${group.color.id}-${group.brickType.id}-${idx}`}
+                  key={`${group.color.name}-${group.brickType.id}-${idx}`}
                   className="flex items-center gap-3 p-3 rounded-md border bg-card hover:bg-accent/50 transition-colors"
                 >
                   {/* Brick Swatch */}

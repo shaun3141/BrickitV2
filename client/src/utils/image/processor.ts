@@ -394,16 +394,16 @@ export function generateMosaicPreview(
 /**
  * Counts the number of bricks needed for each color (1x1 only)
  */
-export function generatePartsList(mosaicData: MosaicData): Map<number, { color: LegoColor; count: number }> {
-  const partsList = new Map<number, { color: LegoColor; count: number }>();
+export function generatePartsList(mosaicData: MosaicData): Map<string, { color: LegoColor; count: number }> {
+  const partsList = new Map<string, { color: LegoColor; count: number }>();
 
   for (const row of mosaicData.pixels) {
     for (const color of row) {
-      const existing = partsList.get(color.id);
+      const existing = partsList.get(color.name);
       if (existing) {
         existing.count++;
       } else {
-        partsList.set(color.id, { color, count: 1 });
+        partsList.set(color.name, { color, count: 1 });
       }
     }
   }
@@ -419,7 +419,7 @@ export interface OptimizedPart {
   brickTypeName: string;
   brickWidth: number;
   brickHeight: number;
-  colorId: number;
+  colorId: string;
   colorName: string;
   color: LegoColor;
   hex: string;
@@ -432,7 +432,7 @@ export function generateOptimizedPartsList(
   const partsMap = new Map<string, OptimizedPart>();
 
   for (const placement of placements) {
-    const key = `${placement.brickType.id}-${placement.color.id}`;
+    const key = `${placement.brickType.id}-${placement.color.name}`;
     
     const existing = partsMap.get(key);
     if (existing) {
@@ -443,7 +443,7 @@ export function generateOptimizedPartsList(
         brickTypeName: placement.brickType.displayName,
         brickWidth: placement.brickType.width,
         brickHeight: placement.brickType.height,
-        colorId: placement.color.id,
+        colorId: placement.color.name,
         colorName: placement.color.name,
         color: placement.color,
         hex: placement.color.hex,

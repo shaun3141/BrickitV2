@@ -1,6 +1,6 @@
 """
-Scraper for LEGO Pick a Brick to extract 2x4 brick item IDs and colors.
-Uses BrowserBase Stagehand for browser automation.
+Final LEGO Pick a Brick scraper - clicks each color to get Element ID and price.
+Based on findings from browser exploration.
 """
 
 import asyncio
@@ -11,15 +11,14 @@ from pydantic import BaseModel, Field
 from dotenv import load_dotenv
 from stagehand import Stagehand, StagehandConfig
 
-# Load environment variables from .env file
 load_dotenv()
 
 
 class ColorVariant(BaseModel):
     """Model for a single color variant of a brick."""
     color_name: str = Field(..., description="The color name (e.g., Bright Red, Dark Orange)")
-    element_id: str | None = Field(None, description="The unique element ID for this color variant (e.g., 4114319)")
-    rgb: str | None = Field(None, description="The RGB color value if available (e.g., #FF0000 or rgb(255,0,0))")
+    element_id: str | None = Field(None, description="The unique element ID for this color variant (e.g., 300121)")
+    rgb: str | None = Field(None, description="The RGB color value (e.g., #b40000)")
     price: float | None = Field(None, description="The price for this color variant in USD")
 
 
@@ -28,226 +27,243 @@ class BrickItem(BaseModel):
     element_id: str = Field(..., description="The base LEGO element ID (like 3001, 3020)")
     brick_type: str = Field(..., description="The type/name of the brick (e.g., BRICK 2X4, PLATE 2X4)")
     num_colors: int = Field(0, description="The number of available colors for this brick")
-    colors: list[ColorVariant] = Field(default=[], description="List of color variants with their unique element IDs, RGB values, and prices")
+    colors: list[ColorVariant] = Field(default=[], description="List of color variants")
 
 
-async def scrape_bricks_and_plates():
-    """
-    Scrape the LEGO Pick a Brick website for brick and plate item IDs and colors.
+# Known brick element IDs
+BRICKS_TO_SCRAPE = [
+    {"element_id": "3001", "name": "BRICK 2X4"},
+    {"element_id": "3004", "name": "BRICK 1X2"},
+    {"element_id": "3005", "name": "BRICK 1X1"},
+    {"element_id": "3010", "name": "BRICK 1X4"},
+    {"element_id": "3622", "name": "BRICK 1X3"},
+    {"element_id": "3020", "name": "PLATE 2X4"},
+    {"element_id": "3023", "name": "PLATE 1X2"},
+    {"element_id": "3024", "name": "PLATE 1X1"},
+    {"element_id": "3623", "name": "PLATE 1X3"},
+    {"element_id": "3710", "name": "PLATE 1X4"},
+]
+
+
+async def scrape_brick_colors(stagehand, base_element_id: str, brick_name: str) -> BrickItem:
+    """Scrape colors for a single brick type by clicking each color."""
     
-    Returns:
-        List[BrickItem]: List of brick items with their IDs and colors
-    """
+    # Navigate directly to the brick's page
+    url = f"https://www.lego.com/en-us/pick-and-build/pick-a-brick?query={base_element_id}"
+    print(f"  Loading: {url}")
+    await stagehand.page.goto(url)
+    await asyncio.sleep(4)
+    
+    # Click on the brick to show colors
+    print(f"  Clicking on brick...")
+    click_result = await stagehand.page.evaluate("""
+        () => {
+            const btn = document.querySelector('[data-test="pab-item-button"]');
+            if (btn) {
+                btn.click();
+                return {success: true};
+            }
+            return {success: false};
+        }
+    """)
+    
+    if not click_result.get('success'):
+        print(f"  ✗ Could not find/click button")
+        return BrickItem(element_id=base_element_id, brick_type=brick_name, num_colors=0, colors=[])
+    
+    await asyncio.sleep(6)  # Wait for colors to load
+    
+    # Get basic info about all colors (name and RGB)
+    print(f"  Getting color information...")
+    colors_basic = await stagehand.page.evaluate("""
+        () => {
+            const colorButtons = document.querySelectorAll('button[class*="color"]');
+            const colors = [];
+            
+            colorButtons.forEach((btn, index) => {
+                const colorName = btn.getAttribute('aria-label') || btn.getAttribute('title');
+                const colorBlock = btn.querySelector('[data-test="pab-element-modal-color-block"]');
+                
+                let rgb = null;
+                if (colorBlock) {
+                    const bgColor = window.getComputedStyle(colorBlock).backgroundColor;
+                    if (bgColor && bgColor !== 'rgba(0, 0, 0, 0)') {
+                        const rgbMatch = bgColor.match(/rgba?\\((\\d+),\\s*(\\d+),\\s*(\\d+)/);
+                        if (rgbMatch) {
+                            const r = parseInt(rgbMatch[1]).toString(16).padStart(2, '0');
+                            const g = parseInt(rgbMatch[2]).toString(16).padStart(2, '0');
+                            const b = parseInt(rgbMatch[3]).toString(16).padStart(2, '0');
+                            rgb = `#${r}${g}${b}`;
+                        }
+                    }
+                }
+                
+                if (colorName) {
+                    colors.push({
+                        index: index,
+                        color_name: colorName,
+                        rgb: rgb
+                    });
+                }
+            });
+            
+            return colors;
+        }
+    """)
+    
+    if not colors_basic:
+        print(f"  ✗ No colors found")
+        return BrickItem(element_id=base_element_id, brick_type=brick_name, num_colors=0, colors=[])
+    
+    print(f"  Found {len(colors_basic)} colors, now clicking each to get Element ID and price...")
+    
+    # Now click each color to get Element ID and price
+    all_colors = []
+    for color_info in colors_basic:
+        try:
+            # Click the color button by index
+            click_color_result = await stagehand.page.evaluate(f"""
+                () => {{
+                    const colorButtons = document.querySelectorAll('button[class*="color"]');
+                    const btn = colorButtons[{color_info['index']}];
+                    if (btn) {{
+                        btn.click();
+                        return {{success: true}};
+                    }}
+                    return {{success: false}};
+                }}
+            """)
+            
+            if not click_color_result.get('success'):
+                print(f"    ✗ Could not click {color_info['color_name']}")
+                continue
+            
+            # Wait a bit for the page to update
+            await asyncio.sleep(1.5)
+            
+            # Extract Element ID from URL and price from page
+            color_details = await stagehand.page.evaluate("""
+                () => {
+                    // Get Element ID from URL
+                    const urlMatch = window.location.href.match(/selectedElement=(\\d+)/);
+                    const elementId = urlMatch ? urlMatch[1] : null;
+                    
+                    // Get price
+                    const priceEl = document.querySelector('[data-test="pab-item-price"]');
+                    let price = null;
+                    if (priceEl) {
+                        const priceText = priceEl.textContent.trim();
+                        const priceMatch = priceText.match(/\\$([\\d.]+)/);
+                        price = priceMatch ? parseFloat(priceMatch[1]) : null;
+                    }
+                    
+                    return {elementId, price};
+                }
+            """)
+            
+            if color_details.get('elementId'):
+                all_colors.append(ColorVariant(
+                    color_name=color_info['color_name'],
+                    element_id=color_details['elementId'],
+                    rgb=color_info['rgb'],
+                    price=color_details.get('price')
+                ))
+                print(f"    ✓ {color_info['color_name']}: ID={color_details['elementId']}, Price=${color_details.get('price')}")
+            else:
+                print(f"    ✗ {color_info['color_name']}: Could not get Element ID")
+                
+        except Exception as e:
+            print(f"    ✗ Error with {color_info['color_name']}: {e}")
+            continue
+    
+    if all_colors:
+        return BrickItem(
+            element_id=base_element_id,
+            brick_type=brick_name,
+            num_colors=len(all_colors),
+            colors=all_colors
+        )
+    
+    return BrickItem(element_id=base_element_id, brick_type=brick_name, num_colors=0, colors=[])
+
+
+async def main():
+    """Main entry point."""
+    print("=" * 70)
+    print("LEGO Pick a Brick - Final Scraper")
+    print("Clicks each color to extract Element ID and Price")
+    print("=" * 70)
+    
+    required_vars = ["BROWSERBASE_API_KEY", "BROWSERBASE_PROJECT_ID", "OPENAI_API_KEY"]
+    missing_vars = [var for var in required_vars if not os.getenv(var)]
+    
+    if missing_vars:
+        print(f"\nError: Missing environment variables: {', '.join(missing_vars)}")
+        return
+    
+    print("\n✓ All required environment variables are set\n")
     
     stagehand = None
+    all_bricks = []
     
     try:
-        # Initialize Stagehand with configuration
-        print("Initializing Stagehand...")
         config = StagehandConfig(
             env="BROWSERBASE",
             api_key=os.getenv("BROWSERBASE_API_KEY"),
             project_id=os.getenv("BROWSERBASE_PROJECT_ID"),
-            model_name="openai/gpt-4o",  # Using GPT-4o for higher token limits
+            model_name="openai/gpt-4o",
             model_api_key=os.getenv("OPENAI_API_KEY"),
         )
         stagehand = Stagehand(config)
         await stagehand.init()
         
-        if stagehand.env == "BROWSERBASE":
-            print(f"View your live browser: https://www.browserbase.com/sessions/{stagehand.session_id}")
+        print(f"View browser: https://www.browserbase.com/sessions/{stagehand.session_id}")
+        print(f"Note: This will take a while as we click each color individually!\n")
         
-        # Navigate to search results for bricks and plates
-        print("Navigating to search results...")
-        url = "https://www.lego.com/en-us/pick-and-build/pick-a-brick?query=brick%20OR%20plate"
-        await stagehand.page.goto(url)
-        
-        # Wait for page to load
-        print("Waiting for page to load...")
-        await asyncio.sleep(8)  # Longer initial wait
-        
-        # Get unique brick types from the initial page
-        print("Getting list of unique 2x4 brick types...")
-        
-        class BrickSummary(BaseModel):
-            element_id: str = Field(..., description="The base LEGO element ID")
-            brick_name: str = Field(..., description="The name of the brick type")
-            num_colors_text: str = Field(..., description="Text showing number of colors like 'This element exists in 30 different colours'")
-        
-        class BricksList(BaseModel):
-            bricks: List[BrickSummary] = Field(..., description="List of brick summaries")
-        
-        summary_result = await stagehand.page.extract(
-            instruction="""Extract unique brick and plate types from the search results. 
-            
-            Focus on these specific sizes:
-            - BRICK 1X1, BRICK 1X2, BRICK 1X3, BRICK 1X4, BRICK 2X4
-            - PLATE 1X1, PLATE 1X2, PLATE 1X3, PLATE 1X4, PLATE 2X4
-            
-            For each brick/plate type, get:
-            - The base element ID (like 3001, 3020, 3023, etc.)
-            - The brick/plate name
-            - The text showing how many colors exist
-            
-            Only list each brick type once - if you see multiple color variants of the same brick type, only extract it once.""",
-            schema=BricksList
-        )
-        
-        all_bricks_summary = summary_result.bricks if hasattr(summary_result, 'bricks') else []
-        print(f"Found {len(all_bricks_summary)} unique brick types to process")
-        
-        # Now click on each brick to get its colors
-        bricks_with_colors = []
-        for idx, brick_summary in enumerate(all_bricks_summary, 1):  # Process all bricks
-            print(f"\n[{idx}/{len(all_bricks_summary)}] Processing {brick_summary.brick_name} (Element ID: {brick_summary.element_id})...")
+        for idx, brick_info in enumerate(BRICKS_TO_SCRAPE, 1):
+            print(f"\n{'='*70}")
+            print(f"[{idx}/{len(BRICKS_TO_SCRAPE)}] {brick_info['name']} (Element ID: {brick_info['element_id']})")
+            print(f"{'='*70}")
             
             try:
-                # Click on the brick to open modal
-                await stagehand.page.act(f"Click on the brick type '{brick_summary.brick_name}' with element ID {brick_summary.element_id}")
-                await asyncio.sleep(5)  # Longer wait for modal to fully load
+                brick_data = await scrape_brick_colors(stagehand, brick_info['element_id'], brick_info['name'])
+                all_bricks.append(brick_data)
                 
-                # Extract ALL colors from the modal using JavaScript evaluation
-                print("  Extracting colors from modal...")
-                
-                # Use JavaScript to extract data directly from DOM
-                colors_data = await stagehand.page.evaluate("""
-                    () => {
-                        const colorButtons = document.querySelectorAll('[data-test="pab-item-button"]');
-                        const colors = [];
-                        
-                        colorButtons.forEach(btn => {
-                            const ariaLabel = btn.getAttribute('aria-label') || '';
-                            const elementIdMatch = ariaLabel.match(/Element (\\d+)/);
-                            const elementId = elementIdMatch ? elementIdMatch[1] : null;
-                            
-                            // Get price
-                            const priceEl = btn.closest('div')?.querySelector('[data-test="price"]');
-                            const priceText = priceEl?.textContent?.trim() || '';
-                            const priceMatch = priceText.match(/\\$([\\d.]+)/);
-                            const price = priceMatch ? parseFloat(priceMatch[1]) : null;
-                            
-                            if (elementId) {
-                                colors.push({
-                                    element_id: elementId,
-                                    price: price
-                                });
-                            }
-                        });
-                        
-                        return colors;
-                    }
-                """)
-                
-                # Now extract with schema for color names
-                color_info = await stagehand.page.extract(
-                    instruction="""Extract color information for each element ID shown in the modal. For each color variant button, get the color name from the visible text or image.""",
-                    schema=BrickItem
-                )
-                
-                # Merge data
-                if colors_data and hasattr(color_info, 'colors'):
-                    for i, color in enumerate(color_info.colors):
-                        if i < len(colors_data):
-                            color.element_id = colors_data[i]['element_id']
-                            color.price = colors_data[i]['price']
-                    colors_result = color_info
+                if brick_data.colors:
+                    print(f"\n  ✓ Successfully scraped {len(brick_data.colors)} colors!")
                 else:
-                    colors_result = color_info
-                
-                if hasattr(colors_result, 'colors') and colors_result.colors:
-                    colors_result.num_colors = len(colors_result.colors)
-                    bricks_with_colors.append(colors_result)
-                    print(f"  ✓ Found {len(colors_result.colors)} colors")
-                else:
-                    # Fallback: just save the brick without colors
-                    bricks_with_colors.append(BrickItem(
-                        element_id=brick_summary.element_id,
-                        brick_type=brick_summary.brick_name,
-                        num_colors=0,
-                        colors=[]
-                    ))
-                    print(f"  ✗ No colors extracted")
-                
-                # Close the modal
-                await stagehand.page.act("Close the modal by clicking the X button")
-                await asyncio.sleep(2)  # Wait before next brick
-                
+                    print(f"\n  ✗ No colors extracted")
+                    
             except Exception as e:
-                print(f"  ✗ Error processing brick: {e}")
-                # Still add the brick without colors
-                bricks_with_colors.append(BrickItem(
-                    element_id=brick_summary.element_id,
-                    brick_type=brick_summary.brick_name,
+                print(f"\n  ✗ Error: {e}")
+                all_bricks.append(BrickItem(
+                    element_id=brick_info['element_id'],
+                    brick_type=brick_info['name'],
                     num_colors=0,
                     colors=[]
                 ))
         
-        bricks = bricks_with_colors
+        # Save results
+        output_file = os.path.join(os.path.dirname(__file__), "bricks_and_plates.json")
+        bricks_data = [brick.model_dump() for brick in all_bricks]
         
-        print(f"\nSuccessfully processed {len(bricks)} brick types:")
-        print("-" * 60)
+        with open(output_file, 'w') as f:
+            json.dump(bricks_data, f, indent=2)
         
-        for brick in bricks:
-            print(f"Element ID: {brick.element_id:<10} Type: {brick.brick_type} ({brick.num_colors} colors)")
-            if brick.colors:
-                for color in brick.colors[:5]:  # Show first 5 colors as sample
-                    price_str = f"${color.price:.2f}" if color.price else "N/A"
-                    rgb_str = color.rgb if color.rgb else "N/A"
-                    print(f"  • {color.color_name:<25} ID: {color.element_id:<10} RGB: {rgb_str:<10} Price: {price_str}")
-                if len(brick.colors) > 5:
-                    print(f"  ... and {len(brick.colors) - 5} more colors")
-        
-        return bricks
-        
-    except Exception as e:
-        print(f"Error during scraping: {e}")
-        return []
+        print(f"\n\n{'=' * 70}")
+        print(f"COMPLETE!")
+        print(f"{'=' * 70}")
+        print(f"Results saved to: {output_file}")
+        print(f"Total bricks processed: {len(all_bricks)}")
+        print(f"Bricks with colors: {sum(1 for b in all_bricks if b.num_colors > 0)}")
+        print(f"Total colors extracted: {sum(b.num_colors for b in all_bricks)}")
+        print("=" * 70)
         
     finally:
         if stagehand:
-            print("\nClosing browser session...")
             await stagehand.close()
-
-
-async def save_results(bricks: List[BrickItem], filename: str = "bricks_and_plates.json"):
-    """Save scraped bricks to a JSON file."""
-    output_file = os.path.join(os.path.dirname(__file__), filename)
-    
-    bricks_data = [brick.model_dump() for brick in bricks]
-    
-    with open(output_file, 'w') as f:
-        json.dump(bricks_data, f, indent=2)
-    
-    print(f"\nResults saved to: {output_file}")
-
-
-async def main():
-    """Main entry point."""
-    print("=" * 60)
-    print("LEGO Pick a Brick - Brick & Plate Scraper")
-    print("=" * 60)
-    
-    # Check for required environment variables
-    required_vars = ["BROWSERBASE_API_KEY", "BROWSERBASE_PROJECT_ID", "OPENAI_API_KEY"]
-    missing_vars = [var for var in required_vars if not os.getenv(var)]
-    
-    if missing_vars:
-        print(f"\nWarning: Missing environment variables: {', '.join(missing_vars)}")
-        print("Make sure to set these in your .env file or environment.")
-        print()
-    else:
-        print("\n✓ All required environment variables are set")
-        print()
-    
-    # Scrape the bricks
-    bricks = await scrape_bricks_and_plates()
-    
-    # Save results
-    if bricks:
-        await save_results(bricks)
-    
-    print("\nDone!")
 
 
 if __name__ == "__main__":
     asyncio.run(main())
+

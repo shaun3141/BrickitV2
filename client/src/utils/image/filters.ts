@@ -178,14 +178,14 @@ export const duotoneFilter: FilterDefinition = {
         label: 'Dark Color',
         type: 'select',
         default: 26,
-        options: LEGO_COLORS.map(c => ({ value: c.id, label: c.name })),
+        options: LEGO_COLORS.map(c => ({ value: c.name, label: c.name })),
       },
       {
         name: 'colorB',
         label: 'Light Color',
         type: 'select',
         default: 1,
-        options: LEGO_COLORS.map(c => ({ value: c.id, label: c.name })),
+        options: LEGO_COLORS.map(c => ({ value: c.name, label: c.name })),
       },
       {
         name: 'threshold',
@@ -206,8 +206,8 @@ export const duotoneFilter: FilterDefinition = {
   },
   process: (imageData, params) => {
     const { colorA, colorB, threshold, halftone } = params;
-    const colorAObj = LEGO_COLORS.find(c => c.id === colorA)!;
-    const colorBObj = LEGO_COLORS.find(c => c.id === colorB)!;
+    const colorAObj = LEGO_COLORS.find(c => c.name === colorA)!;
+    const colorBObj = LEGO_COLORS.find(c => c.name === colorB)!;
     
     const output = new Uint8ClampedArray(imageData.data);
     
@@ -249,29 +249,29 @@ export const tricolorFilter: FilterDefinition = {
         label: 'Dark Color',
         type: 'select',
         default: 26,
-        options: LEGO_COLORS.map(c => ({ value: c.id, label: c.name })),
+        options: LEGO_COLORS.map(c => ({ value: c.name, label: c.name })),
       },
       {
         name: 'midColor',
         label: 'Mid Color',
         type: 'select',
         default: 21,
-        options: LEGO_COLORS.map(c => ({ value: c.id, label: c.name })),
+        options: LEGO_COLORS.map(c => ({ value: c.name, label: c.name })),
       },
       {
         name: 'lightColor',
         label: 'Light Color',
         type: 'select',
         default: 1,
-        options: LEGO_COLORS.map(c => ({ value: c.id, label: c.name })),
+        options: LEGO_COLORS.map(c => ({ value: c.name, label: c.name })),
       },
     ],
   },
   process: (imageData, params) => {
     const { darkColor, midColor, lightColor } = params;
-    const darkObj = LEGO_COLORS.find(c => c.id === darkColor)!;
-    const midObj = LEGO_COLORS.find(c => c.id === midColor)!;
-    const lightObj = LEGO_COLORS.find(c => c.id === lightColor)!;
+    const darkObj = LEGO_COLORS.find(c => c.name === darkColor)!;
+    const midObj = LEGO_COLORS.find(c => c.name === midColor)!;
+    const lightObj = LEGO_COLORS.find(c => c.name === lightColor)!;
     
     // Calculate luminance quantiles
     const luminances: number[] = [];
@@ -1049,13 +1049,13 @@ export const toonOutlinesFilter: FilterDefinition = {
         label: 'Outline Color',
         type: 'select',
         default: 26,
-        options: LEGO_COLORS.map(c => ({ value: c.id, label: c.name })),
+        options: LEGO_COLORS.map(c => ({ value: c.name, label: c.name })),
       },
     ],
   },
   process: (imageData, params) => {
     const { threshold, outlineColor } = params;
-    const outlineColorObj = LEGO_COLORS.find(c => c.id === outlineColor)!;
+    const outlineColorObj = LEGO_COLORS.find(c => c.name === outlineColor)!;
     
     const { magnitude } = sobelEdgeDetection(imageData.data, imageData.width, imageData.height);
     const output = quantizeToLegoPalette(imageData.data);
@@ -1155,14 +1155,14 @@ export const edgeSketchFilter: FilterDefinition = {
         label: 'Background Color',
         type: 'select',
         default: 1,
-        options: LEGO_COLORS.map(c => ({ value: c.id, label: c.name })),
+        options: LEGO_COLORS.map(c => ({ value: c.name, label: c.name })),
       },
     ],
   },
   process: (imageData, params) => {
     const { edgeStrength, bgColor } = params;
-    const bgColorObj = LEGO_COLORS.find(c => c.id === bgColor)!;
-    const darkColor = LEGO_COLORS.find(c => c.id === 26)!; // Black
+    const bgColorObj = LEGO_COLORS.find(c => c.name === bgColor)!;
+    const darkColor = LEGO_COLORS.find(c => c.name === "Black")!;
     
     const { magnitude } = sobelEdgeDetection(imageData.data, imageData.width, imageData.height);
     const output = new Uint8ClampedArray(imageData.data);
@@ -1315,7 +1315,7 @@ export const halftoneFilter: FilterDefinition = {
               output[i + 1] = legoColor.rgb[1];
               output[i + 2] = legoColor.rgb[2];
             } else {
-              const lightColor = LEGO_COLORS.find(c => c.id === 1)!; // White
+              const lightColor = LEGO_COLORS.find(c => c.name === "White")!;
               output[i] = lightColor.rgb[0];
               output[i + 1] = lightColor.rgb[1];
               output[i + 2] = lightColor.rgb[2];
@@ -1366,7 +1366,7 @@ export const crosshatchFilter: FilterDefinition = {
         const isDiag2 = (x - y) % (lineWidth * 3) < lineWidth;
         
         if (lum < 128 && (isDiag1 || isDiag2)) {
-          const darkColor = LEGO_COLORS.find(c => c.id === 26)!;
+          const darkColor = LEGO_COLORS.find(c => c.name === "Black")!;
           output[i] = darkColor.rgb[0];
           output[i + 1] = darkColor.rgb[1];
           output[i + 2] = darkColor.rgb[2];

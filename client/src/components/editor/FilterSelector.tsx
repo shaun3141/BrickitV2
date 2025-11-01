@@ -184,14 +184,14 @@ export function FilterSelector({
             <div className="grid grid-cols-6 gap-1">
               {LEGO_COLORS.slice(0, 12).map(color => (
                 <button
-                  key={color.id}
+                  key={color.name}
                   className={`aspect-square rounded border transition-all ${
-                    currentValue === color.id
+                    currentValue === color.name
                       ? 'border-primary border-2'
                       : 'border-border hover:border-primary/50'
                   }`}
                   style={{ backgroundColor: color.hex }}
-                  onClick={() => handleParamChange(param.name, color.id)}
+                  onClick={() => handleParamChange(param.name, color.name)}
                   title={color.name}
                 />
               ))}

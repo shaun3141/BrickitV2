@@ -104,8 +104,8 @@ export function MobileEditToolbar({
         <div className="flex items-center gap-1">
           {quickColors.map((color) => (
             <button
-              key={color.id}
-              className={`h-7 w-7 rounded-full border ${selectedColor.id === color.id ? 'ring-2 ring-primary ring-offset-1' : ''}`}
+              key={color.name}
+              className={`h-7 w-7 rounded-full border ${selectedColor.name === color.name ? 'ring-2 ring-primary ring-offset-1' : ''}`}
               style={{ backgroundColor: color.hex }}
               onClick={() => onColorSelect(color)}
               aria-label={`Select ${color.name}`}

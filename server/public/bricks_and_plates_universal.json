@@ -1,0 +1,2185 @@
+[
+  {
+    "element_id": "3001",
+    "brick_type": "BRICK 2X4",
+    "num_colors": 27,
+    "colors": [
+      {
+        "color_name": "Bright Red",
+        "element_id": "300121",
+        "rgb": "#b40000",
+        "price": 0.21
+      },
+      {
+        "color_name": "Dark Orange",
+        "element_id": "6487946",
+        "rgb": "#91501c",
+        "price": 0.2
+      },
+      {
+        "color_name": "Reddish Brown",
+        "element_id": "4211201",
+        "rgb": "#5f3109",
+        "price": 0.21
+      },
+      {
+        "color_name": "Medium Nougat",
+        "element_id": "6135191",
+        "rgb": "#aa7d55",
+        "price": 0.21
+      },
+      {
+        "color_name": "Bright Orange",
+        "element_id": "4153827",
+        "rgb": "#d67923",
+        "price": 0.21
+      },
+      {
+        "color_name": "Dark Brown",
+        "element_id": "6353072",
+        "rgb": "#372100",
+        "price": 0.21
+      },
+      {
+        "color_name": "Brick Yellow",
+        "element_id": "4114319",
+        "rgb": "#ccb98d",
+        "price": 0.21
+      },
+      {
+        "color_name": "Bright Yellow",
+        "element_id": "300124",
+        "rgb": "#fac80a",
+        "price": 0.21
+      },
+      {
+        "color_name": "Bright Yellowish Green",
+        "element_id": "4165967",
+        "rgb": "#a5ca18",
+        "price": 0.21
+      },
+      {
+        "color_name": "Dark Green",
+        "element_id": "4106356",
+        "rgb": "#00852b",
+        "price": 0.21
+      },
+      {
+        "color_name": "Earth Green",
+        "element_id": "4260493",
+        "rgb": "#00451a",
+        "price": 0.21
+      },
+      {
+        "color_name": "Sand Green",
+        "element_id": "6075626",
+        "rgb": "#708e7c",
+        "price": 0.21
+      },
+      {
+        "color_name": "Dark Azur",
+        "element_id": "4655172",
+        "rgb": "#469bc3",
+        "price": 0.21
+      },
+      {
+        "color_name": "Black",
+        "element_id": "300126",
+        "rgb": "#1b2a34",
+        "price": 0.21
+      },
+      {
+        "color_name": "Bright Blue",
+        "element_id": "300123",
+        "rgb": "#1e5aa8",
+        "price": 0.21
+      },
+      {
+        "color_name": "Sand Blue",
+        "element_id": "6406007",
+        "rgb": "#70819a",
+        "price": 0.18
+      },
+      {
+        "color_name": "Earth Blue",
+        "element_id": "6275133",
+        "rgb": "#19325a",
+        "price": 0.21
+      },
+      {
+        "color_name": "Medium Lilac",
+        "element_id": "4626935",
+        "rgb": "#441a91",
+        "price": 0.21
+      },
+      {
+        "color_name": "New Dark Red",
+        "element_id": "6117418",
+        "rgb": "#720012",
+        "price": 0.21
+      },
+      {
+        "color_name": "White",
+        "element_id": "300101",
+        "rgb": "#f4f4f4",
+        "price": 0.21
+      },
+      {
+        "color_name": "Medium Stone Grey",
+        "element_id": "4211385",
+        "rgb": "#969696",
+        "price": 0.21
+      },
+      {
+        "color_name": "Dark Stone Grey",
+        "element_id": "4211085",
+        "rgb": "#646464",
+        "price": 0.21
+      },
+      {
+        "color_name": "Light Royal Blue",
+        "element_id": null,
+        "rgb": "#9dc3f7",
+        "price": 0.32,
+        "is_substitute": true,
+        "substitutes": [
+          {
+            "brick_type": "BRICK 1X4",
+            "element_id": "6287903",
+            "quantity": 2
+          }
+        ]
+      },
+      {
+        "color_name": "Medium Blue",
+        "element_id": null,
+        "rgb": "#7396c8",
+        "price": 0.32,
+        "is_substitute": true,
+        "substitutes": [
+          {
+            "brick_type": "BRICK 1X4",
+            "element_id": "4163696",
+            "quantity": 2
+          }
+        ]
+      },
+      {
+        "color_name": "Nougat",
+        "element_id": null,
+        "rgb": "#bb805a",
+        "price": 0.4,
+        "is_substitute": true,
+        "substitutes": [
+          {
+            "brick_type": "BRICK 1X2",
+            "element_id": "6330371",
+            "quantity": 4
+          }
+        ]
+      },
+      {
+        "color_name": "Olive Green",
+        "element_id": null,
+        "rgb": "#77774e",
+        "price": 0.32,
+        "is_substitute": true,
+        "substitutes": [
+          {
+            "brick_type": "BRICK 1X4",
+            "element_id": "6062697",
+            "quantity": 2
+          }
+        ]
+      },
+      {
+        "color_name": "Sand Yellow",
+        "element_id": null,
+        "rgb": "#897d62",
+        "price": 0.32,
+        "is_substitute": true,
+        "substitutes": [
+          {
+            "brick_type": "BRICK 1X4",
+            "element_id": "6001822",
+            "quantity": 2
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "element_id": "3004",
+    "brick_type": "BRICK 1X2",
+    "num_colors": 27,
+    "colors": [
+      {
+        "color_name": "Bright Red",
+        "element_id": "300421",
+        "rgb": "#b40000",
+        "price": 0.1
+      },
+      {
+        "color_name": "Nougat",
+        "element_id": "6330371",
+        "rgb": "#bb805a",
+        "price": 0.1
+      },
+      {
+        "color_name": "Dark Orange",
+        "element_id": "4579659",
+        "rgb": "#91501c",
+        "price": 0.1
+      },
+      {
+        "color_name": "Reddish Brown",
+        "element_id": "4211149",
+        "rgb": "#5f3109",
+        "price": 0.1
+      },
+      {
+        "color_name": "Medium Nougat",
+        "element_id": "4569382",
+        "rgb": "#aa7d55",
+        "price": 0.1
+      },
+      {
+        "color_name": "Bright Orange",
+        "element_id": "4121739",
+        "rgb": "#d67923",
+        "price": 0.1
+      },
+      {
+        "color_name": "Dark Brown",
+        "element_id": "6058257",
+        "rgb": "#372100",
+        "price": 0.1
+      },
+      {
+        "color_name": "Sand Yellow",
+        "element_id": "4521914",
+        "rgb": "#897d62",
+        "price": 0.1
+      },
+      {
+        "color_name": "Brick Yellow",
+        "element_id": "4109995",
+        "rgb": "#ccb98d",
+        "price": 0.1
+      },
+      {
+        "color_name": "Bright Yellow",
+        "element_id": "300424",
+        "rgb": "#fac80a",
+        "price": 0.1
+      },
+      {
+        "color_name": "Olive Green",
+        "element_id": "6024722",
+        "rgb": "#77774e",
+        "price": 0.1
+      },
+      {
+        "color_name": "Dark Green",
+        "element_id": "4107736",
+        "rgb": "#00852b",
+        "price": 0.1
+      },
+      {
+        "color_name": "Earth Green",
+        "element_id": "4245570",
+        "rgb": "#00451a",
+        "price": 0.1
+      },
+      {
+        "color_name": "Sand Green",
+        "element_id": "4616581",
+        "rgb": "#708e7c",
+        "price": 0.1
+      },
+      {
+        "color_name": "Black",
+        "element_id": "300426",
+        "rgb": "#1b2a34",
+        "price": 0.1
+      },
+      {
+        "color_name": "Bright Blue",
+        "element_id": "300423",
+        "rgb": "#1e5aa8",
+        "price": 0.1
+      },
+      {
+        "color_name": "Light Royal Blue",
+        "element_id": "6100322",
+        "rgb": "#9dc3f7",
+        "price": 0.1
+      },
+      {
+        "color_name": "Medium Blue",
+        "element_id": "4179833",
+        "rgb": "#7396c8",
+        "price": 0.1
+      },
+      {
+        "color_name": "Sand Blue",
+        "element_id": "6177142",
+        "rgb": "#70819a",
+        "price": 0.1
+      },
+      {
+        "color_name": "Earth Blue",
+        "element_id": "4249891",
+        "rgb": "#19325a",
+        "price": 0.1
+      },
+      {
+        "color_name": "Medium Lilac",
+        "element_id": "6104154",
+        "rgb": "#441a91",
+        "price": 0.1
+      },
+      {
+        "color_name": "New Dark Red",
+        "element_id": "4539102",
+        "rgb": "#720012",
+        "price": 0.1
+      },
+      {
+        "color_name": "White",
+        "element_id": "300401",
+        "rgb": "#f4f4f4",
+        "price": 0.1
+      },
+      {
+        "color_name": "Medium Stone Grey",
+        "element_id": "4211388",
+        "rgb": "#969696",
+        "price": 0.1
+      },
+      {
+        "color_name": "Dark Stone Grey",
+        "element_id": "4211088",
+        "rgb": "#646464",
+        "price": 0.1
+      },
+      {
+        "color_name": "Bright Yellowish Green",
+        "element_id": null,
+        "rgb": "#a5ca18",
+        "price": 0.14,
+        "is_substitute": true,
+        "substitutes": [
+          {
+            "brick_type": "BRICK 1X1",
+            "element_id": "4220634",
+            "quantity": 2
+          }
+        ]
+      },
+      {
+        "color_name": "Dark Azur",
+        "element_id": null,
+        "rgb": "#469bc3",
+        "price": 0.14,
+        "is_substitute": true,
+        "substitutes": [
+          {
+            "brick_type": "BRICK 1X1",
+            "element_id": "6225538",
+            "quantity": 2
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "element_id": "3005",
+    "brick_type": "BRICK 1X1",
+    "num_colors": 27,
+    "colors": [
+      {
+        "color_name": "Bright Red",
+        "element_id": "300521",
+        "rgb": "#b40000",
+        "price": 0.07
+      },
+      {
+        "color_name": "Nougat",
+        "element_id": "6330369",
+        "rgb": "#bb805a",
+        "price": 0.07
+      },
+      {
+        "color_name": "Dark Orange",
+        "element_id": "6254484",
+        "rgb": "#91501c",
+        "price": 0.07
+      },
+      {
+        "color_name": "Reddish Brown",
+        "element_id": "4211242",
+        "rgb": "#5f3109",
+        "price": 0.07
+      },
+      {
+        "color_name": "Medium Nougat",
+        "element_id": "6057986",
+        "rgb": "#aa7d55",
+        "price": 0.07
+      },
+      {
+        "color_name": "Bright Orange",
+        "element_id": "4173805",
+        "rgb": "#d67923",
+        "price": 0.07
+      },
+      {
+        "color_name": "Dark Brown",
+        "element_id": "6226437",
+        "rgb": "#372100",
+        "price": 0.07
+      },
+      {
+        "color_name": "Sand Yellow",
+        "element_id": "6001824",
+        "rgb": "#897d62",
+        "price": 0.07
+      },
+      {
+        "color_name": "Brick Yellow",
+        "element_id": "4113915",
+        "rgb": "#ccb98d",
+        "price": 0.07
+      },
+      {
+        "color_name": "Bright Yellow",
+        "element_id": "300524",
+        "rgb": "#fac80a",
+        "price": 0.07
+      },
+      {
+        "color_name": "Olive Green",
+        "element_id": "6058242",
+        "rgb": "#77774e",
+        "price": 0.07
+      },
+      {
+        "color_name": "Bright Yellowish Green",
+        "element_id": "4220634",
+        "rgb": "#a5ca18",
+        "price": 0.07
+      },
+      {
+        "color_name": "Dark Green",
+        "element_id": "300528",
+        "rgb": "#00852b",
+        "price": 0.07
+      },
+      {
+        "color_name": "Earth Green",
+        "element_id": "4521915",
+        "rgb": "#00451a",
+        "price": 0.07
+      },
+      {
+        "color_name": "Sand Green",
+        "element_id": "4521948",
+        "rgb": "#708e7c",
+        "price": 0.07
+      },
+      {
+        "color_name": "Dark Azur",
+        "element_id": "6225538",
+        "rgb": "#469bc3",
+        "price": 0.07
+      },
+      {
+        "color_name": "Black",
+        "element_id": "300526",
+        "rgb": "#1b2a34",
+        "price": 0.07
+      },
+      {
+        "color_name": "Bright Blue",
+        "element_id": "300523",
+        "rgb": "#1e5aa8",
+        "price": 0.07
+      },
+      {
+        "color_name": "Light Royal Blue",
+        "element_id": "6285271",
+        "rgb": "#9dc3f7",
+        "price": 0.07
+      },
+      {
+        "color_name": "Medium Blue",
+        "element_id": "4179830",
+        "rgb": "#7396c8",
+        "price": 0.07
+      },
+      {
+        "color_name": "Sand Blue",
+        "element_id": "4620077",
+        "rgb": "#70819a",
+        "price": 0.07
+      },
+      {
+        "color_name": "Earth Blue",
+        "element_id": "4255413",
+        "rgb": "#19325a",
+        "price": 0.07
+      },
+      {
+        "color_name": "Medium Lilac",
+        "element_id": "6084028",
+        "rgb": "#441a91",
+        "price": 0.07
+      },
+      {
+        "color_name": "New Dark Red",
+        "element_id": "4541376",
+        "rgb": "#720012",
+        "price": 0.07
+      },
+      {
+        "color_name": "White",
+        "element_id": "300501",
+        "rgb": "#f4f4f4",
+        "price": 0.07
+      },
+      {
+        "color_name": "Medium Stone Grey",
+        "element_id": "4211389",
+        "rgb": "#969696",
+        "price": 0.07
+      },
+      {
+        "color_name": "Dark Stone Grey",
+        "element_id": "4211098",
+        "rgb": "#646464",
+        "price": 0.07
+      }
+    ]
+  },
+  {
+    "element_id": "3010",
+    "brick_type": "BRICK 1X4",
+    "num_colors": 27,
+    "colors": [
+      {
+        "color_name": "Bright Red",
+        "element_id": "301021",
+        "rgb": "#b40000",
+        "price": 0.16
+      },
+      {
+        "color_name": "Dark Orange",
+        "element_id": "6223040",
+        "rgb": "#91501c",
+        "price": 0.16
+      },
+      {
+        "color_name": "Reddish Brown",
+        "element_id": "4211225",
+        "rgb": "#5f3109",
+        "price": 0.16
+      },
+      {
+        "color_name": "Medium Nougat",
+        "element_id": "6223183",
+        "rgb": "#aa7d55",
+        "price": 0.16
+      },
+      {
+        "color_name": "Bright Orange",
+        "element_id": "4118827",
+        "rgb": "#d67923",
+        "price": 0.16
+      },
+      {
+        "color_name": "Sand Yellow",
+        "element_id": "6001822",
+        "rgb": "#897d62",
+        "price": 0.16
+      },
+      {
+        "color_name": "Brick Yellow",
+        "element_id": "4113916",
+        "rgb": "#ccb98d",
+        "price": 0.16
+      },
+      {
+        "color_name": "Bright Yellow",
+        "element_id": "301024",
+        "rgb": "#fac80a",
+        "price": 0.16
+      },
+      {
+        "color_name": "Olive Green",
+        "element_id": "6062697",
+        "rgb": "#77774e",
+        "price": 0.16
+      },
+      {
+        "color_name": "Dark Green",
+        "element_id": "4112838",
+        "rgb": "#00852b",
+        "price": 0.16
+      },
+      {
+        "color_name": "Earth Green",
+        "element_id": "4245571",
+        "rgb": "#00451a",
+        "price": 0.16
+      },
+      {
+        "color_name": "Sand Green",
+        "element_id": "4521947",
+        "rgb": "#708e7c",
+        "price": 0.16
+      },
+      {
+        "color_name": "Black",
+        "element_id": "301026",
+        "rgb": "#1b2a34",
+        "price": 0.16
+      },
+      {
+        "color_name": "Bright Blue",
+        "element_id": "301023",
+        "rgb": "#1e5aa8",
+        "price": 0.16
+      },
+      {
+        "color_name": "Light Royal Blue",
+        "element_id": "6287903",
+        "rgb": "#9dc3f7",
+        "price": 0.16
+      },
+      {
+        "color_name": "Medium Blue",
+        "element_id": "4163696",
+        "rgb": "#7396c8",
+        "price": 0.16
+      },
+      {
+        "color_name": "Sand Blue",
+        "element_id": "4620993",
+        "rgb": "#70819a",
+        "price": 0.16
+      },
+      {
+        "color_name": "Earth Blue",
+        "element_id": "4264569",
+        "rgb": "#19325a",
+        "price": 0.16
+      },
+      {
+        "color_name": "New Dark Red",
+        "element_id": "6052777",
+        "rgb": "#720012",
+        "price": 0.16
+      },
+      {
+        "color_name": "White",
+        "element_id": "301001",
+        "rgb": "#f4f4f4",
+        "price": 0.16
+      },
+      {
+        "color_name": "Medium Stone Grey",
+        "element_id": "4211394",
+        "rgb": "#969696",
+        "price": 0.16
+      },
+      {
+        "color_name": "Dark Stone Grey",
+        "element_id": "4211103",
+        "rgb": "#646464",
+        "price": 0.16
+      },
+      {
+        "color_name": "Bright Yellowish Green",
+        "element_id": null,
+        "rgb": "#a5ca18",
+        "price": 0.28,
+        "is_substitute": true,
+        "substitutes": [
+          {
+            "brick_type": "BRICK 1X1",
+            "element_id": "4220634",
+            "quantity": 4
+          }
+        ]
+      },
+      {
+        "color_name": "Dark Azur",
+        "element_id": null,
+        "rgb": "#469bc3",
+        "price": 0.28,
+        "is_substitute": true,
+        "substitutes": [
+          {
+            "brick_type": "BRICK 1X1",
+            "element_id": "6225538",
+            "quantity": 4
+          }
+        ]
+      },
+      {
+        "color_name": "Dark Brown",
+        "element_id": null,
+        "rgb": "#372100",
+        "price": 0.2,
+        "is_substitute": true,
+        "substitutes": [
+          {
+            "brick_type": "BRICK 1X2",
+            "element_id": "6058257",
+            "quantity": 2
+          }
+        ]
+      },
+      {
+        "color_name": "Medium Lilac",
+        "element_id": null,
+        "rgb": "#441a91",
+        "price": 0.2,
+        "is_substitute": true,
+        "substitutes": [
+          {
+            "brick_type": "BRICK 1X2",
+            "element_id": "6104154",
+            "quantity": 2
+          }
+        ]
+      },
+      {
+        "color_name": "Nougat",
+        "element_id": null,
+        "rgb": "#bb805a",
+        "price": 0.2,
+        "is_substitute": true,
+        "substitutes": [
+          {
+            "brick_type": "BRICK 1X2",
+            "element_id": "6330371",
+            "quantity": 2
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "element_id": "3622",
+    "brick_type": "BRICK 1X3",
+    "num_colors": 27,
+    "colors": [
+      {
+        "color_name": "Bright Red",
+        "element_id": "362221",
+        "rgb": "#b40000",
+        "price": 0.14
+      },
+      {
+        "color_name": "Dark Orange",
+        "element_id": "6263221",
+        "rgb": "#91501c",
+        "price": 0.14
+      },
+      {
+        "color_name": "Reddish Brown",
+        "element_id": "4211220",
+        "rgb": "#5f3109",
+        "price": 0.14
+      },
+      {
+        "color_name": "Medium Nougat",
+        "element_id": "6192922",
+        "rgb": "#aa7d55",
+        "price": 0.14
+      },
+      {
+        "color_name": "Brick Yellow",
+        "element_id": "4162465",
+        "rgb": "#ccb98d",
+        "price": 0.14
+      },
+      {
+        "color_name": "Bright Yellow",
+        "element_id": "362224",
+        "rgb": "#fac80a",
+        "price": 0.14
+      },
+      {
+        "color_name": "Dark Green",
+        "element_id": "4109679",
+        "rgb": "#00852b",
+        "price": 0.14
+      },
+      {
+        "color_name": "Sand Green",
+        "element_id": "6330616",
+        "rgb": "#708e7c",
+        "price": 0.14
+      },
+      {
+        "color_name": "Black",
+        "element_id": "362226",
+        "rgb": "#1b2a34",
+        "price": 0.14
+      },
+      {
+        "color_name": "Bright Blue",
+        "element_id": "362223",
+        "rgb": "#1e5aa8",
+        "price": 0.14
+      },
+      {
+        "color_name": "Light Royal Blue",
+        "element_id": "6182777",
+        "rgb": "#9dc3f7",
+        "price": 0.14
+      },
+      {
+        "color_name": "Medium Blue",
+        "element_id": "6000881",
+        "rgb": "#7396c8",
+        "price": 0.14
+      },
+      {
+        "color_name": "Earth Blue",
+        "element_id": "6233955",
+        "rgb": "#19325a",
+        "price": 0.14
+      },
+      {
+        "color_name": "White",
+        "element_id": "362201",
+        "rgb": "#f4f4f4",
+        "price": 0.14
+      },
+      {
+        "color_name": "Medium Stone Grey",
+        "element_id": "4211428",
+        "rgb": "#969696",
+        "price": 0.14
+      },
+      {
+        "color_name": "Dark Stone Grey",
+        "element_id": "4211104",
+        "rgb": "#646464",
+        "price": 0.14
+      },
+      {
+        "color_name": "Bright Orange",
+        "element_id": null,
+        "rgb": "#d67923",
+        "price": 0.17,
+        "is_substitute": true,
+        "substitutes": [
+          {
+            "brick_type": "BRICK 1X2",
+            "element_id": "4121739",
+            "quantity": 1
+          },
+          {
+            "brick_type": "BRICK 1X1",
+            "element_id": "4173805",
+            "quantity": 1
+          }
+        ]
+      },
+      {
+        "color_name": "Bright Yellowish Green",
+        "element_id": null,
+        "rgb": "#a5ca18",
+        "price": 0.21,
+        "is_substitute": true,
+        "substitutes": [
+          {
+            "brick_type": "BRICK 1X1",
+            "element_id": "4220634",
+            "quantity": 3
+          }
+        ]
+      },
+      {
+        "color_name": "Dark Azur",
+        "element_id": null,
+        "rgb": "#469bc3",
+        "price": 0.21,
+        "is_substitute": true,
+        "substitutes": [
+          {
+            "brick_type": "BRICK 1X1",
+            "element_id": "6225538",
+            "quantity": 3
+          }
+        ]
+      },
+      {
+        "color_name": "Dark Brown",
+        "element_id": null,
+        "rgb": "#372100",
+        "price": 0.17,
+        "is_substitute": true,
+        "substitutes": [
+          {
+            "brick_type": "BRICK 1X2",
+            "element_id": "6058257",
+            "quantity": 1
+          },
+          {
+            "brick_type": "BRICK 1X1",
+            "element_id": "6226437",
+            "quantity": 1
+          }
+        ]
+      },
+      {
+        "color_name": "Earth Green",
+        "element_id": null,
+        "rgb": "#00451a",
+        "price": 0.17,
+        "is_substitute": true,
+        "substitutes": [
+          {
+            "brick_type": "BRICK 1X2",
+            "element_id": "4245570",
+            "quantity": 1
+          },
+          {
+            "brick_type": "BRICK 1X1",
+            "element_id": "4521915",
+            "quantity": 1
+          }
+        ]
+      },
+      {
+        "color_name": "Medium Lilac",
+        "element_id": null,
+        "rgb": "#441a91",
+        "price": 0.17,
+        "is_substitute": true,
+        "substitutes": [
+          {
+            "brick_type": "BRICK 1X2",
+            "element_id": "6104154",
+            "quantity": 1
+          },
+          {
+            "brick_type": "BRICK 1X1",
+            "element_id": "6084028",
+            "quantity": 1
+          }
+        ]
+      },
+      {
+        "color_name": "New Dark Red",
+        "element_id": null,
+        "rgb": "#720012",
+        "price": 0.17,
+        "is_substitute": true,
+        "substitutes": [
+          {
+            "brick_type": "BRICK 1X2",
+            "element_id": "4539102",
+            "quantity": 1
+          },
+          {
+            "brick_type": "BRICK 1X1",
+            "element_id": "4541376",
+            "quantity": 1
+          }
+        ]
+      },
+      {
+        "color_name": "Nougat",
+        "element_id": null,
+        "rgb": "#bb805a",
+        "price": 0.17,
+        "is_substitute": true,
+        "substitutes": [
+          {
+            "brick_type": "BRICK 1X2",
+            "element_id": "6330371",
+            "quantity": 1
+          },
+          {
+            "brick_type": "BRICK 1X1",
+            "element_id": "6330369",
+            "quantity": 1
+          }
+        ]
+      },
+      {
+        "color_name": "Olive Green",
+        "element_id": null,
+        "rgb": "#77774e",
+        "price": 0.17,
+        "is_substitute": true,
+        "substitutes": [
+          {
+            "brick_type": "BRICK 1X2",
+            "element_id": "6024722",
+            "quantity": 1
+          },
+          {
+            "brick_type": "BRICK 1X1",
+            "element_id": "6058242",
+            "quantity": 1
+          }
+        ]
+      },
+      {
+        "color_name": "Sand Blue",
+        "element_id": null,
+        "rgb": "#70819a",
+        "price": 0.17,
+        "is_substitute": true,
+        "substitutes": [
+          {
+            "brick_type": "BRICK 1X2",
+            "element_id": "6177142",
+            "quantity": 1
+          },
+          {
+            "brick_type": "BRICK 1X1",
+            "element_id": "4620077",
+            "quantity": 1
+          }
+        ]
+      },
+      {
+        "color_name": "Sand Yellow",
+        "element_id": null,
+        "rgb": "#897d62",
+        "price": 0.17,
+        "is_substitute": true,
+        "substitutes": [
+          {
+            "brick_type": "BRICK 1X2",
+            "element_id": "4521914",
+            "quantity": 1
+          },
+          {
+            "brick_type": "BRICK 1X1",
+            "element_id": "6001824",
+            "quantity": 1
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "element_id": "3020",
+    "brick_type": "PLATE 2X4",
+    "num_colors": 27,
+    "colors": [
+      {
+        "color_name": "Bright Red",
+        "element_id": "302021",
+        "rgb": "#b40000",
+        "price": 0.14
+      },
+      {
+        "color_name": "Dark Orange",
+        "element_id": "4535928",
+        "rgb": "#91501c",
+        "price": 0.14
+      },
+      {
+        "color_name": "Reddish Brown",
+        "element_id": "4211186",
+        "rgb": "#5f3109",
+        "price": 0.14
+      },
+      {
+        "color_name": "Medium Nougat",
+        "element_id": "6093494",
+        "rgb": "#aa7d55",
+        "price": 0.14
+      },
+      {
+        "color_name": "Bright Orange",
+        "element_id": "4158355",
+        "rgb": "#d67923",
+        "price": 0.14
+      },
+      {
+        "color_name": "Dark Brown",
+        "element_id": "6226792",
+        "rgb": "#372100",
+        "price": 0.14
+      },
+      {
+        "color_name": "Sand Yellow",
+        "element_id": "4267874",
+        "rgb": "#897d62",
+        "price": 0.14
+      },
+      {
+        "color_name": "Brick Yellow",
+        "element_id": "4114309",
+        "rgb": "#ccb98d",
+        "price": 0.14
+      },
+      {
+        "color_name": "Bright Yellow",
+        "element_id": "302024",
+        "rgb": "#fac80a",
+        "price": 0.14
+      },
+      {
+        "color_name": "Dark Green",
+        "element_id": "302028",
+        "rgb": "#00852b",
+        "price": 0.14
+      },
+      {
+        "color_name": "Earth Green",
+        "element_id": "4586057",
+        "rgb": "#00451a",
+        "price": 0.14
+      },
+      {
+        "color_name": "Black",
+        "element_id": "302026",
+        "rgb": "#1b2a34",
+        "price": 0.14
+      },
+      {
+        "color_name": "Bright Blue",
+        "element_id": "302023",
+        "rgb": "#1e5aa8",
+        "price": 0.14
+      },
+      {
+        "color_name": "Earth Blue",
+        "element_id": "4667595",
+        "rgb": "#19325a",
+        "price": 0.14
+      },
+      {
+        "color_name": "New Dark Red",
+        "element_id": "4539071",
+        "rgb": "#720012",
+        "price": 0.14
+      },
+      {
+        "color_name": "White",
+        "element_id": "302001",
+        "rgb": "#f4f4f4",
+        "price": 0.14
+      },
+      {
+        "color_name": "Medium Stone Grey",
+        "element_id": "4211395",
+        "rgb": "#969696",
+        "price": 0.14
+      },
+      {
+        "color_name": "Dark Stone Grey",
+        "element_id": "4211065",
+        "rgb": "#646464",
+        "price": 0.14
+      },
+      {
+        "color_name": "Bright Yellowish Green",
+        "element_id": null,
+        "rgb": "#a5ca18",
+        "price": 0.28,
+        "is_substitute": true,
+        "substitutes": [
+          {
+            "brick_type": "PLATE 1X2",
+            "element_id": "4164037",
+            "quantity": 4
+          }
+        ]
+      },
+      {
+        "color_name": "Dark Azur",
+        "element_id": null,
+        "rgb": "#469bc3",
+        "price": 0.22,
+        "is_substitute": true,
+        "substitutes": [
+          {
+            "brick_type": "PLATE 1X4",
+            "element_id": "6133728",
+            "quantity": 2
+          }
+        ]
+      },
+      {
+        "color_name": "Light Royal Blue",
+        "element_id": null,
+        "rgb": "#9dc3f7",
+        "price": 0.28,
+        "is_substitute": true,
+        "substitutes": [
+          {
+            "brick_type": "PLATE 1X2",
+            "element_id": "6362254",
+            "quantity": 4
+          }
+        ]
+      },
+      {
+        "color_name": "Medium Blue",
+        "element_id": null,
+        "rgb": "#7396c8",
+        "price": 0.21,
+        "is_substitute": true,
+        "substitutes": [
+          {
+            "brick_type": "PLATE 1X3",
+            "element_id": "6170268",
+            "quantity": 2
+          },
+          {
+            "brick_type": "PLATE 1X2",
+            "element_id": "4179825",
+            "quantity": 1
+          }
+        ]
+      },
+      {
+        "color_name": "Medium Lilac",
+        "element_id": null,
+        "rgb": "#441a91",
+        "price": 0.4,
+        "is_substitute": true,
+        "substitutes": [
+          {
+            "brick_type": "PLATE 1X1",
+            "element_id": "6231376",
+            "quantity": 8
+          }
+        ]
+      },
+      {
+        "color_name": "Nougat",
+        "element_id": null,
+        "rgb": "#bb805a",
+        "price": 0.4,
+        "is_substitute": true,
+        "substitutes": [
+          {
+            "brick_type": "PLATE 1X1",
+            "element_id": "6330584",
+            "quantity": 8
+          }
+        ]
+      },
+      {
+        "color_name": "Olive Green",
+        "element_id": null,
+        "rgb": "#77774e",
+        "price": 0.28,
+        "is_substitute": true,
+        "substitutes": [
+          {
+            "brick_type": "PLATE 1X2",
+            "element_id": "6016483",
+            "quantity": 4
+          }
+        ]
+      },
+      {
+        "color_name": "Sand Blue",
+        "element_id": null,
+        "rgb": "#70819a",
+        "price": 0.28,
+        "is_substitute": true,
+        "substitutes": [
+          {
+            "brick_type": "PLATE 1X2",
+            "element_id": "6198156",
+            "quantity": 4
+          }
+        ]
+      },
+      {
+        "color_name": "Sand Green",
+        "element_id": null,
+        "rgb": "#708e7c",
+        "price": 0.2,
+        "is_substitute": true,
+        "substitutes": [
+          {
+            "brick_type": "PLATE 1X4",
+            "element_id": "6100234",
+            "quantity": 2
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "element_id": "3023",
+    "brick_type": "PLATE 1X2",
+    "num_colors": 27,
+    "colors": [
+      {
+        "color_name": "Bright Red",
+        "element_id": "302321",
+        "rgb": "#b40000",
+        "price": 0.07
+      },
+      {
+        "color_name": "Reddish Brown",
+        "element_id": "4211150",
+        "rgb": "#5f3109",
+        "price": 0.07
+      },
+      {
+        "color_name": "Medium Nougat",
+        "element_id": "6218360",
+        "rgb": "#aa7d55",
+        "price": 0.07
+      },
+      {
+        "color_name": "Bright Orange",
+        "element_id": "4177932",
+        "rgb": "#d67923",
+        "price": 0.07
+      },
+      {
+        "color_name": "Dark Brown",
+        "element_id": "6058221",
+        "rgb": "#372100",
+        "price": 0.07
+      },
+      {
+        "color_name": "Sand Yellow",
+        "element_id": "4528604",
+        "rgb": "#897d62",
+        "price": 0.07
+      },
+      {
+        "color_name": "Brick Yellow",
+        "element_id": "4113917",
+        "rgb": "#ccb98d",
+        "price": 0.07
+      },
+      {
+        "color_name": "Bright Yellow",
+        "element_id": "302324",
+        "rgb": "#fac80a",
+        "price": 0.07
+      },
+      {
+        "color_name": "Olive Green",
+        "element_id": "6016483",
+        "rgb": "#77774e",
+        "price": 0.07
+      },
+      {
+        "color_name": "Bright Yellowish Green",
+        "element_id": "4164037",
+        "rgb": "#a5ca18",
+        "price": 0.07
+      },
+      {
+        "color_name": "Dark Green",
+        "element_id": "302328",
+        "rgb": "#00852b",
+        "price": 0.07
+      },
+      {
+        "color_name": "Earth Green",
+        "element_id": "6013102",
+        "rgb": "#00451a",
+        "price": 0.07
+      },
+      {
+        "color_name": "Sand Green",
+        "element_id": "4655080",
+        "rgb": "#708e7c",
+        "price": 0.07
+      },
+      {
+        "color_name": "Dark Azur",
+        "element_id": "4653988",
+        "rgb": "#469bc3",
+        "price": 0.07
+      },
+      {
+        "color_name": "Black",
+        "element_id": "302326",
+        "rgb": "#1b2a34",
+        "price": 0.07
+      },
+      {
+        "color_name": "Bright Blue",
+        "element_id": "302323",
+        "rgb": "#1e5aa8",
+        "price": 0.07
+      },
+      {
+        "color_name": "Light Royal Blue",
+        "element_id": "6362254",
+        "rgb": "#9dc3f7",
+        "price": 0.07
+      },
+      {
+        "color_name": "Medium Blue",
+        "element_id": "4179825",
+        "rgb": "#7396c8",
+        "price": 0.07
+      },
+      {
+        "color_name": "Sand Blue",
+        "element_id": "6198156",
+        "rgb": "#70819a",
+        "price": 0.07
+      },
+      {
+        "color_name": "Earth Blue",
+        "element_id": "4528981",
+        "rgb": "#19325a",
+        "price": 0.07
+      },
+      {
+        "color_name": "New Dark Red",
+        "element_id": "4539097",
+        "rgb": "#720012",
+        "price": 0.07
+      },
+      {
+        "color_name": "White",
+        "element_id": "302301",
+        "rgb": "#f4f4f4",
+        "price": 0.07
+      },
+      {
+        "color_name": "Medium Stone Grey",
+        "element_id": "4211398",
+        "rgb": "#969696",
+        "price": 0.07
+      },
+      {
+        "color_name": "Dark Stone Grey",
+        "element_id": "4211063",
+        "rgb": "#646464",
+        "price": 0.07
+      },
+      {
+        "color_name": "Dark Orange",
+        "element_id": null,
+        "rgb": "#91501c",
+        "price": 0.1,
+        "is_substitute": true,
+        "substitutes": [
+          {
+            "brick_type": "PLATE 1X1",
+            "element_id": "6186012",
+            "quantity": 2
+          }
+        ]
+      },
+      {
+        "color_name": "Medium Lilac",
+        "element_id": null,
+        "rgb": "#441a91",
+        "price": 0.1,
+        "is_substitute": true,
+        "substitutes": [
+          {
+            "brick_type": "PLATE 1X1",
+            "element_id": "6231376",
+            "quantity": 2
+          }
+        ]
+      },
+      {
+        "color_name": "Nougat",
+        "element_id": null,
+        "rgb": "#bb805a",
+        "price": 0.1,
+        "is_substitute": true,
+        "substitutes": [
+          {
+            "brick_type": "PLATE 1X1",
+            "element_id": "6330584",
+            "quantity": 2
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "element_id": "3024",
+    "brick_type": "PLATE 1X1",
+    "num_colors": 27,
+    "colors": [
+      {
+        "color_name": "Bright Red",
+        "element_id": "302421",
+        "rgb": "#b40000",
+        "price": 0.05
+      },
+      {
+        "color_name": "Nougat",
+        "element_id": "6330584",
+        "rgb": "#bb805a",
+        "price": 0.05
+      },
+      {
+        "color_name": "Dark Orange",
+        "element_id": "6186012",
+        "rgb": "#91501c",
+        "price": 0.05
+      },
+      {
+        "color_name": "Reddish Brown",
+        "element_id": "4221744",
+        "rgb": "#5f3109",
+        "price": 0.05
+      },
+      {
+        "color_name": "Medium Nougat",
+        "element_id": "6215606",
+        "rgb": "#aa7d55",
+        "price": 0.05
+      },
+      {
+        "color_name": "Bright Orange",
+        "element_id": "4524929",
+        "rgb": "#d67923",
+        "price": 0.05
+      },
+      {
+        "color_name": "Dark Brown",
+        "element_id": "6194729",
+        "rgb": "#372100",
+        "price": 0.05
+      },
+      {
+        "color_name": "Sand Yellow",
+        "element_id": "4549436",
+        "rgb": "#897d62",
+        "price": 0.05
+      },
+      {
+        "color_name": "Brick Yellow",
+        "element_id": "4159553",
+        "rgb": "#ccb98d",
+        "price": 0.05
+      },
+      {
+        "color_name": "Bright Yellow",
+        "element_id": "302424",
+        "rgb": "#fac80a",
+        "price": 0.05
+      },
+      {
+        "color_name": "Olive Green",
+        "element_id": "6058245",
+        "rgb": "#77774e",
+        "price": 0.05
+      },
+      {
+        "color_name": "Bright Yellowish Green",
+        "element_id": "4621557",
+        "rgb": "#a5ca18",
+        "price": 0.05
+      },
+      {
+        "color_name": "Dark Green",
+        "element_id": "302428",
+        "rgb": "#00852b",
+        "price": 0.05
+      },
+      {
+        "color_name": "Earth Green",
+        "element_id": "6055169",
+        "rgb": "#00451a",
+        "price": 0.05
+      },
+      {
+        "color_name": "Sand Green",
+        "element_id": "6099189",
+        "rgb": "#708e7c",
+        "price": 0.05
+      },
+      {
+        "color_name": "Dark Azur",
+        "element_id": "6151664",
+        "rgb": "#469bc3",
+        "price": 0.05
+      },
+      {
+        "color_name": "Black",
+        "element_id": "302426",
+        "rgb": "#1b2a34",
+        "price": 0.05
+      },
+      {
+        "color_name": "Bright Blue",
+        "element_id": "302423",
+        "rgb": "#1e5aa8",
+        "price": 0.05
+      },
+      {
+        "color_name": "Light Royal Blue",
+        "element_id": "6184484",
+        "rgb": "#9dc3f7",
+        "price": 0.05
+      },
+      {
+        "color_name": "Medium Blue",
+        "element_id": "4179826",
+        "rgb": "#7396c8",
+        "price": 0.05
+      },
+      {
+        "color_name": "Sand Blue",
+        "element_id": "6257079",
+        "rgb": "#70819a",
+        "price": 0.05
+      },
+      {
+        "color_name": "Earth Blue",
+        "element_id": "4184108",
+        "rgb": "#19325a",
+        "price": 0.05
+      },
+      {
+        "color_name": "Medium Lilac",
+        "element_id": "6231376",
+        "rgb": "#441a91",
+        "price": 0.05
+      },
+      {
+        "color_name": "New Dark Red",
+        "element_id": "4539114",
+        "rgb": "#720012",
+        "price": 0.05
+      },
+      {
+        "color_name": "White",
+        "element_id": "302401",
+        "rgb": "#f4f4f4",
+        "price": 0.05
+      },
+      {
+        "color_name": "Medium Stone Grey",
+        "element_id": "4211399",
+        "rgb": "#969696",
+        "price": 0.05
+      },
+      {
+        "color_name": "Dark Stone Grey",
+        "element_id": "4210719",
+        "rgb": "#646464",
+        "price": 0.05
+      }
+    ]
+  },
+  {
+    "element_id": "3623",
+    "brick_type": "PLATE 1X3",
+    "num_colors": 27,
+    "colors": [
+      {
+        "color_name": "Bright Red",
+        "element_id": "362321",
+        "rgb": "#b40000",
+        "price": 0.07
+      },
+      {
+        "color_name": "Reddish Brown",
+        "element_id": "4211152",
+        "rgb": "#5f3109",
+        "price": 0.07
+      },
+      {
+        "color_name": "Bright Orange",
+        "element_id": "6147047",
+        "rgb": "#d67923",
+        "price": 0.07
+      },
+      {
+        "color_name": "Dark Brown",
+        "element_id": "6518013",
+        "rgb": "#372100",
+        "price": 0.07
+      },
+      {
+        "color_name": "Sand Yellow",
+        "element_id": "6132768",
+        "rgb": "#897d62",
+        "price": 0.07
+      },
+      {
+        "color_name": "Brick Yellow",
+        "element_id": "4121921",
+        "rgb": "#ccb98d",
+        "price": 0.07
+      },
+      {
+        "color_name": "Bright Yellow",
+        "element_id": "362324",
+        "rgb": "#fac80a",
+        "price": 0.07
+      },
+      {
+        "color_name": "Dark Green",
+        "element_id": "4107758",
+        "rgb": "#00852b",
+        "price": 0.07
+      },
+      {
+        "color_name": "Earth Green",
+        "element_id": "6013975",
+        "rgb": "#00451a",
+        "price": 0.07
+      },
+      {
+        "color_name": "Sand Green",
+        "element_id": "6069257",
+        "rgb": "#708e7c",
+        "price": 0.07
+      },
+      {
+        "color_name": "Black",
+        "element_id": "362326",
+        "rgb": "#1b2a34",
+        "price": 0.07
+      },
+      {
+        "color_name": "Bright Blue",
+        "element_id": "362323",
+        "rgb": "#1e5aa8",
+        "price": 0.07
+      },
+      {
+        "color_name": "Medium Blue",
+        "element_id": "6170268",
+        "rgb": "#7396c8",
+        "price": 0.07
+      },
+      {
+        "color_name": "Earth Blue",
+        "element_id": "4177735",
+        "rgb": "#19325a",
+        "price": 0.07
+      },
+      {
+        "color_name": "New Dark Red",
+        "element_id": "4539076",
+        "rgb": "#720012",
+        "price": 0.07
+      },
+      {
+        "color_name": "White",
+        "element_id": "362301",
+        "rgb": "#f4f4f4",
+        "price": 0.07
+      },
+      {
+        "color_name": "Medium Stone Grey",
+        "element_id": "4211429",
+        "rgb": "#969696",
+        "price": 0.07
+      },
+      {
+        "color_name": "Dark Stone Grey",
+        "element_id": "4211133",
+        "rgb": "#646464",
+        "price": 0.07
+      },
+      {
+        "color_name": "Bright Yellowish Green",
+        "element_id": null,
+        "rgb": "#a5ca18",
+        "price": 0.12,
+        "is_substitute": true,
+        "substitutes": [
+          {
+            "brick_type": "PLATE 1X2",
+            "element_id": "4164037",
+            "quantity": 1
+          },
+          {
+            "brick_type": "PLATE 1X1",
+            "element_id": "4621557",
+            "quantity": 1
+          }
+        ]
+      },
+      {
+        "color_name": "Dark Azur",
+        "element_id": null,
+        "rgb": "#469bc3",
+        "price": 0.12,
+        "is_substitute": true,
+        "substitutes": [
+          {
+            "brick_type": "PLATE 1X2",
+            "element_id": "4653988",
+            "quantity": 1
+          },
+          {
+            "brick_type": "PLATE 1X1",
+            "element_id": "6151664",
+            "quantity": 1
+          }
+        ]
+      },
+      {
+        "color_name": "Dark Orange",
+        "element_id": null,
+        "rgb": "#91501c",
+        "price": 0.15,
+        "is_substitute": true,
+        "substitutes": [
+          {
+            "brick_type": "PLATE 1X1",
+            "element_id": "6186012",
+            "quantity": 3
+          }
+        ]
+      },
+      {
+        "color_name": "Light Royal Blue",
+        "element_id": null,
+        "rgb": "#9dc3f7",
+        "price": 0.12,
+        "is_substitute": true,
+        "substitutes": [
+          {
+            "brick_type": "PLATE 1X2",
+            "element_id": "6362254",
+            "quantity": 1
+          },
+          {
+            "brick_type": "PLATE 1X1",
+            "element_id": "6184484",
+            "quantity": 1
+          }
+        ]
+      },
+      {
+        "color_name": "Medium Lilac",
+        "element_id": null,
+        "rgb": "#441a91",
+        "price": 0.15,
+        "is_substitute": true,
+        "substitutes": [
+          {
+            "brick_type": "PLATE 1X1",
+            "element_id": "6231376",
+            "quantity": 3
+          }
+        ]
+      },
+      {
+        "color_name": "Medium Nougat",
+        "element_id": null,
+        "rgb": "#aa7d55",
+        "price": 0.12,
+        "is_substitute": true,
+        "substitutes": [
+          {
+            "brick_type": "PLATE 1X2",
+            "element_id": "6218360",
+            "quantity": 1
+          },
+          {
+            "brick_type": "PLATE 1X1",
+            "element_id": "6215606",
+            "quantity": 1
+          }
+        ]
+      },
+      {
+        "color_name": "Nougat",
+        "element_id": null,
+        "rgb": "#bb805a",
+        "price": 0.15,
+        "is_substitute": true,
+        "substitutes": [
+          {
+            "brick_type": "PLATE 1X1",
+            "element_id": "6330584",
+            "quantity": 3
+          }
+        ]
+      },
+      {
+        "color_name": "Olive Green",
+        "element_id": null,
+        "rgb": "#77774e",
+        "price": 0.12,
+        "is_substitute": true,
+        "substitutes": [
+          {
+            "brick_type": "PLATE 1X2",
+            "element_id": "6016483",
+            "quantity": 1
+          },
+          {
+            "brick_type": "PLATE 1X1",
+            "element_id": "6058245",
+            "quantity": 1
+          }
+        ]
+      },
+      {
+        "color_name": "Sand Blue",
+        "element_id": null,
+        "rgb": "#70819a",
+        "price": 0.12,
+        "is_substitute": true,
+        "substitutes": [
+          {
+            "brick_type": "PLATE 1X2",
+            "element_id": "6198156",
+            "quantity": 1
+          },
+          {
+            "brick_type": "PLATE 1X1",
+            "element_id": "6257079",
+            "quantity": 1
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "element_id": "3710",
+    "brick_type": "PLATE 1X4",
+    "num_colors": 27,
+    "colors": [
+      {
+        "color_name": "Bright Red",
+        "element_id": "371021",
+        "rgb": "#b40000",
+        "price": 0.1
+      },
+      {
+        "color_name": "Dark Orange",
+        "element_id": "6074892",
+        "rgb": "#91501c",
+        "price": 0.1
+      },
+      {
+        "color_name": "Reddish Brown",
+        "element_id": "4211190",
+        "rgb": "#5f3109",
+        "price": 0.1
+      },
+      {
+        "color_name": "Medium Nougat",
+        "element_id": "6167700",
+        "rgb": "#aa7d55",
+        "price": 0.11
+      },
+      {
+        "color_name": "Bright Orange",
+        "element_id": "4118782",
+        "rgb": "#d67923",
+        "price": 0.1
+      },
+      {
+        "color_name": "Dark Brown",
+        "element_id": "6252667",
+        "rgb": "#372100",
+        "price": 0.1
+      },
+      {
+        "color_name": "Sand Yellow",
+        "element_id": "4626904",
+        "rgb": "#897d62",
+        "price": 0.1
+      },
+      {
+        "color_name": "Brick Yellow",
+        "element_id": "4113233",
+        "rgb": "#ccb98d",
+        "price": 0.1
+      },
+      {
+        "color_name": "Bright Yellow",
+        "element_id": "371024",
+        "rgb": "#fac80a",
+        "price": 0.1
+      },
+      {
+        "color_name": "Dark Green",
+        "element_id": "371028",
+        "rgb": "#00852b",
+        "price": 0.1
+      },
+      {
+        "color_name": "Earth Green",
+        "element_id": "6020923",
+        "rgb": "#00451a",
+        "price": 0.1
+      },
+      {
+        "color_name": "Sand Green",
+        "element_id": "6100234",
+        "rgb": "#708e7c",
+        "price": 0.1
+      },
+      {
+        "color_name": "Dark Azur",
+        "element_id": "6133728",
+        "rgb": "#469bc3",
+        "price": 0.11
+      },
+      {
+        "color_name": "Black",
+        "element_id": "371026",
+        "rgb": "#1b2a34",
+        "price": 0.1
+      },
+      {
+        "color_name": "Bright Blue",
+        "element_id": "371023",
+        "rgb": "#1e5aa8",
+        "price": 0.1
+      },
+      {
+        "color_name": "Earth Blue",
+        "element_id": "4502089",
+        "rgb": "#19325a",
+        "price": 0.1
+      },
+      {
+        "color_name": "New Dark Red",
+        "element_id": "4539061",
+        "rgb": "#720012",
+        "price": 0.1
+      },
+      {
+        "color_name": "White",
+        "element_id": "371001",
+        "rgb": "#f4f4f4",
+        "price": 0.1
+      },
+      {
+        "color_name": "Medium Stone Grey",
+        "element_id": "4211445",
+        "rgb": "#969696",
+        "price": 0.1
+      },
+      {
+        "color_name": "Dark Stone Grey",
+        "element_id": "4211001",
+        "rgb": "#646464",
+        "price": 0.1
+      },
+      {
+        "color_name": "Bright Yellowish Green",
+        "element_id": null,
+        "rgb": "#a5ca18",
+        "price": 0.14,
+        "is_substitute": true,
+        "substitutes": [
+          {
+            "brick_type": "PLATE 1X2",
+            "element_id": "4164037",
+            "quantity": 2
+          }
+        ]
+      },
+      {
+        "color_name": "Light Royal Blue",
+        "element_id": null,
+        "rgb": "#9dc3f7",
+        "price": 0.14,
+        "is_substitute": true,
+        "substitutes": [
+          {
+            "brick_type": "PLATE 1X2",
+            "element_id": "6362254",
+            "quantity": 2
+          }
+        ]
+      },
+      {
+        "color_name": "Medium Blue",
+        "element_id": null,
+        "rgb": "#7396c8",
+        "price": 0.12,
+        "is_substitute": true,
+        "substitutes": [
+          {
+            "brick_type": "PLATE 1X3",
+            "element_id": "6170268",
+            "quantity": 1
+          },
+          {
+            "brick_type": "PLATE 1X1",
+            "element_id": "4179826",
+            "quantity": 1
+          }
+        ]
+      },
+      {
+        "color_name": "Medium Lilac",
+        "element_id": null,
+        "rgb": "#441a91",
+        "price": 0.2,
+        "is_substitute": true,
+        "substitutes": [
+          {
+            "brick_type": "PLATE 1X1",
+            "element_id": "6231376",
+            "quantity": 4
+          }
+        ]
+      },
+      {
+        "color_name": "Nougat",
+        "element_id": null,
+        "rgb": "#bb805a",
+        "price": 0.2,
+        "is_substitute": true,
+        "substitutes": [
+          {
+            "brick_type": "PLATE 1X1",
+            "element_id": "6330584",
+            "quantity": 4
+          }
+        ]
+      },
+      {
+        "color_name": "Olive Green",
+        "element_id": null,
+        "rgb": "#77774e",
+        "price": 0.14,
+        "is_substitute": true,
+        "substitutes": [
+          {
+            "brick_type": "PLATE 1X2",
+            "element_id": "6016483",
+            "quantity": 2
+          }
+        ]
+      },
+      {
+        "color_name": "Sand Blue",
+        "element_id": null,
+        "rgb": "#70819a",
+        "price": 0.14,
+        "is_substitute": true,
+        "substitutes": [
+          {
+            "brick_type": "PLATE 1X2",
+            "element_id": "6198156",
+            "quantity": 2
+          }
+        ]
+      }
+    ]
+  }
+]

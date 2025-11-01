@@ -166,7 +166,7 @@ export function generateInstructionHTML(
   const partsCounts = new Map<string, { color: LegoColor; brickType: string; count: number }>();
   
   for (const placement of placements) {
-    const key = `${placement.color.id}-${placement.brickType.id}`;
+    const key = `${placement.color.name}-${placement.brickType.id}`;
     const existing = partsCounts.get(key);
     if (existing) {
       existing.count++;
@@ -205,7 +205,7 @@ export function generateInstructionHTML(
         }>();
         
         step.placements.forEach(placement => {
-          const key = `${placement.color.id}-${placement.brickType.id}`;
+          const key = `${placement.color.name}-${placement.brickType.id}`;
           const existing = grouped.get(key);
           if (existing) {
             existing.count++;

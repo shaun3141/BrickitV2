@@ -92,7 +92,7 @@ export function EditTab({ mosaicData, onMosaicUpdate, onSave }: EditTabProps) {
     for (let row = 0; row < mosaicData.height; row++) {
       for (let col = 0; col < mosaicData.width; col++) {
         const color = mosaicData.pixels[row][col];
-        counts[color.id] = (counts[color.id] || 0) + 1;
+        counts[color.name] = (counts[color.name] || 0) + 1;
       }
     }
     
@@ -460,7 +460,7 @@ export function EditTab({ mosaicData, onMosaicUpdate, onSave }: EditTabProps) {
   };
 
   const floodFill = (startRow: number, startCol: number, targetColor: LegoColor, replacementColor: LegoColor) => {
-    if (targetColor.id === replacementColor.id) return mosaicData.pixels;
+    if (targetColor.name === replacementColor.name) return mosaicData.pixels;
 
     const pixels = mosaicData.pixels.map(row => [...row]);
     const queue: [number, number][] = [[startRow, startCol]];
@@ -472,7 +472,7 @@ export function EditTab({ mosaicData, onMosaicUpdate, onSave }: EditTabProps) {
 
       if (visited.has(key)) continue;
       if (row < 0 || row >= mosaicData.height || col < 0 || col >= mosaicData.width) continue;
-      if (pixels[row][col].id !== targetColor.id) continue;
+      if (pixels[row][col].name !== targetColor.name) continue;
 
       visited.add(key);
       pixels[row][col] = replacementColor;
@@ -487,10 +487,10 @@ export function EditTab({ mosaicData, onMosaicUpdate, onSave }: EditTabProps) {
   };
 
   const replaceAllColors = (targetColor: LegoColor, replacementColor: LegoColor) => {
-    if (targetColor.id === replacementColor.id) return;
+    if (targetColor.name === replacementColor.name) return;
 
     const pixels = mosaicData.pixels.map(row => 
-      row.map(pixel => pixel.id === targetColor.id ? replacementColor : pixel)
+      row.map(pixel => pixel.name === targetColor.name ? replacementColor : pixel)
     );
 
     addToHistory({
@@ -942,12 +942,12 @@ export function EditTab({ mosaicData, onMosaicUpdate, onSave }: EditTabProps) {
                   
                   <div className="grid grid-cols-4 gap-1 max-h-[400px] overflow-y-auto p-1">
                     {LEGO_COLORS.map((color) => {
-                      const count = colorCounts[color.id] || 0;
+                      const count = colorCounts[color.name] || 0;
                       return (
                         <button
-                          key={color.id}
+                          key={color.name}
                           className={`relative w-full aspect-square rounded border-2 transition-all hover:scale-110 ${
-                            selectedColor.id === color.id
+                            selectedColor.name === color.name
                               ? 'ring-2 ring-primary ring-offset-2'
                               : 'border-border'
                           }`}
@@ -1247,8 +1247,8 @@ export function EditTab({ mosaicData, onMosaicUpdate, onSave }: EditTabProps) {
             <div className="grid grid-cols-5 gap-1 max-h-[280px] overflow-y-auto p-1">
               {LEGO_COLORS.map((color) => (
                 <button
-                  key={color.id}
-                  className={`relative w-full aspect-square rounded border-2 transition-all ${selectedColor.id === color.id ? 'ring-2 ring-primary ring-offset-2' : 'border-border'}`}
+                  key={color.name}
+                  className={`relative w-full aspect-square rounded border-2 transition-all ${selectedColor.name === color.name ? 'ring-2 ring-primary ring-offset-2' : 'border-border'}`}
                   style={{ backgroundColor: color.hex }}
                   onClick={() => setSelectedColor(color)}
                   aria-label={`Select ${color.name}`}

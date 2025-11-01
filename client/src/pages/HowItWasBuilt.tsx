@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react';
 import { BarChart3, MessageSquare, Coins, User, Bot, TrendingUp, Clock, Zap, Code2, Timer, FileText, Wrench, Database, Brain, Search, Download } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { SiteLayout } from '@/components/layout/SiteLayout';
+import { Button } from '@/components/ui/button';
 
 interface ConversationMetadata {
   export_date: string;
@@ -237,30 +239,34 @@ export default function HowItWasBuilt() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="relative">
-            <div className="animate-spin rounded-full h-16 w-16 border-4 border-purple-200 border-t-purple-600 mx-auto mb-4"></div>
-            <Code2 className="w-6 h-6 text-purple-600 absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 animate-pulse" />
+      <SiteLayout>
+        <div className="flex items-center justify-center min-h-[400px]">
+          <div className="text-center">
+            <div className="relative">
+              <div className="animate-spin rounded-full h-16 w-16 border-4 border-purple-200 border-t-purple-600 mx-auto mb-4"></div>
+              <Code2 className="w-6 h-6 text-purple-600 absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 animate-pulse" />
+            </div>
+            <p className="text-slate-700 font-medium">Loading AI conversation history...</p>
+            <p className="text-slate-500 text-sm mt-2">Analyzing thousands of messages</p>
           </div>
-          <p className="text-slate-700 font-medium">Loading AI conversation history...</p>
-          <p className="text-slate-500 text-sm mt-2">Analyzing thousands of messages</p>
         </div>
-      </div>
+      </SiteLayout>
     );
   }
 
   if (error) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 flex items-center justify-center p-4">
-        <div className="bg-white rounded-lg shadow-lg p-8 max-w-md">
-          <h2 className="text-2xl font-bold text-red-600 mb-4">Error Loading Data</h2>
-          <p className="text-slate-600">{error}</p>
-          <p className="text-sm text-slate-500 mt-4">
-            Make sure to run the conversation export notebook first.
-          </p>
+      <SiteLayout>
+        <div className="flex items-center justify-center min-h-[400px]">
+          <div className="bg-white rounded-lg shadow-lg p-8 max-w-md">
+            <h2 className="text-2xl font-bold text-red-600 mb-4">Error Loading Data</h2>
+            <p className="text-slate-600">{error}</p>
+            <p className="text-sm text-slate-500 mt-4">
+              Make sure to run the conversation export notebook first.
+            </p>
+          </div>
         </div>
-      </div>
+      </SiteLayout>
     );
   }
 
@@ -268,47 +274,41 @@ export default function HowItWasBuilt() {
 
   return (
     <TooltipProvider>
-    <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50">
-      {/* Animated Background Pattern */}
-      <div className="fixed inset-0 opacity-30 pointer-events-none">
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(99,102,241,0.1),transparent_50%)]"></div>
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_80%_20%,rgba(168,85,247,0.1),transparent_50%)]"></div>
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_80%,rgba(236,72,153,0.1),transparent_50%)]"></div>
-      </div>
-
-      {/* Header */}
-      <div className="relative bg-white/80 backdrop-blur-sm border-b border-purple-200 shadow-lg">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-          <div className="flex items-start justify-between gap-4 animate-fade-in">
-            <div className="flex items-start gap-4">
-              <div className="bg-gradient-to-br from-purple-500 to-pink-500 p-3 rounded-2xl shadow-lg">
-                <Code2 className="w-8 h-8 text-white" />
-              </div>
-              <div>
-                <h1 className="text-5xl font-extrabold bg-gradient-to-r from-purple-600 via-pink-600 to-indigo-600 bg-clip-text text-transparent mb-3">
-                  How BrickIt Was Built
-                </h1>
-                <p className="text-slate-600 text-xl font-medium">
-                  100% of this app was written by AI
-                </p>
-                <p className="text-slate-500 mt-2">
-                  Every line of code, every feature, every bug fix—fully documented across {data?.metadata.total_conversations || 66} conversations.
-                </p>
-              </div>
-            </div>
-            <button
-              onClick={downloadJSON}
-              className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-lg hover:shadow-lg transition-all duration-200 font-medium"
-            >
-              <Download className="w-4 h-4" />
-              Download JSON
-            </button>
+    <SiteLayout
+      headerActions={
+        <Button
+          onClick={downloadJSON}
+          variant="outline"
+          size="sm"
+          className="flex items-center gap-2"
+        >
+          <Download className="w-4 h-4" />
+          Download JSON
+        </Button>
+      }
+    >
+      {/* Page Title */}
+      <div className="mb-8">
+        <div className="flex items-start gap-4">
+          <div className="bg-gradient-to-br from-purple-500 to-pink-500 p-3 rounded-2xl shadow-lg">
+            <Code2 className="w-8 h-8 text-white" />
+          </div>
+          <div>
+            <h1 className="text-4xl md:text-5xl font-extrabold bg-gradient-to-r from-purple-600 via-pink-600 to-indigo-600 bg-clip-text text-transparent mb-3">
+              How BrickIt Was Built
+            </h1>
+            <p className="text-slate-600 text-lg md:text-xl font-medium">
+              100% of this app was written by AI
+            </p>
+            <p className="text-slate-500 mt-2">
+              Every line of code, every feature, every bug fix—fully documented across {data?.metadata.total_conversations || 66} conversations.
+            </p>
           </div>
         </div>
       </div>
 
       {/* Stats Overview */}
-      <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div>
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
           {/* Conversations Card */}
           <div className="group relative bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl shadow-xl p-6 transform hover:scale-105 transition-all duration-300 hover:shadow-2xl overflow-hidden">
@@ -723,7 +723,7 @@ export default function HowItWasBuilt() {
           )}
         </div>
       </div>
-    </div>
+    </SiteLayout>
     </TooltipProvider>
   );
 }

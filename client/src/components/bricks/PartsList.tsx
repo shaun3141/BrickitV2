@@ -3,7 +3,6 @@ import { Download, Check } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { BrickSwatch } from './BrickSwatch';
 import { generatePartsList, generateOptimizedPartsList } from '@/utils/image/processor';
 import type { MosaicData } from '@/types/mosaic.types';
@@ -36,12 +35,7 @@ export function PartsList({ mosaicData, placements, showOptimized = false }: Par
   const [ownedQuantities, setOwnedQuantities] = useState<Map<string, number>>(new Map());
 
   const updateOwnedQuantity = (key: string, value: string) => {
-    // Allow empty string or only numeric characters
-    if (value !== '' && !/^\d+$/.test(value)) {
-      return; // Reject non-numeric input
-    }
-    
-    const numValue = value === '' ? 0 : Math.max(0, Number(value));
+    const numValue = value === '' ? 0 : Math.max(0, Number(value) || 0);
     setOwnedQuantities(prev => {
       const next = new Map(prev);
       if (numValue === 0) {
@@ -63,7 +57,7 @@ export function PartsList({ mosaicData, placements, showOptimized = false }: Par
       }, 0);
     } else {
       return Array.from(unoptimizedPartsList.values()).reduce((sum, part) => {
-        const key = `${part.color.id}`;
+        const key = `${part.color.name}`;
         const owned = ownedQuantities.get(key) || 0;
         return sum + Math.max(0, part.count - owned);
       }, 0);
@@ -108,11 +102,11 @@ export function PartsList({ mosaicData, placements, showOptimized = false }: Par
           totalBricks,
           totalNeeded,
           parts: Array.from(unoptimizedPartsList.values()).map((part) => {
-            const key = `${part.color.id}`;
+            const key = `${part.color.name}`;
             const owned = ownedQuantities.get(key) || 0;
             const needed = Math.max(0, part.count - owned);
             return {
-              colorId: part.color.id,
+              colorId: part.color.name,
               colorName: part.color.name,
               hex: part.color.hex,
               quantity: part.count,
@@ -144,10 +138,10 @@ export function PartsList({ mosaicData, placements, showOptimized = false }: Par
           return `${part.colorId},${part.colorName},${part.hex},${part.count},${owned},${needed},${part.brickTypeName}`;
         }).join('\n')
       : Array.from(unoptimizedPartsList.values()).map((part) => {
-          const key = `${part.color.id}`;
+          const key = `${part.color.name}`;
           const owned = ownedQuantities.get(key) || 0;
           const needed = Math.max(0, part.count - owned);
-          return `${part.color.id},${part.color.name},${part.color.hex},${part.count},${owned},${needed},1×1 Plate`;
+          return `${part.color.name},${part.color.name},${part.color.hex},${part.count},${owned},${needed},1×1 Plate`;
         }).join('\n');
 
     const csv = header + rows;
@@ -233,25 +227,15 @@ export function PartsList({ mosaicData, placements, showOptimized = false }: Par
                         {owned === 0 && 'needed'}
                       </div>
                     </div>
-                    <div className="flex flex-col items-end gap-1">
-                      <TooltipProvider>
-                        <Tooltip>
-                          <TooltipTrigger asChild>
-                            <Input
-                              type="text"
-                              inputMode="numeric"
-                              value={ownedQuantities.get(key) || ''}
-                              onChange={(e) => updateOwnedQuantity(key, e.target.value)}
-                              placeholder="0"
-                              className="h-8 w-16 text-right text-sm"
-                            />
-                          </TooltipTrigger>
-                          <TooltipContent>
-                            <p>Enter how many you already own</p>
-                          </TooltipContent>
-                        </Tooltip>
-                      </TooltipProvider>
-                      <div className="text-xs text-muted-foreground font-medium">owned</div>
+                    <div className="w-16">
+                      <Input
+                        type="number"
+                        min="0"
+                        value={ownedQuantities.get(key) || ''}
+                        onChange={(e) => updateOwnedQuantity(key, e.target.value)}
+                        placeholder="0"
+                        className="h-8 w-16 text-center text-sm"
+                      />
                     </div>
                   </div>
                 </div>
@@ -262,14 +246,14 @@ export function PartsList({ mosaicData, placements, showOptimized = false }: Par
             Array.from(unoptimizedPartsList.values())
               .sort((a, b) => b.count - a.count)
               .map((part) => {
-                const key = `${part.color.id}`;
+                const key = `${part.color.name}`;
                 const owned = ownedQuantities.get(key) || 0;
                 const needed = Math.max(0, part.count - owned);
                 const isComplete = owned >= part.count;
                 
                 return (
                   <div
-                    key={part.color.id}
+                    key={part.color.name}
                     className={`flex items-center gap-3 p-3 rounded-md border transition-colors ${
                       isComplete 
                         ? 'bg-green-50/50 border-green-200/50 hover:bg-green-50' 
@@ -285,7 +269,7 @@ export function PartsList({ mosaicData, placements, showOptimized = false }: Par
                     <div className="flex-1 min-w-0">
                       <div className="font-medium">{part.color.name}</div>
                       <div className="text-xs text-muted-foreground">
-                        1×1 Plate • ID: {part.color.id}
+                        1×1 Plate
                       </div>
                     </div>
                     <div className="flex items-center gap-3 shrink-0">
@@ -302,37 +286,26 @@ export function PartsList({ mosaicData, placements, showOptimized = false }: Par
                           {owned > 0 && (
                             <span className="text-green-600">{owned} owned</span>
                           )}
-                        {owned === 0 && 'needed'}
+                          {owned === 0 && 'needed'}
+                        </div>
+                      </div>
+                      <div className="w-16">
+                        <Input
+                          type="number"
+                          min="0"
+                          value={ownedQuantities.get(key) || ''}
+                          onChange={(e) => updateOwnedQuantity(key, e.target.value)}
+                          placeholder="0"
+                          className="h-8 w-16 text-center text-sm"
+                        />
                       </div>
                     </div>
-                    <div className="flex flex-col items-end gap-1">
-                      <TooltipProvider>
-                        <Tooltip>
-                          <TooltipTrigger asChild>
-                            <Input
-                              type="text"
-                              inputMode="numeric"
-                              value={ownedQuantities.get(key) || ''}
-                              onChange={(e) => updateOwnedQuantity(key, e.target.value)}
-                              placeholder="0"
-                              className="h-8 w-16 text-right text-sm"
-                            />
-                          </TooltipTrigger>
-                          <TooltipContent>
-                            <p>Enter how many you already own</p>
-                          </TooltipContent>
-                        </Tooltip>
-                      </TooltipProvider>
-                      <div className="text-xs text-muted-foreground font-medium">owned</div>
-                    </div>
                   </div>
-                </div>
-              );
-            })
+                );
+              })
           )}
         </div>
       </CardContent>
     </Card>
   );
 }
-

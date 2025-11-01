@@ -1,0 +1,3 @@
+# Add to server/.gitignore if it exists, or create it
+# Allow the public conversations file to be committed
+!public/brickit_conversations_public.json
