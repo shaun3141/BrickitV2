@@ -1,12 +1,26 @@
-import { useState, useMemo } from 'react';
-import { Download, Check } from 'lucide-react';
+import { useState, useMemo, useEffect } from 'react';
+import { Download, Check, AlertCircle } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { BrickSwatch } from './BrickSwatch';
 import { generatePartsList, generateOptimizedPartsList } from '@/utils/image/processor';
+import { fetchAllBricks } from '@/services/bricks.service';
 import type { MosaicData } from '@/types/mosaic.types';
 import type { BrickPlacement } from '@/types';
+
+interface BrickColorInfo {
+  color_name: string;
+  element_id: string | null;
+  rgb: string;
+  price: number;
+  is_substitute?: boolean;
+  substitutes?: Array<{
+    brick_type: string;
+    element_id: string;
+    quantity: number;
+  }>;
+}
 
 interface PartsListProps {
   mosaicData: MosaicData;
@@ -33,6 +47,38 @@ export function PartsList({ mosaicData, placements, showOptimized = false }: Par
   // State for tracking owned quantities
   // Key format: for optimized `${brickTypeId}-${colorId}`, for unoptimized `${colorId}`
   const [ownedQuantities, setOwnedQuantities] = useState<Map<string, number>>(new Map());
+  
+  // State for brick data with element IDs and substitutes
+  const [brickData, setBrickData] = useState<Map<string, Map<string, BrickColorInfo>>>(new Map());
+  const [isLoadingBrickData, setIsLoadingBrickData] = useState(true);
+
+  // Load brick data on mount
+  useEffect(() => {
+    fetchAllBricks()
+      .then(bricks => {
+        const dataMap = new Map<string, Map<string, BrickColorInfo>>();
+        
+        bricks.forEach(brick => {
+          const colorMap = new Map<string, BrickColorInfo>();
+          brick.colors.forEach(color => {
+            colorMap.set(color.color_name, color);
+          });
+          dataMap.set(brick.brick_type, colorMap);
+        });
+        
+        setBrickData(dataMap);
+        setIsLoadingBrickData(false);
+      })
+      .catch(error => {
+        console.error('Failed to load brick data:', error);
+        setIsLoadingBrickData(false);
+      });
+  }, []);
+
+  // Helper function to get color info for a brick/color combination
+  const getColorInfo = (brickType: string, colorName: string): BrickColorInfo | null => {
+    return brickData.get(brickType)?.get(colorName) || null;
+  };
 
   const updateOwnedQuantity = (key: string, value: string) => {
     const numValue = value === '' ? 0 : Math.max(0, Number(value) || 0);
@@ -82,6 +128,7 @@ export function PartsList({ mosaicData, placements, showOptimized = false }: Par
             const key = `${part.brickTypeId}-${part.colorId}`;
             const owned = ownedQuantities.get(key) || 0;
             const needed = Math.max(0, part.count - owned);
+            const colorInfo = getColorInfo(part.brickTypeName, part.colorName);
             return {
               colorId: part.colorId,
               colorName: part.colorName,
@@ -90,6 +137,10 @@ export function PartsList({ mosaicData, placements, showOptimized = false }: Par
               owned,
               needed,
               brickType: part.brickTypeName,
+              elementId: colorInfo?.element_id || null,
+              isSubstitute: colorInfo?.is_substitute || false,
+              substitutes: colorInfo?.substitutes || null,
+              price: colorInfo?.price || null,
             };
           }),
         }
@@ -105,6 +156,7 @@ export function PartsList({ mosaicData, placements, showOptimized = false }: Par
             const key = `${part.color.name}`;
             const owned = ownedQuantities.get(key) || 0;
             const needed = Math.max(0, part.count - owned);
+            const colorInfo = getColorInfo('PLATE 1X1', part.color.name);
             return {
               colorId: part.color.name,
               colorName: part.color.name,
@@ -113,6 +165,8 @@ export function PartsList({ mosaicData, placements, showOptimized = false }: Par
               owned,
               needed,
               brickType: '1×1 Plate',
+              elementId: colorInfo?.element_id || null,
+              price: colorInfo?.price || null,
             };
           }),
         };
@@ -129,19 +183,24 @@ export function PartsList({ mosaicData, placements, showOptimized = false }: Par
   };
 
   const exportAsCSV = () => {
-    const header = 'Color ID,Color Name,Hex,Quantity,Owned,Needed,Brick Type\n';
+    const header = 'Color ID,Color Name,Hex,Quantity,Owned,Needed,Brick Type,Element ID,Price,Is Substitute,Substitute Details\n';
     const rows = showOptimized && placements
       ? optimizedParts.map((part) => {
           const key = `${part.brickTypeId}-${part.colorId}`;
           const owned = ownedQuantities.get(key) || 0;
           const needed = Math.max(0, part.count - owned);
-          return `${part.colorId},${part.colorName},${part.hex},${part.count},${owned},${needed},${part.brickTypeName}`;
+          const colorInfo = getColorInfo(part.brickTypeName, part.colorName);
+          const substituteDetails = colorInfo?.substitutes 
+            ? colorInfo.substitutes.map(s => `${s.quantity}× ${s.brick_type} (${s.element_id})`).join('; ')
+            : '';
+          return `${part.colorId},${part.colorName},${part.hex},${part.count},${owned},${needed},${part.brickTypeName},${colorInfo?.element_id || ''},${colorInfo?.price || ''},${colorInfo?.is_substitute ? 'Yes' : 'No'},"${substituteDetails}"`;
         }).join('\n')
       : Array.from(unoptimizedPartsList.values()).map((part) => {
           const key = `${part.color.name}`;
           const owned = ownedQuantities.get(key) || 0;
           const needed = Math.max(0, part.count - owned);
-          return `${part.color.name},${part.color.name},${part.color.hex},${part.count},${owned},${needed},1×1 Plate`;
+          const colorInfo = getColorInfo('PLATE 1X1', part.color.name);
+          return `${part.color.name},${part.color.name},${part.color.hex},${part.count},${owned},${needed},1×1 Plate,${colorInfo?.element_id || ''},${colorInfo?.price || ''},No,""`;
         }).join('\n');
 
     const csv = header + rows;
@@ -164,6 +223,9 @@ export function PartsList({ mosaicData, placements, showOptimized = false }: Par
               Total pieces needed: {totalNeeded.toLocaleString()}
               {totalNeeded !== totalBricks && (
                 <span className="ml-2 text-xs">({totalBricks.toLocaleString()} total)</span>
+              )}
+              {isLoadingBrickData && (
+                <span className="ml-2 text-xs italic">Loading element IDs...</span>
               )}
             </p>
           </div>
@@ -206,8 +268,37 @@ export function PartsList({ mosaicData, placements, showOptimized = false }: Par
                   />
                   <div className="flex-1 min-w-0">
                     <div className="font-medium">{part.colorName}</div>
-                    <div className="text-xs text-muted-foreground">
-                      {part.brickTypeName} • ID: {part.colorId}
+                    <div className="text-xs text-muted-foreground space-y-1">
+                      {(() => {
+                        const colorInfo = getColorInfo(part.brickTypeName, part.colorName);
+                        if (colorInfo) {
+                          if (colorInfo.is_substitute && colorInfo.substitutes) {
+                            return (
+                              <>
+                                <div className="flex items-center gap-1 text-amber-600">
+                                  <AlertCircle className="h-3 w-3" />
+                                  <span className="font-medium">Substitute needed</span>
+                                </div>
+                                <div className="text-xs">
+                                  {part.brickTypeName} not available in this color
+                                </div>
+                                <div className="pl-4 space-y-0.5">
+                                  {colorInfo.substitutes.map((sub, idx) => (
+                                    <div key={idx} className="text-xs">
+                                      • {sub.quantity}× {sub.brick_type} (ID: {sub.element_id})
+                                    </div>
+                                  ))}
+                                </div>
+                              </>
+                            );
+                          } else {
+                            return (
+                              <div>{part.brickTypeName} • Element ID: {colorInfo.element_id}</div>
+                            );
+                          }
+                        }
+                        return <div>{part.brickTypeName}</div>;
+                      })()}
                     </div>
                   </div>
                   <div className="flex items-center gap-3 shrink-0">
@@ -269,7 +360,13 @@ export function PartsList({ mosaicData, placements, showOptimized = false }: Par
                     <div className="flex-1 min-w-0">
                       <div className="font-medium">{part.color.name}</div>
                       <div className="text-xs text-muted-foreground">
-                        1×1 Plate
+                        {(() => {
+                          const colorInfo = getColorInfo('PLATE 1X1', part.color.name);
+                          if (colorInfo?.element_id) {
+                            return `1×1 Plate • Element ID: ${colorInfo.element_id}`;
+                          }
+                          return '1×1 Plate';
+                        })()}
                       </div>
                     </div>
                     <div className="flex items-center gap-3 shrink-0">
