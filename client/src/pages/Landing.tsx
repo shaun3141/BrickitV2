@@ -14,8 +14,10 @@ import {
 } from 'lucide-react';
 import { LoginButton } from '@/features/auth/LoginButton';
 import { SiteLayout } from '@/components/layout/SiteLayout';
+import { useCanonical } from '@/hooks/useCanonical';
 
 export function Landing() {
+  useCanonical();
   return (
     <SiteLayout
       headerActions={<LoginButton />}

@@ -20,9 +20,11 @@ import { trackEvent, posthog } from '@/services/analytics.service';
 import { toast } from '@/lib/toast';
 import { Button } from '@/components/ui/button';
 import { Monitor, Sparkles } from 'lucide-react';
+import { useCanonical } from '@/hooks/useCanonical';
 
 export function AppPage() {
   const { user } = useAuth();
+  useCanonical();
   
   // Capture initial pageview
   useEffect(() => {

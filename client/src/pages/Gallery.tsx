@@ -6,10 +6,12 @@ import { SiteLayout } from '@/components/layout/SiteLayout';
 import { GalleryGrid } from '@/components/layout/GalleryGrid';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft } from 'lucide-react';
+import { useCanonical } from '@/hooks/useCanonical';
 
 const ITEMS_PER_PAGE = 20;
 
 export function Gallery() {
+  useCanonical();
   const [creations, setCreations] = useState<Creation[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);

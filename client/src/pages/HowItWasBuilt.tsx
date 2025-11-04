@@ -3,6 +3,7 @@ import { BarChart3, MessageSquare, Coins, User, Bot, TrendingUp, Clock, Zap, Cod
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { SiteLayout } from '@/components/layout/SiteLayout';
 import { Button } from '@/components/ui/button';
+import { useCanonical } from '@/hooks/useCanonical';
 
 interface ConversationMetadata {
   export_date: string;
@@ -67,6 +68,7 @@ interface ConversationsData {
 }
 
 export default function HowItWasBuilt() {
+  useCanonical();
   const [data, setData] = useState<ConversationsData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);

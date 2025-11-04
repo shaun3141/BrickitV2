@@ -11,6 +11,7 @@ import { loadPixelDataFromPng } from '@/utils/image/pngToPixelData';
 import { optimizeBrickPlacement } from '@/utils/bricks/optimizer';
 import { PartsListTab } from '@/components/tabs/PartsListTab';
 import { InstructionsTab } from '@/components/tabs/InstructionsTab';
+import { updateCanonicalTag } from '@/utils/seo';
 
 export function ViewCreation() {
   const { creationId } = useParams<{ creationId: string }>();
@@ -87,6 +88,9 @@ export function ViewCreation() {
   }, [creationId]);
 
   function updateMetaTags(data: Creation) {
+    // Update canonical tag for this specific creation page
+    updateCanonicalTag(`${window.location.origin}/creations/${data.id}`);
+    
     // Update Open Graph tags
     const ogTitle = document.querySelector('meta[property="og:title"]');
     if (ogTitle) ogTitle.setAttribute('content', `${data.title} - BrickIt`);

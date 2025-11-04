@@ -16,8 +16,10 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
+import { useCanonical } from '@/hooks/useCanonical';
 
 export function Donate() {
+  useCanonical();
   const { user } = useAuth();
   const [showCustomAmountDialog, setShowCustomAmountDialog] = useState(false);
   const [customAmount, setCustomAmount] = useState('');

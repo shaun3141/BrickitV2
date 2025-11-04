@@ -6,11 +6,13 @@ import { SiteLayout } from '@/components/layout/SiteLayout';
 import { GalleryGrid } from '@/components/layout/GalleryGrid';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft } from 'lucide-react';
+import { useCanonical } from '@/hooks/useCanonical';
 
 const ITEMS_PER_PAGE = 20;
 
 export function CreatorPage() {
   const { creatorId } = useParams<{ creatorId: string }>();
+  useCanonical();
   const [creations, setCreations] = useState<Creation[]>([]);
   const [displayName, setDisplayName] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
