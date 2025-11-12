@@ -7,6 +7,12 @@ import { loadPixelDataFromPng } from '@/utils/image/pngToPixelData';
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080';
 
 /**
+ * Image generation size constants
+ */
+const THUMBNAIL_MAX_SIZE = 512; // Small, fast-loading thumbnails for galleries and profile views
+const RENDERED_IMAGE_MAX_SIZE = 4096; // High-quality display images with LEGO studs and shading for detailed views
+
+/**
  * Save a creation (insert new or update existing) via backend API
  */
 export async function saveCreation(
@@ -52,9 +58,9 @@ export async function saveCreation(
       const { creation } = await createResponse.json();
       console.log('[saveCreation] Creation created with ID:', creation.id);
 
-      // Generate and upload preview
-      console.log('[saveCreation] Generating preview...');
-      const { url: previewUrl, error: previewError } = await generateAndUploadPreview(
+      // Generate and upload thumbnail
+      console.log('[saveCreation] Generating thumbnail...');
+      const { url: previewUrl, error: previewError } = await generateAndUploadThumbnail(
         data.pixel_data,
         data.width,
         data.height,
@@ -126,9 +132,9 @@ export async function saveCreation(
       // Update existing creation
       console.log('[saveCreation] Updating existing creation via API...');
       
-      // Generate new preview from the current pixel data
-      console.log('[saveCreation] Generating new preview from edited pixel data...');
-      const { url: previewUrl, error: previewError } = await generateAndUploadPreview(
+      // Generate new thumbnail from the current pixel data
+      console.log('[saveCreation] Generating new thumbnail from edited pixel data...');
+      const { url: previewUrl, error: previewError } = await generateAndUploadThumbnail(
         data.pixel_data,
         data.width,
         data.height,
@@ -549,29 +555,95 @@ export function generateThumbnail(
 }
 
 /**
- * Generate a high-quality preview image and upload to storage
+ * Calculate scaled canvas dimensions rounded to nearest multiple of 16
+ * @param width Original mosaic width
+ * @param height Original mosaic height
+ * @param maxSize Maximum size for the longest side
+ * @returns Object with canvas dimensions, pixelSize, and scaling info
  */
-export async function generateAndUploadPreview(
+function calculateScaledCanvasDimensions(
+  width: number,
+  height: number,
+  maxSize: number
+): {
+  canvasWidth: number;
+  canvasHeight: number;
+  pixelSize: number;
+  scale: number;
+  initialCanvasWidth: number;
+  initialCanvasHeight: number;
+} {
+  const longestSide = Math.max(width, height);
+  const scale = maxSize / longestSide;
+  
+  // Calculate initial canvas dimensions using scale factor
+  const initialCanvasWidth = Math.round(width * scale);
+  const initialCanvasHeight = Math.round(height * scale);
+  
+  // Round to nearest multiple of 16
+  const canvasWidth = Math.round(initialCanvasWidth / 16) * 16;
+  const canvasHeight = Math.round(initialCanvasHeight / 16) * 16;
+  
+  // Recalculate pixelSize from rounded dimensions
+  const pixelSize = canvasWidth / width;
+  
+  return {
+    canvasWidth,
+    canvasHeight,
+    pixelSize,
+    scale,
+    initialCanvasWidth,
+    initialCanvasHeight,
+  };
+}
+
+/**
+ * Generate a thumbnail image and upload to storage
+ * Creates a simple preview with colored squares (no studs/shading) for fast loading.
+ * Used for gallery thumbnails, profile views, and pixel data reconstruction.
+ */
+export async function generateAndUploadThumbnail(
   pixelData: LegoColor[][],
   width: number,
   height: number,
   userId: string,
   creationId: string
 ): Promise<{ url: string | null; error: Error | null }> {
-  console.log('[generateAndUploadPreview] Starting...');
+  console.log('[generateAndUploadThumbnail] Starting...', { width, height });
   try {
     // Ensure pixel data has proper structure
     const validPixelData = ensureLegoColorStructure(pixelData);
 
-    // Calculate preview dimensions (max 512px on longest side)
-    const maxSize = 512;
-    const pixelSize = Math.floor(maxSize / Math.max(width, height));
+    // Calculate thumbnail dimensions (max 512px on longest side)
+    const maxSize = THUMBNAIL_MAX_SIZE;
+    const {
+      canvasWidth,
+      canvasHeight,
+      pixelSize,
+      scale,
+      initialCanvasWidth,
+      initialCanvasHeight,
+    } = calculateScaledCanvasDimensions(width, height, maxSize);
+    
+    console.log('[generateAndUploadThumbnail] Scaling:', {
+      originalDimensions: `${width}×${height}`,
+      longestSide: Math.max(width, height),
+      scale,
+      initialCanvasDimensions: `${initialCanvasWidth}×${initialCanvasHeight}`,
+      roundedCanvasDimensions: `${canvasWidth}×${canvasHeight}`,
+      pixelSize,
+    });
+    
+    // Validate canvas dimensions
+    if (canvasWidth <= 0 || canvasHeight <= 0) {
+      throw new Error(`Invalid canvas dimensions: ${canvasWidth}×${canvasHeight}`);
+    }
     
     // Create canvas and draw pixels
-    console.log('[generateAndUploadPreview] Creating canvas...');
+    console.log('[generateAndUploadThumbnail] Creating canvas...');
     const canvas = document.createElement('canvas');
-    canvas.width = width * pixelSize;
-    canvas.height = height * pixelSize;
+    canvas.width = canvasWidth;
+    canvas.height = canvasHeight;
     const ctx = canvas.getContext('2d');
 
     if (!ctx) {
@@ -583,30 +655,32 @@ export async function generateAndUploadPreview(
       for (let col = 0; col < width; col++) {
         const color = validPixelData[row][col];
         ctx.fillStyle = color.hex;
-        ctx.fillRect(col * pixelSize, row * pixelSize, pixelSize, pixelSize);
+        const x = col * pixelSize;
+        const y = row * pixelSize;
+        ctx.fillRect(x, y, pixelSize, pixelSize);
       }
     }
 
     // Convert canvas to blob
-    console.log('[generateAndUploadPreview] Converting to blob...');
+    console.log('[generateAndUploadThumbnail] Converting to blob...');
     const blob = await new Promise<Blob | null>((resolve) => {
       canvas.toBlob(resolve, 'image/png', 1.0);
     });
 
     if (!blob) {
-      throw new Error('Failed to generate preview image');
+      throw new Error('Failed to generate thumbnail image');
     }
-    console.log('[generateAndUploadPreview] Blob created, size:', blob.size);
+    console.log('[generateAndUploadThumbnail] Blob created, size:', blob.size);
 
     // Upload to storage
     const path = `${userId}/${creationId}-preview.png`;
-    console.log('[generateAndUploadPreview] Uploading to:', path);
+    console.log('[generateAndUploadThumbnail] Uploading to:', path);
     const url = await uploadFile(blob, path, { upsert: true });
-    console.log('[generateAndUploadPreview] Upload complete, URL:', url);
+    console.log('[generateAndUploadThumbnail] Upload complete, URL:', url);
 
     return { url, error: null };
   } catch (error) {
-    console.error('[generateAndUploadPreview] Error:', error);
+    console.error('[generateAndUploadThumbnail] Error:', error);
     return { url: null, error: error as Error };
   }
 }
@@ -677,7 +751,9 @@ function drawLegoStud(
 }
 
 /**
- * Generate a rendered image with studs but without grid overlay
+ * Generate a rendered image with LEGO studs and shading, upload to storage
+ * Creates a high-quality image with 3D studs, edge shading, and brick details.
+ * Used for detailed views on creation pages. Larger file size but better visual quality.
  */
 export async function generateAndUploadRenderedImage(
   pixelData: LegoColor[][],
@@ -686,20 +762,41 @@ export async function generateAndUploadRenderedImage(
   userId: string,
   creationId: string
 ): Promise<{ url: string | null; error: Error | null }> {
-  console.log('[generateAndUploadRenderedImage] Starting...');
+  console.log('[generateAndUploadRenderedImage] Starting...', { width, height });
   try {
     // Ensure pixel data has proper structure
     const validPixelData = ensureLegoColorStructure(pixelData);
 
-    // Calculate rendered dimensions (larger than preview for better quality)
-    const maxSize = 1024;
-    const pixelSize = Math.floor(maxSize / Math.max(width, height));
+    // Calculate rendered dimensions (larger than thumbnail for better quality)
+    const maxSize = RENDERED_IMAGE_MAX_SIZE;
+    const {
+      canvasWidth,
+      canvasHeight,
+      pixelSize,
+      scale,
+      initialCanvasWidth,
+      initialCanvasHeight,
+    } = calculateScaledCanvasDimensions(width, height, maxSize);
+    
+    console.log('[generateAndUploadRenderedImage] Scaling:', {
+      originalDimensions: `${width}×${height}`,
+      longestSide: Math.max(width, height),
+      scale,
+      initialCanvasDimensions: `${initialCanvasWidth}×${initialCanvasHeight}`,
+      roundedCanvasDimensions: `${canvasWidth}×${canvasHeight}`,
+      pixelSize,
+    });
+    
+    // Validate canvas dimensions
+    if (canvasWidth <= 0 || canvasHeight <= 0) {
+      throw new Error(`Invalid canvas dimensions: ${canvasWidth}×${canvasHeight}`);
+    }
     
     // Create canvas and draw pixels
     console.log('[generateAndUploadRenderedImage] Creating canvas...');
     const canvas = document.createElement('canvas');
-    canvas.width = width * pixelSize;
-    canvas.height = height * pixelSize;
+    canvas.width = canvasWidth;
+    canvas.height = canvasHeight;
     const ctx = canvas.getContext('2d');
 
     if (!ctx) {

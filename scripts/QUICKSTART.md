@@ -25,7 +25,7 @@ cd scripts
 ```
 
 ### 5. View the Page
-- Development: `http://localhost:5173/how-it-was-built`
+- Development: `http://localhost:3000/how-it-was-built`
 - Production: `https://brickit.build/how-it-was-built`
 
 ## What Gets Exported

@@ -35,7 +35,14 @@ const app = express();
   );
 
   // Configure body parser with larger limit for file uploads
-app.use(express.json({ limit: '10mb' }));
+  // IMPORTANT: Exclude webhook routes - they need raw body for signature verification
+  app.use((req, res, next) => {
+    // Skip JSON parsing for Stripe webhooks - they need raw body
+    if (req.path === '/api/webhooks/stripe') {
+      return next();
+    }
+    express.json({ limit: '10mb' })(req, res, next);
+  });
 
   // API routes
   app.use(routes);

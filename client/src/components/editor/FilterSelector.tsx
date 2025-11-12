@@ -266,7 +266,7 @@ export function FilterSelector({
               onValueChange={(value: number[]) => onCustomWidthChange(value[0])}
               min={16}
               max={512}
-              step={4}
+              step={16}
               className="w-full"
             />
           </div>

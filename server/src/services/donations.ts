@@ -64,11 +64,20 @@ export class DonationService {
   async recordDonation(session: Stripe.Checkout.Session): Promise<void> {
     const userId = session.metadata?.user_id || null;
 
+    // Handle payment_intent - it can be a string ID or an expanded PaymentIntent object
+    const paymentIntentId = typeof session.payment_intent === 'string' 
+      ? session.payment_intent 
+      : session.payment_intent?.id || null;
+
+    if (!paymentIntentId) {
+      throw new Error('Missing payment_intent in checkout session');
+    }
+
     const { error } = await this.supabase.from('donations').insert({
       user_id: userId,
       amount: session.amount_total,
       currency: session.currency,
-      stripe_payment_intent_id: session.payment_intent as string,
+      stripe_payment_intent_id: paymentIntentId,
       stripe_session_id: session.id,
       status: 'completed',
       metadata: {

@@ -69,6 +69,10 @@ export async function loadPixelDataFromPng(
         // Draw the image to the canvas
         ctx.drawImage(img, 0, 0);
         
+        // Read all pixel data once (much more efficient than multiple getImageData calls)
+        const imageData = ctx.getImageData(0, 0, img.width, img.height);
+        const data = imageData.data;
+        
         // Extract pixel data
         const pixelData: LegoColor[][] = [];
         
@@ -80,9 +84,11 @@ export async function loadPixelDataFromPng(
             const x = col * pixelSize + Math.floor(pixelSize / 2);
             const y = row * pixelSize + Math.floor(pixelSize / 2);
             
-            // Get the pixel color
-            const imageData = ctx.getImageData(x, y, 1, 1);
-            const [r, g, b] = imageData.data;
+            // Access pixel data from cached array (RGBA format: 4 bytes per pixel)
+            const index = (y * img.width + x) * 4;
+            const r = data[index];
+            const g = data[index + 1];
+            const b = data[index + 2];
             
             // Find the closest LEGO color
             const legoColor = findClosestLegoColor([r, g, b]);

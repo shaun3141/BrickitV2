@@ -1058,21 +1058,6 @@ export function EditTab({ mosaicData, onMosaicUpdate, onSave }: EditTabProps) {
                     onPointerUp={onPointerUpOrCancel}
                     onPointerCancel={onPointerUpOrCancel}
                     onPointerLeave={onPointerUpOrCancel}
-                    onWheel={(e) => {
-                      e.preventDefault();
-                      const rect = (e.currentTarget as HTMLCanvasElement).getBoundingClientRect();
-                      const x = e.clientX - rect.left;
-                      const y = e.clientY - rect.top;
-                      const zoomIntensity = 0.0015;
-                      const delta = -e.deltaY; // wheel up -> zoom in
-                      const newScale = Math.min(4, Math.max(0.5, viewScale * (1 + delta * zoomIntensity)));
-                      const worldX = (x - viewOffset.x) / viewScale;
-                      const worldY = (y - viewOffset.y) / viewScale;
-                      const newOffsetX = x - newScale * worldX;
-                      const newOffsetY = y - newScale * worldY;
-                      setViewScale(newScale);
-                      setViewOffset({ x: newOffsetX, y: newOffsetY });
-                    }}
                     aria-label={`Mosaic editor canvas, ${mosaicData.width} by ${mosaicData.height} studs`}
                     role="img"
                     tabIndex={0}

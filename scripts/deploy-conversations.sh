@@ -25,6 +25,6 @@ echo "📊 File size: $(du -h brickit_conversations_public.json | cut -f1)"
 echo ""
 echo "Next steps:"
 echo "  1. Restart your server (npm run dev)"
-echo "  2. Visit http://localhost:5173/how-it-was-built"
+echo "  2. Visit http://localhost:3000/how-it-was-built"
 echo "  3. Or in production: https://brickit.build/how-it-was-built"
 

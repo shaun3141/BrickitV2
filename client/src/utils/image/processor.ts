@@ -49,6 +49,7 @@ export function loadImage(file: File): Promise<HTMLImageElement> {
 
 /**
  * Calculates target dimensions while maintaining aspect ratio
+ * Ensures dimensions are multiples of 16 and max studs per side is 512
  */
 export function calculateDimensions(
   originalWidth: number,
@@ -56,13 +57,33 @@ export function calculateDimensions(
   targetWidth: number,
   maintainAspectRatio: boolean = true
 ): { width: number; height: number } {
+  // Cap targetWidth to max 512 studs
+  const maxStuds = 512;
+  const cappedWidth = Math.min(targetWidth, maxStuds);
+  
   if (!maintainAspectRatio) {
-    return { width: targetWidth, height: targetWidth };
+    // Round to nearest multiple of 16
+    const width = Math.round(cappedWidth / 16) * 16;
+    return { width, height: width };
   }
 
   const aspectRatio = originalWidth / originalHeight;
-  const width = targetWidth;
-  const height = Math.round(width / aspectRatio);
+  
+  // Calculate initial dimensions maintaining aspect ratio
+  let width = cappedWidth;
+  let height = Math.round(width / aspectRatio);
+  
+  // Round both dimensions to nearest multiple of 16
+  width = Math.round(width / 16) * 16;
+  height = Math.round(height / 16) * 16;
+  
+  // Ensure longest side doesn't exceed 512
+  const longestSide = Math.max(width, height);
+  if (longestSide > maxStuds) {
+    const scale = maxStuds / longestSide;
+    width = Math.round(width * scale / 16) * 16;
+    height = Math.round(height * scale / 16) * 16;
+  }
 
   return { width, height };
 }

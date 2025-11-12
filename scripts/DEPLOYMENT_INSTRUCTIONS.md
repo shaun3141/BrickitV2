@@ -16,7 +16,7 @@
    ```
 
 4. **Visit the page:**
-   - Local: http://localhost:5173/how-it-was-built
+   - Local: http://localhost:3000/how-it-was-built
    - Production: https://brickit.build/how-it-was-built
 
 ## What You'll See
