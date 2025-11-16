@@ -397,6 +397,7 @@ export function Home() {
                 mosaicData={mosaicData} 
                 placements={placements}
                 creationId={currentCreationId}
+                onSave={() => setShowSaveDialog(true)}
               />
             )}
           </TabsContent>

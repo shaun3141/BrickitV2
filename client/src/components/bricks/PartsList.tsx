@@ -51,6 +51,9 @@ export function PartsList({ mosaicData, placements, showOptimized = false }: Par
   // State for brick data with element IDs and substitutes
   const [brickData, setBrickData] = useState<Map<string, Map<string, BrickColorInfo>>>(new Map());
   const [isLoadingBrickData, setIsLoadingBrickData] = useState(true);
+  
+  // State for Bricks vs Plates toggle (false = Plates, true = Bricks)
+  const [showBricks, setShowBricks] = useState(false);
 
   // Load brick data on mount
   useEffect(() => {
@@ -75,10 +78,43 @@ export function PartsList({ mosaicData, placements, showOptimized = false }: Par
       });
   }, []);
 
-  // Helper function to get color info for a brick/color combination
-  const getColorInfo = (brickType: string, colorName: string): BrickColorInfo | null => {
-    return brickData.get(brickType)?.get(colorName) || null;
+  // Helper function to convert displayName (e.g., "2×4 Plate") to service format (e.g., "PLATE 2X4" or "BRICK 2X4")
+  const convertDisplayNameToServiceFormat = (displayName: string, useBricks: boolean): string => {
+    // Extract dimensions from displayName (e.g., "2×4 Plate" -> "2×4")
+    const match = displayName.match(/^(\d+)×(\d+)\s+(Plate|Brick)$/i);
+    if (!match) {
+      // Fallback for unoptimized 1x1
+      return useBricks ? 'BRICK 1X1' : 'PLATE 1X1';
+    }
+    const [, width, height, type] = match;
+    const prefix = useBricks ? 'BRICK' : 'PLATE';
+    return `${prefix} ${width}X${height}`;
   };
+
+  // Helper function to get color info for a brick/color combination
+  const getColorInfo = (brickType: string, colorName: string, useBricks: boolean = false): BrickColorInfo | null => {
+    // If brickType is already in service format, use it directly
+    // Otherwise, convert from displayName format
+    const serviceFormat = brickType.includes(' ') && (brickType.startsWith('PLATE') || brickType.startsWith('BRICK'))
+      ? brickType
+      : convertDisplayNameToServiceFormat(brickType, useBricks);
+    return brickData.get(serviceFormat)?.get(colorName) || null;
+  };
+
+  // Helper function to get display name based on toggle (e.g., "2×4 Plate" -> "2×4 Brick")
+  const getDisplayName = (displayName: string): string => {
+    if (!showBricks) return displayName;
+    return displayName.replace(/\s+Plate$/i, ' Brick');
+  };
+
+  // Filter optimized parts based on toggle
+  const filteredOptimizedParts = useMemo(() => {
+    if (!showOptimized || !placements) return [];
+    return optimizedParts.map(part => ({
+      ...part,
+      brickTypeName: showBricks ? part.brickTypeName.replace(/\s+Plate$/i, ' Brick') : part.brickTypeName,
+    }));
+  }, [optimizedParts, showOptimized, placements, showBricks]);
 
   const updateOwnedQuantity = (key: string, value: string) => {
     // Allow empty string for clearing the input
@@ -121,7 +157,7 @@ export function PartsList({ mosaicData, placements, showOptimized = false }: Par
   // Calculate total needed pieces (accounting for owned)
   const totalNeeded = useMemo(() => {
     if (showOptimized && placements) {
-      return optimizedParts.reduce((sum, part) => {
+      return filteredOptimizedParts.reduce((sum, part) => {
         const key = `${part.brickTypeId}-${part.colorId}`;
         const owned = ownedQuantities.get(key) || 0;
         return sum + Math.max(0, part.count - owned);
@@ -133,7 +169,7 @@ export function PartsList({ mosaicData, placements, showOptimized = false }: Par
         return sum + Math.max(0, part.count - owned);
       }, 0);
     }
-  }, [showOptimized, optimizedParts, unoptimizedPartsList, ownedQuantities]);
+  }, [showOptimized, filteredOptimizedParts, unoptimizedPartsList, ownedQuantities]);
 
   const exportAsJSON = () => {
     const data = showOptimized && placements
@@ -149,11 +185,11 @@ export function PartsList({ mosaicData, placements, showOptimized = false }: Par
             pieces: savings,
             percentage: savingsPercent,
           },
-          parts: optimizedParts.map((part) => {
+          parts: filteredOptimizedParts.map((part) => {
             const key = `${part.brickTypeId}-${part.colorId}`;
             const owned = ownedQuantities.get(key) || 0;
             const needed = Math.max(0, part.count - owned);
-            const colorInfo = getColorInfo(part.brickTypeName, part.colorName);
+            const colorInfo = getColorInfo(part.brickTypeName, part.colorName, showBricks);
             return {
               colorId: part.colorId,
               colorName: part.colorName,
@@ -181,7 +217,8 @@ export function PartsList({ mosaicData, placements, showOptimized = false }: Par
             const key = `${part.color.name}`;
             const owned = ownedQuantities.get(key) || 0;
             const needed = Math.max(0, part.count - owned);
-            const colorInfo = getColorInfo('PLATE 1X1', part.color.name);
+            const brickTypeName = showBricks ? '1×1 Brick' : '1×1 Plate';
+            const colorInfo = getColorInfo(showBricks ? 'BRICK 1X1' : 'PLATE 1X1', part.color.name, showBricks);
             return {
               colorId: part.color.name,
               colorName: part.color.name,
@@ -189,7 +226,7 @@ export function PartsList({ mosaicData, placements, showOptimized = false }: Par
               quantity: part.count,
               owned,
               needed,
-              brickType: '1×1 Plate',
+              brickType: brickTypeName,
               elementId: colorInfo?.element_id || null,
               price: colorInfo?.price || null,
             };
@@ -202,7 +239,7 @@ export function PartsList({ mosaicData, placements, showOptimized = false }: Par
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `lego-mosaic-parts-list${showOptimized ? '-optimized' : ''}.json`;
+    a.download = `lego-mosaic-parts-list${showOptimized ? '-optimized' : ''}${showBricks ? '-bricks' : '-plates'}.json`;
     a.click();
     URL.revokeObjectURL(url);
   };
@@ -210,11 +247,11 @@ export function PartsList({ mosaicData, placements, showOptimized = false }: Par
   const exportAsCSV = () => {
     const header = 'Color ID,Color Name,Hex,Quantity,Owned,Needed,Brick Type,Element ID,Price,Is Substitute,Substitute Details\n';
     const rows = showOptimized && placements
-      ? optimizedParts.map((part) => {
+      ? filteredOptimizedParts.map((part) => {
           const key = `${part.brickTypeId}-${part.colorId}`;
           const owned = ownedQuantities.get(key) || 0;
           const needed = Math.max(0, part.count - owned);
-          const colorInfo = getColorInfo(part.brickTypeName, part.colorName);
+          const colorInfo = getColorInfo(part.brickTypeName, part.colorName, showBricks);
           const substituteDetails = colorInfo?.substitutes 
             ? colorInfo.substitutes.map(s => `${s.quantity}× ${s.brick_type} (${s.element_id})`).join('; ')
             : '';
@@ -224,8 +261,9 @@ export function PartsList({ mosaicData, placements, showOptimized = false }: Par
           const key = `${part.color.name}`;
           const owned = ownedQuantities.get(key) || 0;
           const needed = Math.max(0, part.count - owned);
-          const colorInfo = getColorInfo('PLATE 1X1', part.color.name);
-          return `${part.color.name},${part.color.name},${part.color.hex},${part.count},${owned},${needed},1×1 Plate,${colorInfo?.element_id || ''},${colorInfo?.price || ''},No,""`;
+          const brickTypeName = showBricks ? '1×1 Brick' : '1×1 Plate';
+          const colorInfo = getColorInfo(showBricks ? 'BRICK 1X1' : 'PLATE 1X1', part.color.name, showBricks);
+          return `${part.color.name},${part.color.name},${part.color.hex},${part.count},${owned},${needed},${brickTypeName},${colorInfo?.element_id || ''},${colorInfo?.price || ''},No,""`;
         }).join('\n');
 
     const csv = header + rows;
@@ -233,7 +271,7 @@ export function PartsList({ mosaicData, placements, showOptimized = false }: Par
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `lego-mosaic-parts-list${showOptimized ? '-optimized' : ''}.csv`;
+    a.download = `lego-mosaic-parts-list${showOptimized ? '-optimized' : ''}${showBricks ? '-bricks' : '-plates'}.csv`;
     a.click();
     URL.revokeObjectURL(url);
   };
@@ -254,7 +292,25 @@ export function PartsList({ mosaicData, placements, showOptimized = false }: Par
               )}
             </p>
           </div>
-          <div className="flex gap-2">
+          <div className="flex gap-2 items-center">
+            <div className="flex gap-1 border rounded-md p-1 bg-muted/50">
+              <Button
+                variant={!showBricks ? "default" : "ghost"}
+                size="sm"
+                onClick={() => setShowBricks(false)}
+                className="h-7 px-3 text-xs"
+              >
+                Plates
+              </Button>
+              <Button
+                variant={showBricks ? "default" : "ghost"}
+                size="sm"
+                onClick={() => setShowBricks(true)}
+                className="h-7 px-3 text-xs"
+              >
+                Bricks
+              </Button>
+            </div>
             <Button variant="outline" size="sm" onClick={exportAsJSON}>
               <Download className="h-4 w-4 mr-2" />
               JSON
@@ -270,7 +326,7 @@ export function PartsList({ mosaicData, placements, showOptimized = false }: Par
         <div className="space-y-2 max-h-[600px] overflow-auto">
           {showOptimized && placements ? (
             // Render optimized parts list
-            optimizedParts.map((part, index) => {
+            filteredOptimizedParts.map((part, index) => {
               const key = `${part.brickTypeId}-${part.colorId}`;
               const owned = ownedQuantities.get(key) || 0;
               const needed = Math.max(0, part.count - owned);
@@ -295,7 +351,7 @@ export function PartsList({ mosaicData, placements, showOptimized = false }: Par
                     <div className="font-medium">{part.colorName}</div>
                     <div className="text-xs text-muted-foreground space-y-1">
                       {(() => {
-                        const colorInfo = getColorInfo(part.brickTypeName, part.colorName);
+                        const colorInfo = getColorInfo(part.brickTypeName, part.colorName, showBricks);
                         if (colorInfo) {
                           if (colorInfo.is_substitute && colorInfo.substitutes) {
                             return (
@@ -367,6 +423,7 @@ export function PartsList({ mosaicData, placements, showOptimized = false }: Par
                 const owned = ownedQuantities.get(key) || 0;
                 const needed = Math.max(0, part.count - owned);
                 const isComplete = owned >= part.count;
+                const brickTypeName = showBricks ? '1×1 Brick' : '1×1 Plate';
                 
                 return (
                   <div
@@ -387,11 +444,11 @@ export function PartsList({ mosaicData, placements, showOptimized = false }: Par
                       <div className="font-medium">{part.color.name}</div>
                       <div className="text-xs text-muted-foreground">
                         {(() => {
-                          const colorInfo = getColorInfo('PLATE 1X1', part.color.name);
+                          const colorInfo = getColorInfo(showBricks ? 'BRICK 1X1' : 'PLATE 1X1', part.color.name, showBricks);
                           if (colorInfo?.element_id) {
-                            return `1×1 Plate • Element ID: ${colorInfo.element_id}`;
+                            return `${brickTypeName} • Element ID: ${colorInfo.element_id}`;
                           }
-                          return '1×1 Plate';
+                          return brickTypeName;
                         })()}
                       </div>
                     </div>
