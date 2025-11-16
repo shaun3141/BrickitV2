@@ -25,95 +25,106 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     console.log('[AuthContext] Initializing auth provider');
 
-    // Listen for auth changes BEFORE getting session
-    // This ensures we catch the SIGNED_IN event from URL parsing
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange(async (event, session) => {
-      console.log('[AuthContext] Auth state changed:', event);
+    // Helper to update session state
+    const updateSession = (session: Session | null) => {
+      console.log('[AuthContext] Updating session:', { hasSession: !!session, userId: session?.user?.id });
       setSession(session);
       setUser(session?.user ?? null);
       setAuthSession(session);
-      
-      // Only set loading to false if we haven't already
-      if (loading) {
-        setLoading(false);
-      }
+      setLoading(false);
+    };
 
-      // Clean up URL after successful sign-in from magic link
-      if (event === 'SIGNED_IN') {
-        const hashParams = new URLSearchParams(window.location.hash.substring(1));
-        const hasAuthParams = hashParams.has('access_token') || hashParams.has('type');
-        
-        if (hasAuthParams) {
-          console.log('[AuthContext] Cleaning up auth URL parameters');
-          // Remove the hash fragment from URL
-          window.history.replaceState(null, '', window.location.pathname + window.location.search);
+    // IMPORTANT: Follow Supabase best practices to avoid deadlocks
+    // See docs/AUTH_INITIALIZATION_BEST_PRACTICES.md for details
+    // 
+    // Key points:
+    // 1. Call getSession() FIRST (recommended pattern)
+    // 2. Keep onAuthStateChange callback SYNCHRONOUS (no async)
+    // 3. Defer all async operations using setTimeout to prevent deadlocks
+
+    // Step 1: Get initial session (recommended pattern from Supabase docs)
+    console.log('[AuthContext] Fetching initial session...');
+    supabase.auth.getSession()
+      .then(({ data: { session }, error }) => {
+        console.log('[AuthContext] Initial session loaded:', { hasSession: !!session, error: error?.message });
+        if (error) {
+          console.error('[AuthContext] Error loading session:', error);
+          updateSession(null);
+        } else {
+          updateSession(session);
         }
-      }
+      })
+      .catch((err) => {
+        console.error('[AuthContext] Failed to get session:', err);
+        updateSession(null);
+      });
 
-      // Track auth events with PostHog
-      if (event === 'SIGNED_IN' && session?.user) {
-        posthog.identify(session.user.id, {
-          email: session.user.email,
-        });
-        
-        // Add user to Resend general audience on signup/first login
-        try {
-          // Call edge function to add user to general audience with auth token
-          // This is fire-and-forget - we don't block on it
-          const { error } = await supabase.functions.invoke('add-user-to-audience', {
+    // Step 2: Set up listener for future auth changes
+    // 
+    // CRITICAL: Keep callback SYNCHRONOUS (no async keyword) to avoid deadlocks
+    // Performing async operations directly in this callback can cause Supabase
+    // calls to hang indefinitely. Always defer async work using setTimeout.
+    // 
+    // See: https://github.com/supabase/auth-js/issues/762
+    console.log('[AuthContext] Setting up auth state change listener...');
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((event, session) => {
+      console.log('[AuthContext] Auth state changed:', event, { hasSession: !!session, userId: session?.user?.id });
+      
+      // Update state synchronously - this is safe and fast
+      updateSession(session);
+
+      // Defer ALL async operations to prevent deadlocks
+      // Using setTimeout(..., 0) moves async work to next event loop tick
+      setTimeout(() => {
+        // Clean up URL after successful sign-in from magic link
+        if (event === 'SIGNED_IN') {
+          const hashParams = new URLSearchParams(window.location.hash.substring(1));
+          const hasAuthParams = hashParams.has('access_token') || hashParams.has('type');
+          
+          if (hasAuthParams) {
+            console.log('[AuthContext] Cleaning up auth URL parameters');
+            window.history.replaceState(null, '', window.location.pathname + window.location.search);
+          }
+        }
+
+        // Track auth events with PostHog
+        if (event === 'SIGNED_IN' && session?.user) {
+          posthog.identify(session.user.id, {
+            email: session.user.email,
+          });
+          
+          // Add user to Resend general audience (fire-and-forget)
+          supabase.functions.invoke('add-user-to-audience', {
             headers: {
               Authorization: `Bearer ${session.access_token}`,
             },
             body: {
               email: session.user.email,
-              // firstName and lastName can be added if available from user metadata
             },
-          });
-
-          if (error) {
-            console.warn('Failed to add user to audience (non-critical):', error);
-          } else {
-            console.log('✅ User added to audience');
-          }
-        } catch (err) {
-          console.warn('Error adding user to audience (non-critical):', err);
+          })
+            .then(({ error }) => {
+              if (error) {
+                console.warn('Failed to add user to audience (non-critical):', error);
+              } else {
+                console.log('✅ User added to audience');
+              }
+            })
+            .catch((err) => {
+              console.warn('Error adding user to audience (non-critical):', err);
+            });
+        } else if (event === 'SIGNED_OUT') {
+          posthog.reset();
+        } else if (event === 'TOKEN_REFRESHED') {
+          console.log('[AuthContext] Session token refreshed successfully');
         }
-      } else if (event === 'SIGNED_OUT') {
-        posthog.reset();
-      } else if (event === 'TOKEN_REFRESHED') {
-        console.log('[AuthContext] Session token refreshed successfully');
-      }
+      }, 0);
     });
 
-    // Get initial session from localStorage or URL
-    // The detectSessionInUrl flag will handle extracting session from URL hash
-    supabase.auth.getSession()
-      .then(({ data: { session }, error }) => {
-        console.log('[AuthContext] Initial session result:', { hasSession: !!session, error });
-        if (error) {
-          console.error('Error loading session:', error);
-          setSession(null);
-          setUser(null);
-          setAuthSession(null);
-        } else {
-          setSession(session);
-          setUser(session?.user ?? null);
-          setAuthSession(session);
-        }
-        setLoading(false);
-      })
-      .catch((err) => {
-        console.error('Failed to get session:', err);
-        setSession(null);
-        setUser(null);
-        setAuthSession(null);
-        setLoading(false);
-      });
-
-    return () => subscription.unsubscribe();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    return () => {
+      subscription.unsubscribe();
+    };
   }, []);
 
   const signInWithEmail = async (email: string) => {

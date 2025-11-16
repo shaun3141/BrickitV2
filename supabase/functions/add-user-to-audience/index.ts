@@ -18,10 +18,20 @@ interface AddUserRequest {
 
 serve(async (req: Request) => {
   const origin = req.headers.get('origin');
+  
+  // Log for debugging (remove in production if needed)
+  console.log('Request received:', {
+    method: req.method,
+    origin,
+    url: req.url,
+    hasAuth: !!req.headers.get('authorization'),
+  });
 
   // Handle CORS preflight
   if (req.method === 'OPTIONS') {
-    return new Response('ok', { headers: getCorsHeaders(origin) });
+    const corsHeaders = getCorsHeaders(origin);
+    console.log('CORS preflight response:', corsHeaders);
+    return new Response('ok', { headers: corsHeaders });
   }
 
   try {
