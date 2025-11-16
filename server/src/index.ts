@@ -8,6 +8,7 @@ import routes from './routes';
 import { stripe, supabase } from './services';
 
 // Get current directory for serving static files
+// __dirname in compiled code is server/dist, so we need to go up two levels to reach project root
 const currentDir = __dirname;
 
 async function createApp() {
@@ -48,7 +49,8 @@ const app = express();
   app.use(routes);
 
   // Serve static files from the client dist directory with caching
-  const clientDistPath = path.join(currentDir, '../client/dist');
+  // Go up two levels from server/dist to project root, then into client/dist
+  const clientDistPath = path.join(currentDir, '../../client/dist');
   app.use(
     express.static(clientDistPath, {
       maxAge: '1y',

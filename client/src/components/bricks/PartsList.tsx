@@ -81,16 +81,41 @@ export function PartsList({ mosaicData, placements, showOptimized = false }: Par
   };
 
   const updateOwnedQuantity = (key: string, value: string) => {
-    const numValue = value === '' ? 0 : Math.max(0, Number(value) || 0);
-    setOwnedQuantities(prev => {
-      const next = new Map(prev);
-      if (numValue === 0) {
+    // Allow empty string for clearing the input
+    if (value === '') {
+      setOwnedQuantities(prev => {
+        const next = new Map(prev);
         next.delete(key);
-      } else {
+        return next;
+      });
+      return;
+    }
+    
+    // Validate: only allow digits (no decimals, no negative, no letters)
+    // Remove any non-digit characters
+    const cleanedValue = value.replace(/[^\d]/g, '');
+    
+    // If after cleaning we have nothing, treat as empty
+    if (cleanedValue === '') {
+      setOwnedQuantities(prev => {
+        const next = new Map(prev);
+        next.delete(key);
+        return next;
+      });
+      return;
+    }
+    
+    // Parse as integer
+    const numValue = parseInt(cleanedValue, 10);
+    
+    // Ensure it's a valid positive integer
+    if (!isNaN(numValue) && numValue >= 0) {
+      setOwnedQuantities(prev => {
+        const next = new Map(prev);
         next.set(key, numValue);
-      }
-      return next;
-    });
+        return next;
+      });
+    }
   };
 
   // Calculate total needed pieces (accounting for owned)
@@ -318,15 +343,16 @@ export function PartsList({ mosaicData, placements, showOptimized = false }: Par
                         {owned === 0 && 'needed'}
                       </div>
                     </div>
-                    <div className="w-16">
+                    <div className="w-16 flex flex-col items-center gap-1">
                       <Input
-                        type="number"
-                        min="0"
-                        value={ownedQuantities.get(key) || ''}
+                        type="text"
+                        value={ownedQuantities.get(key)?.toString() || ''}
                         onChange={(e) => updateOwnedQuantity(key, e.target.value)}
                         placeholder="0"
-                        className="h-8 w-16 text-center text-sm"
+                        className="h-8 w-16 text-right text-sm"
+                        inputMode="numeric"
                       />
+                      <label className="text-xs text-muted-foreground">owned</label>
                     </div>
                   </div>
                 </div>
@@ -386,15 +412,16 @@ export function PartsList({ mosaicData, placements, showOptimized = false }: Par
                           {owned === 0 && 'needed'}
                         </div>
                       </div>
-                      <div className="w-16">
+                      <div className="w-16 flex flex-col items-center gap-1">
                         <Input
-                          type="number"
-                          min="0"
-                          value={ownedQuantities.get(key) || ''}
+                          type="text"
+                          value={ownedQuantities.get(key)?.toString() || ''}
                           onChange={(e) => updateOwnedQuantity(key, e.target.value)}
                           placeholder="0"
-                          className="h-8 w-16 text-center text-sm"
+                          className="h-8 w-16 text-right text-sm"
+                          inputMode="numeric"
                         />
+                        <label className="text-xs text-muted-foreground">owned</label>
                       </div>
                     </div>
                   </div>

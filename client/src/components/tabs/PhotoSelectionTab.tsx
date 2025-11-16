@@ -104,7 +104,7 @@ export function PhotoSelectionTab({
           <div className="bg-muted/50 p-4 rounded-lg">
             <p className="text-sm text-muted-foreground">
               <strong className="text-foreground">Privacy First:</strong> All image processing happens locally in your browser. 
-              Your photos are never uploaded to our servers, keeping your images completely private.
+              Your photos are never uploaded to our servers unless you explicitly save your creation, keeping your images completely private.
             </p>
           </div>
         </div>
