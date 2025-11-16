@@ -191,7 +191,7 @@ export function ViewCreation() {
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center">
           <h1 className="text-2xl font-bold mb-4">Creation Not Found</h1>
-          <p className="text-muted-foreground mb-6">{error || 'This creation does not exist or is not public.'}</p>
+          <p className="text-muted-foreground mb-6">{error || 'This creation does not exist or is not accessible.'}</p>
           <Link to="/">
             <Button>
               <ArrowLeft className="mr-2 h-4 w-4" />

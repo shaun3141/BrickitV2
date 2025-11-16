@@ -19,7 +19,7 @@ export class CreationService {
   async getUserCreations(userId: string): Promise<Creation[]> {
     const { data, error } = await this.supabase
       .from('creations')
-      .select('id, user_id, title, description, width, height, original_image_url, preview_image_url, rendered_image_url, is_public, filter_options, created_at, updated_at')
+      .select('id, user_id, title, description, width, height, original_image_url, preview_image_url, rendered_image_url, sharing_status, filter_options, created_at, updated_at')
       .eq('user_id', userId)
       .order('updated_at', { ascending: false });
 
@@ -37,7 +37,7 @@ export class CreationService {
   async getCreationById(creationId: string, userId: string): Promise<Creation | null> {
     const { data, error } = await this.supabase
       .from('creations')
-      .select('id, user_id, title, description, width, height, original_image_url, preview_image_url, rendered_image_url, is_public, filter_options, created_at, updated_at')
+      .select('id, user_id, title, description, width, height, original_image_url, preview_image_url, rendered_image_url, sharing_status, filter_options, created_at, updated_at')
       .eq('id', creationId)
       .eq('user_id', userId)
       .single();
@@ -54,7 +54,7 @@ export class CreationService {
 
   /**
    * Get a public creation by ID (no authentication required)
-   * Returns null if creation is not public
+   * Returns null if creation is not link-sharable or gallery-sharable
    * Joins with user_profiles to include display name
    */
   async getPublicCreationById(creationId: string): Promise<Creation | null> {
@@ -70,19 +70,19 @@ export class CreationService {
         original_image_url, 
         preview_image_url, 
         rendered_image_url, 
-        is_public, 
+        sharing_status, 
         filter_options, 
         created_at, 
         updated_at,
         user_profiles(display_name)
       `)
       .eq('id', creationId)
-      .eq('is_public', true)
+      .in('sharing_status', ['link', 'gallery'])
       .single();
 
     if (error) {
       if (error.code === 'PGRST116') {
-        return null; // Not found or not public
+        return null; // Not found or not link/gallery sharable
       }
       throw new Error(`Failed to fetch creation: ${error.message}`);
     }
@@ -98,7 +98,7 @@ export class CreationService {
       original_image_url: data.original_image_url,
       preview_image_url: data.preview_image_url,
       rendered_image_url: data.rendered_image_url,
-      is_public: data.is_public,
+      sharing_status: data.sharing_status,
       filter_options: data.filter_options,
       created_at: data.created_at,
       updated_at: data.updated_at,
@@ -107,8 +107,8 @@ export class CreationService {
   }
 
   /**
-   * Get all public creations (no authentication required)
-   * Returns list of public creations with pagination
+   * Get all gallery creations (no authentication required)
+   * Returns list of gallery creations with pagination
    * Joins with user_profiles to include display name
    */
   async getPublicCreations(page: number = 1, limit: number = 20): Promise<{ creations: Creation[]; total: number }> {
@@ -118,7 +118,7 @@ export class CreationService {
     const { count, error: countError } = await this.supabase
       .from('creations')
       .select('*', { count: 'exact', head: true })
-      .eq('is_public', true);
+      .eq('sharing_status', 'gallery');
 
     if (countError) {
       throw new Error(`Failed to count creations: ${countError.message}`);
@@ -137,13 +137,13 @@ export class CreationService {
         original_image_url, 
         preview_image_url, 
         rendered_image_url, 
-        is_public, 
+        sharing_status, 
         filter_options, 
         created_at, 
         updated_at,
         user_profiles(display_name)
       `)
-      .eq('is_public', true)
+      .eq('sharing_status', 'gallery')
       .order('created_at', { ascending: false })
       .range(offset, offset + limit - 1);
 
@@ -162,7 +162,7 @@ export class CreationService {
       original_image_url: creation.original_image_url,
       preview_image_url: creation.preview_image_url,
       rendered_image_url: creation.rendered_image_url,
-      is_public: creation.is_public,
+      sharing_status: creation.sharing_status,
       filter_options: creation.filter_options,
       created_at: creation.created_at,
       updated_at: creation.updated_at,
@@ -176,8 +176,8 @@ export class CreationService {
   }
 
   /**
-   * Get all public creations for a specific creator/user (no authentication required)
-   * Returns list of public creations with pagination filtered by creator
+   * Get all gallery creations for a specific creator/user (no authentication required)
+   * Returns list of gallery creations with pagination filtered by creator
    * Joins with user_profiles to include display name
    */
   async getCreatorPublicCreations(creatorId: string, page: number = 1, limit: number = 20): Promise<{ creations: Creation[]; total: number; displayName: string | null }> {
@@ -187,7 +187,7 @@ export class CreationService {
     const { count, error: countError } = await this.supabase
       .from('creations')
       .select('*', { count: 'exact', head: true })
-      .eq('is_public', true)
+      .eq('sharing_status', 'gallery')
       .eq('user_id', creatorId);
 
     if (countError) {
@@ -207,13 +207,13 @@ export class CreationService {
         original_image_url, 
         preview_image_url, 
         rendered_image_url, 
-        is_public, 
+        sharing_status, 
         filter_options, 
         created_at, 
         updated_at,
         user_profiles(display_name)
       `)
-      .eq('is_public', true)
+      .eq('sharing_status', 'gallery')
       .eq('user_id', creatorId)
       .order('created_at', { ascending: false })
       .range(offset, offset + limit - 1);
@@ -233,7 +233,7 @@ export class CreationService {
       original_image_url: creation.original_image_url,
       preview_image_url: creation.preview_image_url,
       rendered_image_url: creation.rendered_image_url,
-      is_public: creation.is_public,
+      sharing_status: creation.sharing_status,
       filter_options: creation.filter_options,
       created_at: creation.created_at,
       updated_at: creation.updated_at,

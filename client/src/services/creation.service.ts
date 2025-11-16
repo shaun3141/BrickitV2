@@ -44,7 +44,7 @@ export async function saveCreation(
             height: data.height,
             original_image_url: data.original_image_url,
             preview_image_url: null,
-            is_public: data.is_public,
+            sharing_status: data.sharing_status,
             filter_options: data.filter_options,
           },
         }),
@@ -115,7 +115,7 @@ export async function saveCreation(
             original_image_url: data.original_image_url,
             preview_image_url: previewUrl,
             rendered_image_url: renderedUrl || null,
-            is_public: data.is_public,
+            sharing_status: data.sharing_status,
             filter_options: data.filter_options,
           },
         }),
@@ -187,7 +187,7 @@ export async function saveCreation(
             original_image_url: data.original_image_url,
             preview_image_url: previewUrl,
             rendered_image_url: renderedUrl || null,
-            is_public: data.is_public,
+            sharing_status: data.sharing_status,
             filter_options: data.filter_options,
           },
         }),
@@ -385,7 +385,7 @@ export async function uploadOriginalImage(
 }
 
 /**
- * Get a public creation by ID (no authentication required)
+ * Get a link-sharable or gallery-sharable creation by ID (no authentication required)
  */
 export async function getPublicCreation(
   creationId: string
@@ -428,7 +428,7 @@ export async function getPublicCreation(
 }
 
 /**
- * Get all public creations (no authentication required)
+ * Get all gallery creations (no authentication required)
  */
 export async function getPublicCreations(
   page: number = 1,

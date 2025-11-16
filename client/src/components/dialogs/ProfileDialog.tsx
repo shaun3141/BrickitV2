@@ -312,10 +312,15 @@ export function ProfileDialog({ open, onOpenChange, onLoadCreation }: ProfilePag
                             </div>
                           )}
                           <div className="absolute top-2 right-2">
-                            {creation.is_public ? (
+                            {creation.sharing_status === 'gallery' ? (
                               <div className="bg-primary/90 text-primary-foreground px-2 py-1 rounded text-xs flex items-center gap-1">
                                 <Globe className="h-3 w-3" />
-                                Public
+                                Gallery
+                              </div>
+                            ) : creation.sharing_status === 'link' ? (
+                              <div className="bg-blue-500/90 text-white px-2 py-1 rounded text-xs flex items-center gap-1">
+                                <Globe className="h-3 w-3" />
+                                Link
                               </div>
                             ) : (
                               <div className="bg-muted/90 text-muted-foreground px-2 py-1 rounded text-xs flex items-center gap-1">

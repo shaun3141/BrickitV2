@@ -219,7 +219,7 @@ export function AppPage() {
   const handleSaveCreation = async (data: {
     title: string;
     description?: string;
-    isPublic: boolean;
+    sharingStatus: 'private' | 'link' | 'gallery';
   }) => {
     if (!user || !mosaicData) return;
 
@@ -248,7 +248,7 @@ export function AppPage() {
           height: mosaicData.height,
           pixel_data: mosaicData.pixels,
           original_image_url: imageUrl,
-          is_public: data.isPublic,
+          sharing_status: data.sharingStatus,
           filter_options: filterOptions,
         },
         currentCreationId || undefined
@@ -264,7 +264,7 @@ export function AppPage() {
         // Track save event
         trackEvent('creation_saved', {
           creation_id: savedCreation.id,
-          is_public: data.isPublic,
+          sharing_status: data.sharingStatus,
           has_description: !!data.description,
         });
       }
@@ -313,7 +313,7 @@ export function AppPage() {
     // Track load event
     trackEvent('creation_loaded', {
       creation_id: creation.id,
-      is_public: creation.is_public,
+      sharing_status: creation.sharing_status,
     });
     
     // Navigate to edit tab

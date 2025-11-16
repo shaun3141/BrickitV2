@@ -15,7 +15,7 @@ import { toast } from '@/lib/toast';
 interface SaveCreationDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onSave: (data: { title: string; description?: string; isPublic: boolean }) => Promise<void>;
+  onSave: (data: { title: string; description?: string; sharingStatus: 'private' | 'link' | 'gallery' }) => Promise<void>;
   defaultTitle?: string;
   existingCreation?: boolean;
 }
@@ -31,7 +31,7 @@ export function SaveCreationDialog({
   const [email, setEmail] = useState('');
   const [title, setTitle] = useState(defaultTitle);
   const [description, setDescription] = useState('');
-  const [isPublic, setIsPublic] = useState(false);
+  const [sharingStatus, setSharingStatus] = useState<'private' | 'link' | 'gallery'>('private');
   const [isLoading, setIsLoading] = useState(false);
   const [emailSent, setEmailSent] = useState(false);
   const [showAuthForm, setShowAuthForm] = useState(false);
@@ -41,7 +41,7 @@ export function SaveCreationDialog({
       // Reset form when dialog opens
       setTitle(defaultTitle);
       setDescription('');
-      setIsPublic(false);
+      setSharingStatus('private');
       setEmailSent(false);
       setShowAuthForm(!user);
     }
@@ -77,7 +77,7 @@ export function SaveCreationDialog({
       await onSave({
         title: title.trim(),
         description: description.trim() || undefined,
-        isPublic,
+        sharingStatus,
       });
       onOpenChange(false);
     } catch (error) {
@@ -200,30 +200,56 @@ export function SaveCreationDialog({
               </div>
 
               <div className="space-y-2">
-                <div className="flex items-center justify-between rounded-lg border p-4">
-                  <div className="space-y-0.5">
-                    <label className="text-sm font-medium">
-                      Share with Community
-                    </label>
-                    <p className="text-xs text-muted-foreground">
-                      Make your creation publicly visible
-                    </p>
-                  </div>
-                  <button
-                    type="button"
-                    role="switch"
-                    aria-checked={isPublic}
-                    onClick={() => setIsPublic(!isPublic)}
-                    className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-                      isPublic ? 'bg-primary' : 'bg-muted'
-                    }`}
-                  >
-                    <span
-                      className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-                        isPublic ? 'translate-x-6' : 'translate-x-1'
-                      }`}
+                <label className="text-sm font-medium">Sharing Settings</label>
+                <div className="space-y-3 rounded-lg border p-4">
+                  <label className="flex items-start gap-3 cursor-pointer">
+                    <input
+                      type="radio"
+                      name="sharingStatus"
+                      value="private"
+                      checked={sharingStatus === 'private'}
+                      onChange={() => setSharingStatus('private')}
+                      className="mt-1 h-4 w-4 text-primary focus:ring-primary"
                     />
-                  </button>
+                    <div className="flex-1">
+                      <div className="text-sm font-medium">Private</div>
+                      <div className="text-xs text-muted-foreground">
+                        Only you can view this creation
+                      </div>
+                    </div>
+                  </label>
+                  <label className="flex items-start gap-3 cursor-pointer">
+                    <input
+                      type="radio"
+                      name="sharingStatus"
+                      value="link"
+                      checked={sharingStatus === 'link'}
+                      onChange={() => setSharingStatus('link')}
+                      className="mt-1 h-4 w-4 text-primary focus:ring-primary"
+                    />
+                    <div className="flex-1">
+                      <div className="text-sm font-medium">Sharable with Link</div>
+                      <div className="text-xs text-muted-foreground">
+                        Anyone with the link can view, but it won't appear in the gallery
+                      </div>
+                    </div>
+                  </label>
+                  <label className="flex items-start gap-3 cursor-pointer">
+                    <input
+                      type="radio"
+                      name="sharingStatus"
+                      value="gallery"
+                      checked={sharingStatus === 'gallery'}
+                      onChange={() => setSharingStatus('gallery')}
+                      className="mt-1 h-4 w-4 text-primary focus:ring-primary"
+                    />
+                    <div className="flex-1">
+                      <div className="text-sm font-medium">Shared with Gallery</div>
+                      <div className="text-xs text-muted-foreground">
+                        Publicly visible and appears in the gallery
+                      </div>
+                    </div>
+                  </label>
                 </div>
               </div>
 

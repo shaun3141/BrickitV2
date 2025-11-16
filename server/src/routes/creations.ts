@@ -61,7 +61,7 @@ router.get(
 );
 
 /**
- * Get a public creation by ID (no authentication required)
+ * Get a link-sharable or gallery-sharable creation by ID (no authentication required)
  * GET /api/creations/public/:id
  */
 router.get(
@@ -76,7 +76,7 @@ router.get(
     const creation = await creationService.getPublicCreationById(creationId);
     
     if (!creation) {
-      throw new ApiException('Creation not found or not public', 404);
+      throw new ApiException('Creation not found or not accessible', 404);
     }
     
     res.json({ creation });

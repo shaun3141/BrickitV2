@@ -10,7 +10,7 @@ export interface CreationData {
   original_image_url?: string;
   preview_image_url?: string;
   rendered_image_url?: string;
-  is_public: boolean;
+  sharing_status: 'private' | 'link' | 'gallery';
   filter_options?: Record<string, any>;
 }
 
