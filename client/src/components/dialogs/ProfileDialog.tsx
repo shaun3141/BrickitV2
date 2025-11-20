@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { User as UserIcon, LogOut, Mail, Heart, Image as ImageIcon, Edit2, Check, Trash2, Globe, Lock } from 'lucide-react';
 import { useAuth } from '@/features/auth/AuthContext';
 import { Button } from '@/components/ui/button';
@@ -27,6 +28,7 @@ interface ProfilePageProps {
 
 export function ProfileDialog({ open, onOpenChange, onLoadCreation }: ProfilePageProps) {
   const { user, signOut } = useAuth();
+  const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('creations');
   const [displayName, setDisplayName] = useState('');
   const [isEditingName, setIsEditingName] = useState(false);
@@ -164,8 +166,17 @@ export function ProfileDialog({ open, onOpenChange, onLoadCreation }: ProfilePag
       }
       
       console.log('[ProfileDialog] Successfully loaded creation');
-      onLoadCreation?.(fullCreation);
-      onOpenChange(false);
+      
+      // If onLoadCreation prop is provided, call it directly (existing behavior for AppPage)
+      if (onLoadCreation) {
+        onLoadCreation(fullCreation);
+        onOpenChange(false);
+      } else {
+        // If not provided, navigate to /app with creation data in location state
+        console.log('[ProfileDialog] Navigating to /app with creation data');
+        navigate('/app', { state: { creationToLoad: fullCreation } });
+        onOpenChange(false);
+      }
     } catch (error) {
       console.error('[ProfileDialog] Unexpected error:', error);
       toast.error(`Failed to load creation: ${error instanceof Error ? error.message : 'Unknown error'}`);

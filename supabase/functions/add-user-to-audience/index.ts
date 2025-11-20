@@ -85,9 +85,27 @@ serve(async (req: Request) => {
       );
     }
 
-    console.log('Adding user to audience and sending welcome email:', { userId, email: userEmail });
+    console.log('Processing user audience addition:', { userId, email: userEmail });
 
-    // Add to Resend general audience
+    // Check if welcome email has already been sent
+    const { data: profile, error: profileError } = await supabase
+      .from('user_profiles')
+      .select('welcome_email_sent')
+      .eq('id', userId)
+      .single();
+
+    if (profileError && profileError.code !== 'PGRST116') {
+      // PGRST116 is "not found" - that's okay, we'll create the profile
+      console.error('Error checking user profile:', profileError);
+    }
+
+    const welcomeEmailAlreadySent = profile?.welcome_email_sent ?? false;
+
+    if (welcomeEmailAlreadySent) {
+      console.log('Welcome email already sent to user, skipping:', { userId, email: userEmail });
+    }
+
+    // Add to Resend general audience (idempotent operation)
     const audienceResult = await addToGeneralAudience({
       email: userEmail,
       firstName,
@@ -96,28 +114,58 @@ serve(async (req: Request) => {
 
     if (!audienceResult.success) {
       console.error('Failed to add user to audience (non-critical):', audienceResult.error);
+    } else {
+      console.log('✅ User added to audience:', { contactId: audienceResult.contactId });
     }
 
-    // Send welcome email
+    // Send welcome email only if not already sent
     let welcomeEmailResult = { success: false, emailId: undefined as string | undefined };
-    try {
-      const welcomeHtml = generateWelcomeEmail({ userName: firstName });
-      
-      welcomeEmailResult = await sendEmail({
-        to: userEmail,
-        subject: 'Welcome to BrickIt! 🧱',
-        html: welcomeHtml,
-        tags: [
-          { name: 'category', value: 'welcome' },
-          { name: 'user_id', value: userId },
-        ],
-      });
+    
+    if (!welcomeEmailAlreadySent) {
+      try {
+        console.log('Sending welcome email to new user:', { userId, email: userEmail });
+        const welcomeHtml = generateWelcomeEmail({ userName: firstName });
+        
+        welcomeEmailResult = await sendEmail({
+          to: userEmail,
+          subject: 'Welcome to BrickIt! 🧱',
+          html: welcomeHtml,
+          tags: [
+            { name: 'category', value: 'welcome' },
+            { name: 'user_id', value: userId },
+          ],
+        });
 
-      if (!welcomeEmailResult.success) {
-        console.warn('Failed to send welcome email (non-critical)');
+        if (welcomeEmailResult.success) {
+          console.log('✅ Welcome email sent successfully:', { 
+            emailId: welcomeEmailResult.emailId,
+            userId,
+            email: userEmail 
+          });
+
+          // Update user profile to mark welcome email as sent
+          const { error: updateError } = await supabase
+            .from('user_profiles')
+            .upsert({
+              id: userId,
+              welcome_email_sent: true,
+            }, {
+              onConflict: 'id',
+            });
+
+          if (updateError) {
+            console.error('Failed to update welcome_email_sent flag (non-critical):', updateError);
+          } else {
+            console.log('✅ Marked welcome email as sent in user profile:', { userId });
+          }
+        } else {
+          console.warn('Failed to send welcome email (non-critical)');
+        }
+      } catch (err) {
+        console.error('Error sending welcome email (non-critical):', err);
       }
-    } catch (err) {
-      console.error('Error sending welcome email (non-critical):', err);
+    } else {
+      console.log('⏭️ Skipping welcome email - already sent previously');
     }
 
     return corsResponse(
@@ -126,7 +174,10 @@ serve(async (req: Request) => {
         contactId: audienceResult.contactId,
         welcomeEmailSent: welcomeEmailResult.success,
         welcomeEmailId: welcomeEmailResult.emailId,
-        message: 'User onboarding completed',
+        welcomeEmailSkipped: welcomeEmailAlreadySent,
+        message: welcomeEmailAlreadySent 
+          ? 'User already in audience, welcome email skipped' 
+          : 'User onboarding completed',
       },
       200,
       origin

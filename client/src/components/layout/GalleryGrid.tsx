@@ -1,7 +1,12 @@
-import { Link } from 'react-router-dom';
+import { useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import type { Creation } from '@/types';
 import { Button } from '@/components/ui/button';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { useAuth } from '@/features/auth/AuthContext';
+import { getPublicCreation } from '@/services/creation.service';
+import { loadPixelDataFromPng } from '@/utils/image/pngToPixelData';
+import { toast } from '@/lib/toast';
 
 interface GalleryGridProps {
   creations: Creation[];
@@ -26,6 +31,58 @@ export function GalleryGrid({
   emptyMessage = 'No Creations Yet',
   emptyDescription = 'Be the first to share your creation!',
 }: GalleryGridProps) {
+  const { user } = useAuth();
+  const navigate = useNavigate();
+  const [loadingCreationId, setLoadingCreationId] = useState<string | null>(null);
+
+  const handleLoadCreation = async (creation: Creation) => {
+    console.log('[GalleryGrid] Loading creation:', creation.id);
+    setLoadingCreationId(creation.id);
+    
+    try {
+      // Fetch the full creation
+      const { data: fullCreation, error: fetchError } = await getPublicCreation(creation.id);
+      
+      if (fetchError || !fullCreation) {
+        console.error('[GalleryGrid] Error fetching creation:', fetchError);
+        toast.error(`Failed to load creation: ${fetchError?.message || 'Unknown error'}`);
+        return;
+      }
+      
+      // Reconstruct pixel_data from preview PNG
+      if (!fullCreation.preview_image_url) {
+        toast.error('This creation has no preview image and cannot be loaded.');
+        return;
+      }
+      
+      console.log('[GalleryGrid] Reconstructing pixel data from preview PNG...');
+      const pixelData = await loadPixelDataFromPng(
+        fullCreation.preview_image_url,
+        fullCreation.width,
+        fullCreation.height
+      );
+      
+      if (!pixelData || !Array.isArray(pixelData) || pixelData.length === 0) {
+        toast.error('Failed to reconstruct pixel data from preview image.');
+        return;
+      }
+      
+      // Add reconstructed pixel_data to creation
+      const creationWithPixelData: Creation = {
+        ...fullCreation,
+        pixel_data: pixelData,
+      };
+      
+      console.log('[GalleryGrid] Successfully loaded creation, navigating to /app');
+      // Navigate to /app with creation data in location state
+      navigate('/app', { state: { creationToLoad: creationWithPixelData } });
+    } catch (error) {
+      console.error('[GalleryGrid] Unexpected error:', error);
+      toast.error(`Failed to load creation: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    } finally {
+      setLoadingCreationId(null);
+    }
+  };
   if (loading && creations.length === 0) {
     return (
       <div className="flex items-center justify-center py-20">
@@ -118,6 +175,23 @@ export function GalleryGrid({
                     {creation.display_name || 'Anonymous'}
                   </Link>
                 </div>
+                {user && (
+                  <div className="mt-3 pt-3 border-t">
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="w-full"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        handleLoadCreation(creation);
+                      }}
+                      disabled={loadingCreationId === creation.id}
+                    >
+                      {loadingCreationId === creation.id ? 'Loading...' : 'Load'}
+                    </Button>
+                  </div>
+                )}
               </div>
             </div>
           </div>

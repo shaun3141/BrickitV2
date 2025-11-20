@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { PhotoSelectionTab } from '@/components/tabs/PhotoSelectionTab';
 import { EditTab } from '@/components/tabs/EditTab';
@@ -24,6 +24,7 @@ import { useCanonical } from '@/hooks/useCanonical';
 
 export function AppPage() {
   const { user } = useAuth();
+  const location = useLocation();
   useCanonical();
   
   // Capture initial pageview
@@ -93,6 +94,18 @@ export function AppPage() {
       setPlacements([]);
     }
   }, [mosaicData]);
+
+  // Handle creation loaded from location state (e.g., from ProfileDialog or Gallery)
+  useEffect(() => {
+    const creationToLoad = (location.state as { creationToLoad?: Creation })?.creationToLoad;
+    if (creationToLoad) {
+      console.log('[AppPage] Detected creation in location state, loading...');
+      handleLoadCreation(creationToLoad);
+      // Clear location state to prevent re-loading on re-renders
+      window.history.replaceState({}, '', window.location.pathname);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [location.state]);
 
   const handleImageSelect = async (file: File) => {
     setUploadedImage(file);
