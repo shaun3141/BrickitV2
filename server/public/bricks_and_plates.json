@@ -1664,5 +1664,445 @@
         "price": 0.1
       }
     ]
+  },
+  {
+    "element_id": "3003",
+    "brick_type": "BRICK 2X2",
+    "num_colors": 36,
+    "colors": [
+      {
+        "color_name": "Bright Red",
+        "element_id": "300321",
+        "rgb": "#b40000",
+        "price": 0.13
+      },
+      {
+        "color_name": "Dark Orange",
+        "element_id": "6212081",
+        "rgb": "#91501c",
+        "price": 0.13
+      },
+      {
+        "color_name": "Light Nougat",
+        "element_id": "6297283",
+        "rgb": "#e1bea1",
+        "price": 0.13
+      },
+      {
+        "color_name": "Reddish Brown",
+        "element_id": "4211210",
+        "rgb": "#5f3109",
+        "price": 0.13
+      },
+      {
+        "color_name": "Medium Nougat",
+        "element_id": "6058085",
+        "rgb": "#aa7d55",
+        "price": 0.13
+      },
+      {
+        "color_name": "Bright Orange",
+        "element_id": "4153825",
+        "rgb": "#d67923",
+        "price": 0.13
+      },
+      {
+        "color_name": "Dark Brown",
+        "element_id": "6092677",
+        "rgb": "#372100",
+        "price": 0.13
+      },
+      {
+        "color_name": "Flame Yellowish Orange",
+        "element_id": "6295078",
+        "rgb": "#fcac00",
+        "price": 0.13
+      },
+      {
+        "color_name": "Sand Yellow",
+        "element_id": "4255416",
+        "rgb": "#897d62",
+        "price": 0.13
+      },
+      {
+        "color_name": "Brick Yellow",
+        "element_id": "4114306",
+        "rgb": "#ccb98d",
+        "price": 0.13
+      },
+      {
+        "color_name": "Bright Yellow",
+        "element_id": "300324",
+        "rgb": "#fac80a",
+        "price": 0.13
+      },
+      {
+        "color_name": "Cool Yellow",
+        "element_id": "6212064",
+        "rgb": "#ffec6c",
+        "price": 0.13
+      },
+      {
+        "color_name": "Vibrant Yellow",
+        "element_id": "6427903",
+        "rgb": "#ffff00",
+        "price": 0.12
+      },
+      {
+        "color_name": "Bright Yellowish Green",
+        "element_id": "4220632",
+        "rgb": "#a5ca18",
+        "price": 0.13
+      },
+      {
+        "color_name": "Spring Yellowish Green",
+        "element_id": "6544543",
+        "rgb": "#e2f99a",
+        "price": 0.12
+      },
+      {
+        "color_name": "Bright Green",
+        "element_id": "6442896",
+        "rgb": "#58ab41",
+        "price": 0.11
+      },
+      {
+        "color_name": "Dark Green",
+        "element_id": "300328",
+        "rgb": "#00852b",
+        "price": 0.13
+      },
+      {
+        "color_name": "Earth Green",
+        "element_id": "6214611",
+        "rgb": "#00451a",
+        "price": 0.13
+      },
+      {
+        "color_name": "Sand Green",
+        "element_id": "6075624",
+        "rgb": "#708e7c",
+        "price": 0.13
+      },
+      {
+        "color_name": "Aqua",
+        "element_id": "6426720",
+        "rgb": "#d3f2ea",
+        "price": 0.12
+      },
+      {
+        "color_name": "Bright Bluish Green",
+        "element_id": "6314091",
+        "rgb": "#009894",
+        "price": 0.13
+      },
+      {
+        "color_name": "Medium Azur",
+        "element_id": "4653970",
+        "rgb": "#68c3e2",
+        "price": 0.13
+      },
+      {
+        "color_name": "Black",
+        "element_id": "300326",
+        "rgb": "#1b2a34",
+        "price": 0.13
+      },
+      {
+        "color_name": "Bright Blue",
+        "element_id": "300323",
+        "rgb": "#1e5aa8",
+        "price": 0.13
+      },
+      {
+        "color_name": "Medium Blue",
+        "element_id": "4201235",
+        "rgb": "#7396c8",
+        "price": 0.13
+      },
+      {
+        "color_name": "Sand Blue",
+        "element_id": "6506825",
+        "rgb": "#70819a",
+        "price": 0.12
+      },
+      {
+        "color_name": "Earth Blue",
+        "element_id": "4296785",
+        "rgb": "#19325a",
+        "price": 0.13
+      },
+      {
+        "color_name": "Medium Lilac",
+        "element_id": "4653960",
+        "rgb": "#441a91",
+        "price": 0.13
+      },
+      {
+        "color_name": "Lavender",
+        "element_id": "6099349",
+        "rgb": "#cda4de",
+        "price": 0.13
+      },
+      {
+        "color_name": "Bright Purple",
+        "element_id": "4517992",
+        "rgb": "#c8509b",
+        "price": 0.13
+      },
+      {
+        "color_name": "Light Purple",
+        "element_id": "4550359",
+        "rgb": "#ff9ecd",
+        "price": 0.13
+      },
+      {
+        "color_name": "New Dark Red",
+        "element_id": "4539104",
+        "rgb": "#720012",
+        "price": 0.13
+      },
+      {
+        "color_name": "Vibrant Coral",
+        "element_id": "6422920",
+        "rgb": "#f06d78",
+        "price": 0.12
+      },
+      {
+        "color_name": "White",
+        "element_id": "300301",
+        "rgb": "#f4f4f4",
+        "price": 0.13
+      },
+      {
+        "color_name": "Medium Stone Grey",
+        "element_id": "4211387",
+        "rgb": "#969696",
+        "price": 0.13
+      },
+      {
+        "color_name": "Dark Stone Grey",
+        "element_id": "4211060",
+        "rgb": "#646464",
+        "price": 0.13
+      }
+    ]
+  },
+  {
+    "element_id": "3022",
+    "brick_type": "PLATE 2X2",
+    "num_colors": 35,
+    "colors": [
+      {
+        "color_name": "Bright Red",
+        "element_id": "302221",
+        "rgb": "#b40000",
+        "price": 0.09
+      },
+      {
+        "color_name": "Dark Orange",
+        "element_id": "4615606",
+        "rgb": "#91501c",
+        "price": 0.09
+      },
+      {
+        "color_name": "Reddish Brown",
+        "element_id": "4216695",
+        "rgb": "#5f3109",
+        "price": 0.09
+      },
+      {
+        "color_name": "Medium Nougat",
+        "element_id": "6056383",
+        "rgb": "#aa7d55",
+        "price": 0.09
+      },
+      {
+        "color_name": "Bright Orange",
+        "element_id": "4159007",
+        "rgb": "#d67923",
+        "price": 0.09
+      },
+      {
+        "color_name": "Warm Tan",
+        "element_id": "6501336",
+        "rgb": "#cca373",
+        "price": 0.04
+      },
+      {
+        "color_name": "Dark Brown",
+        "element_id": "6494115",
+        "rgb": "#372100",
+        "price": 0.09
+      },
+      {
+        "color_name": "Flame Yellowish Orange",
+        "element_id": "6003033",
+        "rgb": "#fcac00",
+        "price": 0.09
+      },
+      {
+        "color_name": "Sand Yellow",
+        "element_id": "6047415",
+        "rgb": "#897d62",
+        "price": 0.09
+      },
+      {
+        "color_name": "Brick Yellow",
+        "element_id": "4114084",
+        "rgb": "#ccb98d",
+        "price": 0.09
+      },
+      {
+        "color_name": "Warm Gold",
+        "element_id": "6347982",
+        "rgb": "#b9953b",
+        "price": 0.09
+      },
+      {
+        "color_name": "Bright Yellow",
+        "element_id": "302224",
+        "rgb": "#fac80a",
+        "price": 0.09
+      },
+      {
+        "color_name": "Cool Yellow",
+        "element_id": "6316265",
+        "rgb": "#ffec6c",
+        "price": 0.09
+      },
+      {
+        "color_name": "Olive Green",
+        "element_id": "6079617",
+        "rgb": "#77774e",
+        "price": 0.09
+      },
+      {
+        "color_name": "Bright Yellowish Green",
+        "element_id": "4537937",
+        "rgb": "#a5ca18",
+        "price": 0.09
+      },
+      {
+        "color_name": "Bright Green",
+        "element_id": "6357612",
+        "rgb": "#58ab41",
+        "price": 0.09
+      },
+      {
+        "color_name": "Dark Green",
+        "element_id": "302228",
+        "rgb": "#00852b",
+        "price": 0.09
+      },
+      {
+        "color_name": "Sand Green",
+        "element_id": "6186823",
+        "rgb": "#708e7c",
+        "price": 0.09
+      },
+      {
+        "color_name": "Bright Bluish Green",
+        "element_id": "6249390",
+        "rgb": "#009894",
+        "price": 0.09
+      },
+      {
+        "color_name": "Medium Azur",
+        "element_id": "4625032",
+        "rgb": "#68c3e2",
+        "price": 0.09
+      },
+      {
+        "color_name": "Dark Azur",
+        "element_id": "6206809",
+        "rgb": "#469bc3",
+        "price": 0.09
+      },
+      {
+        "color_name": "Black",
+        "element_id": "302226",
+        "rgb": "#1b2a34",
+        "price": 0.09
+      },
+      {
+        "color_name": "Bright Blue",
+        "element_id": "302223",
+        "rgb": "#1e5aa8",
+        "price": 0.09
+      },
+      {
+        "color_name": "Light Royal Blue",
+        "element_id": "6099373",
+        "rgb": "#9dc3f7",
+        "price": 0.09
+      },
+      {
+        "color_name": "Medium Blue",
+        "element_id": "4653540",
+        "rgb": "#7396c8",
+        "price": 0.09
+      },
+      {
+        "color_name": "Sand Blue",
+        "element_id": "6062089",
+        "rgb": "#70819a",
+        "price": 0.09
+      },
+      {
+        "color_name": "Earth Blue",
+        "element_id": "6037890",
+        "rgb": "#19325a",
+        "price": 0.09
+      },
+      {
+        "color_name": "Medium Lilac",
+        "element_id": "6047422",
+        "rgb": "#441a91",
+        "price": 0.09
+      },
+      {
+        "color_name": "Medium Lavender",
+        "element_id": "6485862",
+        "rgb": "#a06eb9",
+        "price": 0.09
+      },
+      {
+        "color_name": "Bright Reddish Violet",
+        "element_id": "6109930",
+        "rgb": "#901f76",
+        "price": 0.09
+      },
+      {
+        "color_name": "Light Purple",
+        "element_id": "6096589",
+        "rgb": "#ff9ecd",
+        "price": 0.09
+      },
+      {
+        "color_name": "New Dark Red",
+        "element_id": "4585479",
+        "rgb": "#720012",
+        "price": 0.09
+      },
+      {
+        "color_name": "White",
+        "element_id": "302201",
+        "rgb": "#f4f4f4",
+        "price": 0.09
+      },
+      {
+        "color_name": "Medium Stone Grey",
+        "element_id": "4211397",
+        "rgb": "#969696",
+        "price": 0.09
+      },
+      {
+        "color_name": "Dark Stone Grey",
+        "element_id": "4211094",
+        "rgb": "#646464",
+        "price": 0.09
+      }
+    ]
   }
 ]

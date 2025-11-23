@@ -32,9 +32,10 @@ interface PartsListProps {
   mosaicData: MosaicData;
   placements?: BrickPlacement[];
   showOptimized?: boolean;
+  showBricks?: boolean;
 }
 
-export function PartsList({ mosaicData, placements, showOptimized = false }: PartsListProps) {
+export function PartsList({ mosaicData, placements, showOptimized = false, showBricks = false }: PartsListProps) {
   const totalCells = mosaicData.width * mosaicData.height;
   
   // Generate both lists for comparison
@@ -57,9 +58,34 @@ export function PartsList({ mosaicData, placements, showOptimized = false }: Par
   // State for brick data with element IDs and substitutes
   const [brickData, setBrickData] = useState<Map<string, Map<string, BrickColorInfo>>>(new Map());
   const [isLoadingBrickData, setIsLoadingBrickData] = useState(true);
-  
-  // State for Bricks vs Plates toggle (false = Plates, true = Bricks)
-  const [showBricks, setShowBricks] = useState(false);
+
+  const OWNED_QUANTITIES_STORAGE_KEY = 'brickit-owned-quantities';
+
+  // Load owned quantities from localStorage on mount
+  useEffect(() => {
+    try {
+      const stored = localStorage.getItem(OWNED_QUANTITIES_STORAGE_KEY);
+      if (stored) {
+        const data = JSON.parse(stored);
+        const quantitiesMap = new Map(Object.entries(data).map(([k, v]) => [k, Number(v)]));
+        setOwnedQuantities(quantitiesMap);
+      }
+    } catch (error) {
+      console.error('Failed to load owned quantities from storage:', error);
+    }
+  }, []);
+
+  // Save owned quantities to localStorage whenever they change
+  useEffect(() => {
+    try {
+      const data = Object.fromEntries(ownedQuantities);
+      localStorage.setItem(OWNED_QUANTITIES_STORAGE_KEY, JSON.stringify(data));
+      // Dispatch custom event for same-tab updates
+      window.dispatchEvent(new CustomEvent('ownedQuantitiesUpdated'));
+    } catch (error) {
+      console.error('Failed to save owned quantities to storage:', error);
+    }
+  }, [ownedQuantities]);
 
   // Load brick data on mount
   useEffect(() => {

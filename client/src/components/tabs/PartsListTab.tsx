@@ -6,9 +6,10 @@ import type { BrickPlacement } from '@/types';
 interface PartsListTabProps {
   mosaicData: MosaicData;
   placements: BrickPlacement[];
+  showBricks?: boolean;
 }
 
-export function PartsListTab({ mosaicData, placements }: PartsListTabProps) {
+export function PartsListTab({ mosaicData, placements, showBricks = false }: PartsListTabProps) {
   return (
     <div className="space-y-6">
       {/* Preview and Parts List */}
@@ -25,6 +26,7 @@ export function PartsListTab({ mosaicData, placements }: PartsListTabProps) {
             mosaicData={mosaicData} 
             placements={placements}
             showOptimized={true}
+            showBricks={showBricks}
           />
         </div>
       </div>

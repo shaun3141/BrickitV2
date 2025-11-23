@@ -49,8 +49,8 @@ const app = express();
   app.use(routes);
 
   // Serve static files from the client dist directory with caching
-  // Go up two levels from server/dist to project root, then into client/dist
-  const clientDistPath = path.join(currentDir, '../../client/dist');
+  // In Docker: __dirname is /app/dist, so go up one level to /app, then into client/dist
+  const clientDistPath = path.join(currentDir, '../client/dist');
   app.use(
     express.static(clientDistPath, {
       maxAge: '1y',

@@ -1,5 +1,5 @@
 import type { MosaicData } from '@/types/mosaic.types';
-import type { BrickPlacement } from '@/types/brick.types';
+import type { BrickPlacement, BrickType } from '@/types/brick.types';
 import { BRICK_TYPES } from '@/constants/brick.constants';
 import type { LegoColor } from './colors';
 
@@ -60,8 +60,39 @@ function markCovered(
 }
 
 /**
- * Optimizes brick placement using a greedy algorithm
- * Tries to place the largest possible bricks first to minimize total piece count
+ * Groups brick types by their base ID (ignoring rotations)
+ * Returns a map of base ID to array of all orientations for that brick type
+ */
+function groupBrickTypesByBaseId(): Map<string, BrickType[]> {
+  const groups = new Map<string, BrickType[]>();
+  
+  for (const brickType of BRICK_TYPES) {
+    const baseId = brickType.id;
+    if (!groups.has(baseId)) {
+      groups.set(baseId, []);
+    }
+    groups.get(baseId)!.push(brickType);
+  }
+  
+  return groups;
+}
+
+/**
+ * Gets the area of a brick type group (using the largest orientation)
+ */
+function getGroupArea(brickTypes: BrickType[]): number {
+  if (brickTypes.length === 0) return 0;
+  const largest = brickTypes.reduce((max, bt) => {
+    const area = bt.width * bt.height;
+    return area > max ? area : max;
+  }, 0);
+  return largest;
+}
+
+/**
+ * Optimizes brick placement using a greedy-by-type algorithm
+ * Places all bricks of one type before moving to the next type
+ * This ensures maximum use of larger bricks before smaller ones
  */
 export function optimizeBrickPlacement(mosaicData: MosaicData): BrickPlacement[] {
   const placements: BrickPlacement[] = [];
@@ -74,46 +105,69 @@ export function optimizeBrickPlacement(mosaicData: MosaicData): BrickPlacement[]
 
   let placementId = 0;
 
-  // Iterate through the grid
-  for (let row = 0; row < mosaicData.height; row++) {
-    for (let col = 0; col < mosaicData.width; col++) {
-      // Skip if already covered
-      if (covered[row][col]) {
-        continue;
-      }
+  // Group brick types by base ID (e.g., all 2x4 orientations together)
+  const brickTypeGroups = groupBrickTypesByBaseId();
+  
+  // Sort groups by area (largest first)
+  const sortedGroups = Array.from(brickTypeGroups.entries()).sort((a, b) => {
+    const areaA = getGroupArea(a[1]);
+    const areaB = getGroupArea(b[1]);
+    return areaB - areaA;
+  });
 
-      // Try to place the largest brick possible at this position
-      let placed = false;
+  // Process each brick type group
+  for (const [baseId, brickTypes] of sortedGroups) {
+    let placedAny = true;
+    
+    // Keep placing bricks of this type until no more can be placed
+    while (placedAny) {
+      placedAny = false;
       
-      for (const brickType of BRICK_TYPES) {
-        const { canPlace, color } = canPlaceBrick(
-          mosaicData,
-          covered,
-          col,
-          row,
-          brickType.width,
-          brickType.height
-        );
+      // Scan the entire grid for placements of this brick type
+      for (let row = 0; row < mosaicData.height; row++) {
+        for (let col = 0; col < mosaicData.width; col++) {
+          // Skip if already covered
+          if (covered[row][col]) {
+            continue;
+          }
 
-        if (canPlace && color) {
-          // Place the brick
-          placements.push({
-            id: `brick-${placementId++}`,
-            x: col,
-            y: row,
-            brickType,
-            color,
-          });
+          // Try each orientation of this brick type
+          for (const brickType of brickTypes) {
+            const { canPlace, color } = canPlaceBrick(
+              mosaicData,
+              covered,
+              col,
+              row,
+              brickType.width,
+              brickType.height
+            );
 
-          // Mark cells as covered
-          markCovered(covered, col, row, brickType.width, brickType.height);
-          placed = true;
-          break;
+            if (canPlace && color) {
+              // Place the brick
+              placements.push({
+                id: `brick-${placementId++}`,
+                x: col,
+                y: row,
+                brickType,
+                color,
+              });
+
+              // Mark cells as covered
+              markCovered(covered, col, row, brickType.width, brickType.height);
+              placedAny = true;
+              // Break to avoid trying other orientations at this position
+              break;
+            }
+          }
         }
       }
+    }
+  }
 
-      // This should never happen, but just in case
-      if (!placed) {
+  // Verify all cells are covered (should always be true, but check for debugging)
+  for (let row = 0; row < mosaicData.height; row++) {
+    for (let col = 0; col < mosaicData.width; col++) {
+      if (!covered[row][col]) {
         console.error(`Failed to place brick at (${col}, ${row})`);
       }
     }

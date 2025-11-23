@@ -24,9 +24,11 @@ interface EditTabProps {
   mosaicData: MosaicData;
   onMosaicUpdate: (updatedMosaic: MosaicData) => void;
   onSave?: () => void;
+  showBricks: boolean;
+  onShowBricksChange: (showBricks: boolean) => void;
 }
 
-export function EditTab({ mosaicData, onMosaicUpdate, onSave }: EditTabProps) {
+export function EditTab({ mosaicData, onMosaicUpdate, onSave, showBricks, onShowBricksChange }: EditTabProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const previewCanvasRef = useRef<HTMLCanvasElement>(null);
   const [pixelSize, setPixelSize] = useState(16);
@@ -93,9 +95,6 @@ export function EditTab({ mosaicData, onMosaicUpdate, onSave }: EditTabProps) {
   
   // Hover state for color palette
   const [hoveredColor, setHoveredColor] = useState<LegoColor | null>(null);
-
-  // Bricks vs Plates toggle state (default to bricks)
-  const [showBricks, setShowBricks] = useState(true);
   
   // Available colors based on toggle (bricks or plates)
   const [availableColors, setAvailableColors] = useState<LegoColor[]>(LEGO_COLORS);
@@ -247,8 +246,8 @@ export function EditTab({ mosaicData, onMosaicUpdate, onSave }: EditTabProps) {
     // Mark that this is a toggle change (not initial mount)
     isToggleChangeRef.current = true;
     // Update showBricks which will trigger useEffect
-    setShowBricks(newValue);
-  }, [showBricks]);
+    onShowBricksChange(newValue);
+  }, [showBricks, onShowBricksChange]);
 
   // Handle remap confirmation
   const handleRemapConfirm = useCallback(() => {
@@ -260,10 +259,10 @@ export function EditTab({ mosaicData, onMosaicUpdate, onSave }: EditTabProps) {
   // Handle remap cancel
   const handleRemapCancel = useCallback(() => {
     // Revert toggle to previous value
-    setShowBricks(!showBricks);
+    onShowBricksChange(!showBricks);
     setShowRemapModal(false);
     setColorMappings(new Map());
-  }, [showBricks]);
+  }, [showBricks, onShowBricksChange]);
 
   const undo = useCallback(() => {
     if (historyIndex > 0) {

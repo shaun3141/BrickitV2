@@ -4,6 +4,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { PhotoSelectionTab } from '@/components/tabs/PhotoSelectionTab';
 import { EditTab } from '@/components/tabs/EditTab';
 import { PartsListTab } from '@/components/tabs/PartsListTab';
+import { BuyItTab } from '@/components/tabs/BuyItTab';
 import { InstructionsTab } from '@/components/tabs/InstructionsTab';
 import { ShareTab } from '@/components/tabs/ShareTab';
 import { LoginButton } from '@/features/auth/LoginButton';
@@ -37,6 +38,7 @@ export function AppPage() {
   const [selectedSize, setSelectedSize] = useState<MosaicSize>('medium');
   const [customWidth, setCustomWidth] = useState(64);
   const [activeTab, setActiveTab] = useState('photo-selection');
+  const [showBricks, setShowBricks] = useState(true); // Shared state for Bricks vs Plates toggle
   
   // Track tab changes
   const handleTabChange = (newTab: string) => {
@@ -336,7 +338,7 @@ export function AppPage() {
   return (
     <SiteLayout
       tabsList={
-        <TabsList className="grid grid-cols-5 flex-1 max-w-3xl" role="tablist">
+        <TabsList className="grid grid-cols-6 flex-1 max-w-4xl" role="tablist">
           <TabsTrigger value="photo-selection" role="tab" aria-controls="photo-selection-panel">1. Photo Selection</TabsTrigger>
           <TabsTrigger value="edit" disabled={!mosaicData} role="tab" aria-controls="edit-panel">
             2. Edit
@@ -344,11 +346,14 @@ export function AppPage() {
           <TabsTrigger value="parts-list" disabled={!mosaicData} role="tab" aria-controls="parts-list-panel">
             3. Parts List
           </TabsTrigger>
+          <TabsTrigger value="buy-it" disabled={!mosaicData} role="tab" aria-controls="buy-it-panel">
+            4. Buy It
+          </TabsTrigger>
           <TabsTrigger value="instructions" disabled={!mosaicData} role="tab" aria-controls="instructions-panel">
-            4. Build it
+            5. Build it
           </TabsTrigger>
           <TabsTrigger value="share" disabled={!mosaicData} role="tab" aria-controls="share-panel">
-            5. Share it
+            6. Share it
           </TabsTrigger>
         </TabsList>
       }
@@ -459,6 +464,8 @@ export function AppPage() {
                 mosaicData={mosaicData}
                 onMosaicUpdate={handleMosaicUpdate}
                 onSave={() => setShowSaveDialog(true)}
+                showBricks={showBricks}
+                onShowBricksChange={setShowBricks}
               />
             )}
           </TabsContent>
@@ -471,7 +478,13 @@ export function AppPage() {
 
           <TabsContent value="parts-list" id="parts-list-panel" className="mt-0" role="tabpanel" aria-labelledby="parts-list-tab">
             {mosaicData && (
-              <PartsListTab mosaicData={mosaicData} placements={placements} />
+              <PartsListTab mosaicData={mosaicData} placements={placements} showBricks={showBricks} />
+            )}
+          </TabsContent>
+
+          <TabsContent value="buy-it" id="buy-it-panel" className="mt-0" role="tabpanel" aria-labelledby="buy-it-tab">
+            {mosaicData && (
+              <BuyItTab mosaicData={mosaicData} placements={placements} showBricks={showBricks} />
             )}
           </TabsContent>
 

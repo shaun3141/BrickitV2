@@ -33,11 +33,13 @@ class BrickItem(BaseModel):
 # Known brick element IDs
 BRICKS_TO_SCRAPE = [
     {"element_id": "3001", "name": "BRICK 2X4"},
+    {"element_id": "3003", "name": "BRICK 2X2"},
     {"element_id": "3004", "name": "BRICK 1X2"},
     {"element_id": "3005", "name": "BRICK 1X1"},
     {"element_id": "3010", "name": "BRICK 1X4"},
     {"element_id": "3622", "name": "BRICK 1X3"},
     {"element_id": "3020", "name": "PLATE 2X4"},
+    {"element_id": "3022", "name": "PLATE 2X2"},
     {"element_id": "3023", "name": "PLATE 1X2"},
     {"element_id": "3024", "name": "PLATE 1X1"},
     {"element_id": "3623", "name": "PLATE 1X3"},
