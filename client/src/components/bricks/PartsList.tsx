@@ -8,6 +8,12 @@ import { generatePartsList, generateOptimizedPartsList } from '@/utils/image/pro
 import { fetchAllBricks } from '@/services/bricks.service';
 import type { MosaicData } from '@/types/mosaic.types';
 import type { BrickPlacement } from '@/types';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '@/components/ui/tooltip';
 
 interface BrickColorInfo {
   color_name: string;
@@ -293,24 +299,36 @@ export function PartsList({ mosaicData, placements, showOptimized = false }: Par
             </p>
           </div>
           <div className="flex gap-2 items-center">
-            <div className="flex gap-1 border rounded-md p-1 bg-muted/50">
-              <Button
-                variant={!showBricks ? "default" : "ghost"}
-                size="sm"
-                onClick={() => setShowBricks(false)}
-                className="h-7 px-3 text-xs"
-              >
-                Plates
-              </Button>
-              <Button
-                variant={showBricks ? "default" : "ghost"}
-                size="sm"
-                onClick={() => setShowBricks(true)}
-                className="h-7 px-3 text-xs"
-              >
-                Bricks
-              </Button>
-            </div>
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <div className="flex gap-1 border rounded-md p-1 bg-muted/50 opacity-60 cursor-not-allowed">
+                    <Button
+                      variant={!showBricks ? "default" : "ghost"}
+                      size="sm"
+                      disabled
+                      className="h-7 px-3 text-xs"
+                    >
+                      Plates
+                    </Button>
+                    <Button
+                      variant={showBricks ? "default" : "ghost"}
+                      size="sm"
+                      disabled
+                      className="h-7 px-3 text-xs"
+                    >
+                      Bricks
+                    </Button>
+                  </div>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p className="max-w-xs">
+                    Changing between bricks and plates impacts available colors. 
+                    Please make this change on the Edit tab to remap colors automatically.
+                  </p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
             <Button variant="outline" size="sm" onClick={exportAsJSON}>
               <Download className="h-4 w-4 mr-2" />
               JSON

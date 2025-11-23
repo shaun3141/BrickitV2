@@ -32,7 +32,7 @@ export interface BrickItem {
  */
 export class BricksService {
   private static cachedData: BrickItem[] | null = null;
-  private static readonly DATA_PATH = path.join(__dirname, '../../public/bricks_and_plates_universal.json');
+  private static readonly DATA_PATH = path.join(__dirname, '../../public/bricks_and_plates_with_substitutes.json');
 
   /**
    * Get all brick data
@@ -79,15 +79,17 @@ export class BricksService {
   }
 
   /**
-   * Get the universal color palette (from BRICK 1X1)
-   * These are the 27 colors available as both bricks and plates
+   * Get the universal color palette (from BRICK 1X1 or PLATE 1X1)
+   * These are the colors available for the specified brick type
+   * @param brickType - 'BRICK' or 'PLATE' (defaults to 'BRICK' for backward compatibility)
    */
-  static async getUniversalPalette(): Promise<ColorVariant[]> {
+  static async getUniversalPalette(brickType: 'BRICK' | 'PLATE' = 'BRICK'): Promise<ColorVariant[]> {
     const bricks = await this.getAllBricks();
-    const brick1x1 = bricks.find(brick => brick.brick_type === 'BRICK 1X1');
+    const typeString = brickType === 'BRICK' ? 'BRICK 1X1' : 'PLATE 1X1';
+    const brick1x1 = bricks.find(brick => brick.brick_type === typeString);
     
     if (!brick1x1) {
-      throw new Error('BRICK 1X1 not found in data');
+      throw new Error(`${typeString} not found in data`);
     }
 
     // Filter out substitutes - only return direct colors

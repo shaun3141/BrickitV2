@@ -4,18 +4,23 @@ import { BricksService } from '../services';
 const router = Router();
 
 /**
- * GET /api/colors/palette
- * Get the universal color palette (27 colors available as both bricks and plates)
+ * GET /api/colors/palette?type=brick|plate
+ * Get the universal color palette for bricks or plates
+ * @param type - Optional query parameter: 'brick' or 'plate' (defaults to 'brick')
  */
 router.get('/palette', async (req: Request, res: Response) => {
   try {
-    const colors = await BricksService.getUniversalPalette();
+    const typeParam = (req.query.type as string)?.toLowerCase();
+    const brickType: 'BRICK' | 'PLATE' = typeParam === 'plate' ? 'PLATE' : 'BRICK';
+    
+    const colors = await BricksService.getUniversalPalette(brickType);
     res.json({
       success: true,
       data: colors,
       meta: {
         total_colors: colors.length,
-        description: 'Universal colors available as both bricks and plates'
+        type: brickType.toLowerCase(),
+        description: `Colors available for ${brickType.toLowerCase()}s`
       }
     });
   } catch (error) {

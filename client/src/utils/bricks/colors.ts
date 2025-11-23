@@ -194,6 +194,34 @@ export function findClosestLegoColor(rgb: [number, number, number]): LegoColor {
 }
 
 /**
+ * Finds the closest color from a given palette to a target color
+ * Uses perceptual HSV matching for better color accuracy
+ */
+export function findClosestColorInPalette(
+  targetColor: LegoColor,
+  palette: LegoColor[]
+): LegoColor {
+  if (palette.length === 0) {
+    return targetColor;
+  }
+
+  const targetHsv = targetColor.hsv;
+  
+  let closestColor = palette[0];
+  let minDistance = colorDistanceHSV(targetHsv, closestColor.hsv);
+
+  for (const color of palette) {
+    const distance = colorDistanceHSV(targetHsv, color.hsv);
+    if (distance < minDistance) {
+      minDistance = distance;
+      closestColor = color;
+    }
+  }
+
+  return closestColor;
+}
+
+/**
  * Converts RGB to HSV color space
  * @param rgb - RGB values [0-255, 0-255, 0-255]
  * @returns HSV values [Hue: 0-360, Saturation: 0-100, Value: 0-100]

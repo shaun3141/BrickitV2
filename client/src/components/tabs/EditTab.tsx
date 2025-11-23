@@ -2,11 +2,20 @@ import { useState, useRef, useEffect, useCallback, useMemo } from 'react';
 import { ZoomIn, ZoomOut, Pipette, Pencil, PaintBucket, Minus, Square, Circle, Undo2, Redo2, Replace, Save } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { LEGO_COLORS } from '@/utils/bricks/colors';
+import { LEGO_COLORS, findClosestColorInPalette } from '@/utils/bricks/colors';
 import type { MosaicData } from '@/types/mosaic.types';
 import type { LegoColor } from '@/utils/bricks/colors';
 import MobileEditToolbar from '@/components/editor/MobileEditToolbar';
 import MobileControlsSheet from '@/components/editor/MobileControlsSheet';
+import { fetchColorPalette } from '@/services/colors.service';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
 
 type Tool = 'pencil' | 'fill' | 'eyedropper' | 'line' | 'rectangle' | 'circle' | 'replace';
 type ShapeMode = 'filled' | 'outline';
@@ -85,6 +94,108 @@ export function EditTab({ mosaicData, onMosaicUpdate, onSave }: EditTabProps) {
   // Hover state for color palette
   const [hoveredColor, setHoveredColor] = useState<LegoColor | null>(null);
 
+  // Bricks vs Plates toggle state (default to bricks)
+  const [showBricks, setShowBricks] = useState(true);
+  
+  // Available colors based on toggle (bricks or plates)
+  const [availableColors, setAvailableColors] = useState<LegoColor[]>(LEGO_COLORS);
+  const [isLoadingColors, setIsLoadingColors] = useState(true);
+  
+  // Remap modal state
+  const [showRemapModal, setShowRemapModal] = useState(false);
+  const [colorMappings, setColorMappings] = useState<Map<string, LegoColor>>(new Map());
+  const isToggleChangeRef = useRef(false);
+
+  // Check if colors need remapping when availableColors changes
+  const checkColorRemapping = useCallback(async (newColors: LegoColor[]) => {
+    // Get all unique colors currently in the mosaic
+    const colorMap = new Map<string, LegoColor>();
+    for (let row = 0; row < mosaicData.height; row++) {
+      for (let col = 0; col < mosaicData.width; col++) {
+        const pixel = mosaicData.pixels[row][col];
+        if (!colorMap.has(pixel.name)) {
+          colorMap.set(pixel.name, pixel);
+        }
+      }
+    }
+
+    console.log('[EditTab] Checking remapping - colors in mosaic:', Array.from(colorMap.keys()));
+    console.log('[EditTab] Checking remapping - colors in new palette:', newColors.map(c => c.name));
+
+    // Check which colors are not available in the new palette
+    const colorsToRemap: Map<string, LegoColor> = new Map();
+    const newColorNames = new Set(newColors.map(c => c.name));
+    
+    for (const [colorName, color] of colorMap.entries()) {
+      if (!newColorNames.has(colorName)) {
+        console.log('[EditTab] Color needs remapping:', colorName, '-> finding closest match');
+        // This color needs remapping - find closest match
+        const closestMatch = findClosestColorInPalette(color, newColors);
+        console.log('[EditTab] Closest match for', colorName, ':', closestMatch.name);
+        colorsToRemap.set(colorName, closestMatch);
+      } else {
+        console.log('[EditTab] Color', colorName, 'exists in new palette, no remapping needed');
+      }
+    }
+
+    console.log('[EditTab] Total colors to remap:', colorsToRemap.size);
+    return colorsToRemap;
+  }, [mosaicData]);
+
+  // Fetch colors when toggle changes or on initial mount
+  useEffect(() => {
+    const type = showBricks ? 'brick' : 'plate';
+    const isToggleChange = isToggleChangeRef.current;
+    console.log('[EditTab] useEffect triggered, showBricks:', showBricks, 'type:', type, 'isToggleChange:', isToggleChange);
+    setIsLoadingColors(true);
+    
+    // Reset the ref for next time
+    isToggleChangeRef.current = false;
+    
+    const fetchColors = async () => {
+      try {
+        console.log('[EditTab] Fetching colors for type:', type);
+        const colors = await fetchColorPalette(type);
+        console.log('[EditTab] Colors fetched:', colors.length, 'colors');
+        // Service already returns a new array reference, so this will trigger re-render
+        setAvailableColors(colors);
+        setIsLoadingColors(false);
+        
+        // Check if remapping is needed
+        const mappings = await checkColorRemapping(colors);
+        if (mappings.size > 0) {
+          console.log('[EditTab] Colors need remapping:', mappings.size);
+          setColorMappings(mappings);
+          // Don't show modal on initial mount, only when toggle changes
+          if (isToggleChange) {
+            console.log('[EditTab] Showing remap modal because this is a toggle change');
+            setShowRemapModal(true);
+          } else {
+            console.log('[EditTab] Not showing remap modal - initial mount');
+          }
+        } else {
+          // No remapping needed, proceed normally
+          console.log('[EditTab] No remapping needed');
+        }
+        
+        // Update selected color if current selection is not in new colors
+        setSelectedColor(prevColor => {
+          if (!colors.find(c => c.name === prevColor.name)) {
+            return colors[0] || LEGO_COLORS[0];
+          }
+          return prevColor;
+        });
+      } catch (error) {
+        console.error('[EditTab] Failed to fetch colors:', error);
+        // Fallback to LEGO_COLORS on error
+        setAvailableColors(LEGO_COLORS);
+        setIsLoadingColors(false);
+      }
+    };
+    
+    fetchColors();
+  }, [showBricks, checkColorRemapping]);
+
   // Calculate color counts
   const colorCounts = useMemo(() => {
     const counts: { [colorId: string]: number } = {};
@@ -112,6 +223,47 @@ export function EditTab({ mosaicData, onMosaicUpdate, onSave }: EditTabProps) {
     setHistory(newHistory);
     onMosaicUpdate(newMosaicData);
   }, [history, historyIndex, onMosaicUpdate]);
+
+  // Remap colors in the mosaic
+  const remapColors = useCallback((mappings: Map<string, LegoColor>) => {
+    const updatedPixels = mosaicData.pixels.map(row =>
+      row.map(pixel => {
+        const mappedColor = mappings.get(pixel.name);
+        return mappedColor || pixel;
+      })
+    );
+
+    addToHistory({
+      ...mosaicData,
+      pixels: updatedPixels,
+    });
+  }, [mosaicData, addToHistory]);
+
+  // Handle toggle button click
+  const handleToggleClick = useCallback((newValue: boolean) => {
+    if (newValue === showBricks) return; // No change needed
+    
+    console.log('[EditTab] Toggle clicked - changing from', showBricks, 'to', newValue);
+    // Mark that this is a toggle change (not initial mount)
+    isToggleChangeRef.current = true;
+    // Update showBricks which will trigger useEffect
+    setShowBricks(newValue);
+  }, [showBricks]);
+
+  // Handle remap confirmation
+  const handleRemapConfirm = useCallback(() => {
+    remapColors(colorMappings);
+    setShowRemapModal(false);
+    setColorMappings(new Map());
+  }, [remapColors, colorMappings]);
+
+  // Handle remap cancel
+  const handleRemapCancel = useCallback(() => {
+    // Revert toggle to previous value
+    setShowBricks(!showBricks);
+    setShowRemapModal(false);
+    setColorMappings(new Map());
+  }, [showBricks]);
 
   const undo = useCallback(() => {
     if (historyIndex > 0) {
@@ -931,6 +1083,39 @@ export function EditTab({ mosaicData, onMosaicUpdate, onSave }: EditTabProps) {
 
                 {/* Color Palette */}
                 <div className="relative">
+                  {/* Bricks vs Plates Toggle */}
+                  <div className="mb-3">
+                    <div className="text-xs font-medium mb-2">
+                      Part Type: <span className="font-bold text-primary">{showBricks ? 'Bricks' : 'Plates'}</span>
+                      {isLoadingColors && <span className="ml-2 text-muted-foreground">(Loading...)</span>}
+                      {!isLoadingColors && <span className="ml-2 text-muted-foreground">({availableColors.length} colors)</span>}
+                    </div>
+                    <div className="flex gap-1 border rounded-md p-1 bg-muted/50">
+                      <Button
+                        variant={showBricks ? "default" : "ghost"}
+                        size="sm"
+                        onClick={() => {
+                          console.log('[EditTab] Bricks button clicked, current showBricks:', showBricks);
+                          handleToggleClick(true);
+                        }}
+                        className="h-7 px-3 text-xs flex-1"
+                      >
+                        Bricks
+                      </Button>
+                      <Button
+                        variant={!showBricks ? "default" : "ghost"}
+                        size="sm"
+                        onClick={() => {
+                          console.log('[EditTab] Plates button clicked, current showBricks:', showBricks);
+                          handleToggleClick(false);
+                        }}
+                        className="h-7 px-3 text-xs flex-1"
+                      >
+                        Plates
+                      </Button>
+                    </div>
+                  </div>
+
                   {/* Hover tooltip */}
                   {hoveredColor && (
                     <div className="absolute -top-8 left-0 right-0 z-10 flex justify-center">
@@ -940,8 +1125,17 @@ export function EditTab({ mosaicData, onMosaicUpdate, onSave }: EditTabProps) {
                     </div>
                   )}
                   
-                  <div className="grid grid-cols-4 gap-1 max-h-[400px] overflow-y-auto p-1">
-                    {LEGO_COLORS.map((color) => {
+                  {isLoadingColors && (
+                    <div className="text-xs text-muted-foreground text-center py-2">
+                      Loading colors...
+                    </div>
+                  )}
+                  
+                  <div 
+                    key={`colors-${showBricks ? 'brick' : 'plate'}`}
+                    className="grid grid-cols-4 gap-1 max-h-[400px] overflow-y-auto p-1"
+                  >
+                    {availableColors.map((color) => {
                       const count = colorCounts[color.name] || 0;
                       return (
                         <button
@@ -1228,9 +1422,50 @@ export function EditTab({ mosaicData, onMosaicUpdate, onSave }: EditTabProps) {
             </div>
           </div>
 
+          {/* Bricks vs Plates Toggle */}
+          <div className="border rounded-md p-2 bg-card">
+            <div className="text-xs font-medium mb-2">
+              Part Type: <span className="font-bold text-primary">{showBricks ? 'Bricks' : 'Plates'}</span>
+              {isLoadingColors && <span className="ml-2 text-muted-foreground">(Loading...)</span>}
+              {!isLoadingColors && <span className="ml-2 text-muted-foreground">({availableColors.length} colors)</span>}
+            </div>
+            <div className="flex gap-1 border rounded-md p-1 bg-muted/50">
+              <Button
+                variant={showBricks ? "default" : "ghost"}
+                size="sm"
+                onClick={() => {
+                  console.log('[EditTab] Mobile Bricks button clicked, current showBricks:', showBricks);
+                  handleToggleClick(true);
+                }}
+                className="h-7 px-3 text-xs flex-1"
+              >
+                Bricks
+              </Button>
+              <Button
+                variant={!showBricks ? "default" : "ghost"}
+                size="sm"
+                onClick={() => {
+                  console.log('[EditTab] Mobile Plates button clicked, current showBricks:', showBricks);
+                  handleToggleClick(false);
+                }}
+                className="h-7 px-3 text-xs flex-1"
+              >
+                Plates
+              </Button>
+            </div>
+          </div>
+
           <div className="relative">
-            <div className="grid grid-cols-5 gap-1 max-h-[280px] overflow-y-auto p-1">
-              {LEGO_COLORS.map((color) => (
+            {isLoadingColors && (
+              <div className="text-xs text-muted-foreground text-center py-2">
+                Loading colors...
+              </div>
+            )}
+            <div 
+              key={`colors-mobile-${showBricks ? 'brick' : 'plate'}`}
+              className="grid grid-cols-5 gap-1 max-h-[280px] overflow-y-auto p-1"
+            >
+              {availableColors.map((color) => (
                 <button
                   key={color.name}
                   className={`relative w-full aspect-square rounded border-2 transition-all ${selectedColor.name === color.name ? 'ring-2 ring-primary ring-offset-2' : 'border-border'}`}
@@ -1243,6 +1478,66 @@ export function EditTab({ mosaicData, onMosaicUpdate, onSave }: EditTabProps) {
           </div>
         </div>
       </MobileControlsSheet>
+
+      {/* Color Remap Confirmation Modal */}
+      <Dialog open={showRemapModal} onOpenChange={(open) => {
+        if (!open) {
+          handleRemapCancel();
+        }
+      }}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Remap Colors?</DialogTitle>
+            <DialogDescription>
+              Some colors in your mosaic are not available in the {showBricks ? 'bricks' : 'plates'} palette. 
+              Would you like to automatically remap them to the closest matching colors?
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="max-h-[300px] overflow-y-auto space-y-2 py-4">
+            {Array.from(colorMappings.entries()).map(([oldColorName, newColor]) => {
+              const oldColor = mosaicData.pixels.flat().find(p => p.name === oldColorName);
+              if (!oldColor) return null;
+              
+              const count = colorCounts[oldColorName] || 0;
+              
+              return (
+                <div key={oldColorName} className="flex items-center gap-3 p-2 border rounded">
+                  <div className="flex items-center gap-2 flex-1">
+                    <div
+                      className="w-8 h-8 rounded border-2"
+                      style={{ backgroundColor: oldColor.hex }}
+                      title={oldColor.name}
+                    />
+                    <div className="text-sm">
+                      <div className="font-medium">{oldColor.name}</div>
+                      <div className="text-xs text-muted-foreground">{count} pixel{count !== 1 ? 's' : ''}</div>
+                    </div>
+                  </div>
+                  <div className="text-muted-foreground">→</div>
+                  <div className="flex items-center gap-2">
+                    <div
+                      className="w-8 h-8 rounded border-2"
+                      style={{ backgroundColor: newColor.hex }}
+                      title={newColor.name}
+                    />
+                    <div className="text-sm font-medium">{newColor.name}</div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+
+          <DialogFooter>
+            <Button variant="outline" onClick={handleRemapCancel}>
+              Cancel
+            </Button>
+            <Button onClick={handleRemapConfirm}>
+              Remap Colors
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
