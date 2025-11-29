@@ -2,6 +2,62 @@ import type { MosaicData } from '@/types/mosaic.types';
 import type { BrickPlacement, BrickType } from '@/types/brick.types';
 import { BRICK_TYPES } from '@/constants/brick.constants';
 import type { LegoColor } from './colors';
+import type { BrickColorAvailabilityMap } from '@/services/bricks.service';
+
+/**
+ * Options for brick placement optimization
+ */
+export interface OptimizationOptions {
+  /** Map of brick type + color availability (if provided, unavailable combinations are skipped) */
+  availabilityMap?: BrickColorAvailabilityMap;
+  /** Whether we're optimizing for bricks (true) or plates (false) - affects availability key format */
+  useBricks?: boolean;
+}
+
+/**
+ * Result of optimization including stats about availability-based decisions
+ */
+export interface OptimizationResult {
+  placements: BrickPlacement[];
+  /** Colors that had some brick sizes skipped due to availability */
+  colorsWithLimitedSizes: Set<string>;
+  /** Total placements that used a smaller brick due to availability constraints */
+  availabilityConstrainedCount: number;
+}
+
+/**
+ * Converts brick dimensions to the service format key component
+ * e.g., width=4, height=2 -> "2X4" (always smaller dimension first in LEGO naming)
+ */
+function getBrickSizeKey(width: number, height: number): string {
+  const w = Math.min(width, height);
+  const h = Math.max(width, height);
+  return `${w}X${h}`;
+}
+
+/**
+ * Checks if a brick type + color combination is available (not a substitute)
+ */
+function isBrickColorAvailable(
+  brickType: BrickType,
+  colorName: string,
+  availabilityMap: BrickColorAvailabilityMap | undefined,
+  useBricks: boolean
+): boolean {
+  if (!availabilityMap) {
+    // No availability data - assume everything is available
+    return true;
+  }
+  
+  const prefix = useBricks ? 'BRICK' : 'PLATE';
+  const sizeKey = getBrickSizeKey(brickType.width, brickType.height);
+  const key = `${prefix} ${sizeKey}-${colorName}`;
+  
+  // If the key exists in the map, use its value; if not found, assume unavailable
+  // (being conservative - if we don't have data, don't place unknown combinations)
+  const isAvailable = availabilityMap.get(key);
+  return isAvailable === true;
+}
 
 /**
  * Checks if a brick can be placed at the given position
@@ -14,11 +70,13 @@ function canPlaceBrick(
   x: number,
   y: number,
   width: number,
-  height: number
-): { canPlace: boolean; color: LegoColor | null } {
+  height: number,
+  brickType: BrickType,
+  options?: OptimizationOptions
+): { canPlace: boolean; color: LegoColor | null; skippedDueToAvailability: boolean } {
   // Check bounds
   if (x + width > mosaicData.width || y + height > mosaicData.height) {
-    return { canPlace: false, color: null };
+    return { canPlace: false, color: null, skippedDueToAvailability: false };
   }
 
   // Get the color at the starting position
@@ -29,17 +87,30 @@ function canPlaceBrick(
     for (let col = x; col < x + width; col++) {
       // Check if already covered
       if (covered[row][col]) {
-        return { canPlace: false, color: null };
+        return { canPlace: false, color: null, skippedDueToAvailability: false };
       }
 
       // Check if color matches
       if (mosaicData.pixels[row][col].name !== targetColor.name) {
-        return { canPlace: false, color: null };
+        return { canPlace: false, color: null, skippedDueToAvailability: false };
       }
     }
   }
 
-  return { canPlace: true, color: targetColor };
+  // Check availability if map is provided
+  if (options?.availabilityMap) {
+    const isAvailable = isBrickColorAvailable(
+      brickType,
+      targetColor.name,
+      options.availabilityMap,
+      options.useBricks ?? false
+    );
+    if (!isAvailable) {
+      return { canPlace: false, color: targetColor, skippedDueToAvailability: true };
+    }
+  }
+
+  return { canPlace: true, color: targetColor, skippedDueToAvailability: false };
 }
 
 /**
@@ -93,9 +164,22 @@ function getGroupArea(brickTypes: BrickType[]): number {
  * Optimizes brick placement using a greedy-by-type algorithm
  * Places all bricks of one type before moving to the next type
  * This ensures maximum use of larger bricks before smaller ones
+ * 
+ * @param mosaicData - The mosaic to optimize
+ * @param options - Optional settings including availability map to skip unavailable brick/color combinations
+ * @returns Optimization result with placements and stats about availability constraints
  */
-export function optimizeBrickPlacement(mosaicData: MosaicData): BrickPlacement[] {
+export function optimizeBrickPlacement(
+  mosaicData: MosaicData,
+  options?: OptimizationOptions
+): OptimizationResult {
   const placements: BrickPlacement[] = [];
+  const colorsWithLimitedSizes = new Set<string>();
+  let availabilityConstrainedCount = 0;
+  
+  // Track which positions were skipped for larger bricks due to availability
+  // Key: "row,col", Value: Set of brick size IDs that were skipped
+  const skippedPositions = new Map<string, Set<string>>();
   
   // Initialize coverage tracking grid
   const covered: boolean[][] = Array.from(
@@ -133,16 +217,34 @@ export function optimizeBrickPlacement(mosaicData: MosaicData): BrickPlacement[]
 
           // Try each orientation of this brick type
           for (const brickType of brickTypes) {
-            const { canPlace, color } = canPlaceBrick(
+            const { canPlace, color, skippedDueToAvailability } = canPlaceBrick(
               mosaicData,
               covered,
               col,
               row,
               brickType.width,
-              brickType.height
+              brickType.height,
+              brickType,
+              options
             );
 
+            if (skippedDueToAvailability && color) {
+              // Track that this position couldn't use this brick size due to color availability
+              const posKey = `${row},${col}`;
+              if (!skippedPositions.has(posKey)) {
+                skippedPositions.set(posKey, new Set());
+              }
+              skippedPositions.get(posKey)!.add(baseId);
+              colorsWithLimitedSizes.add(color.name);
+            }
+
             if (canPlace && color) {
+              // Check if this position had larger bricks skipped due to availability
+              const posKey = `${row},${col}`;
+              if (skippedPositions.has(posKey) && skippedPositions.get(posKey)!.size > 0) {
+                availabilityConstrainedCount++;
+              }
+              
               // Place the brick
               placements.push({
                 id: `brick-${placementId++}`,
@@ -173,7 +275,11 @@ export function optimizeBrickPlacement(mosaicData: MosaicData): BrickPlacement[]
     }
   }
 
-  return placements;
+  return {
+    placements,
+    colorsWithLimitedSizes,
+    availabilityConstrainedCount,
+  };
 }
 
 /**

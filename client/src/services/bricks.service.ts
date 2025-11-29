@@ -116,6 +116,88 @@ export function clearBricksCache(): void {
   fetchPromise = null;
 }
 
+/**
+ * Map of brick type + color combinations to availability status
+ * Key format: "BRICK 2X4-Bright Green" or "PLATE 2X4-Bright Green"
+ * Value: true if directly available, false if requires substitute
+ */
+export type BrickColorAvailabilityMap = Map<string, boolean>;
+
+/**
+ * Builds a map of brick type + color availability
+ * Used by the optimizer to skip brick types that don't exist in certain colors
+ * @param useBricks - If true, maps BRICK types; if false, maps PLATE types
+ */
+export async function buildBrickColorAvailabilityMap(useBricks: boolean = false): Promise<BrickColorAvailabilityMap> {
+  const bricks = await fetchAllBricks();
+  const availabilityMap: BrickColorAvailabilityMap = new Map();
+  
+  const prefix = useBricks ? 'BRICK' : 'PLATE';
+  
+  for (const brick of bricks) {
+    // Only include bricks/plates matching our prefix
+    if (!brick.brick_type.startsWith(prefix)) continue;
+    
+    for (const color of brick.colors) {
+      const key = `${brick.brick_type}-${color.color_name}`;
+      // Available if it's NOT a substitute (has a real element_id)
+      const isAvailable = !color.is_substitute && color.element_id !== null;
+      availabilityMap.set(key, isAvailable);
+    }
+  }
+  
+  return availabilityMap;
+}
+
+/**
+ * Tracks colors that required smaller bricks due to availability
+ * Used for UI messaging about optimization choices
+ */
+export interface ColorAvailabilityInfo {
+  colorName: string;
+  unavailableSizes: string[]; // e.g., ["2×4", "2×3"]
+}
+
+/**
+ * Gets information about which colors had limited brick size availability
+ * @param availabilityMap - The availability map from buildBrickColorAvailabilityMap
+ * @param useBricks - Whether we're using bricks or plates
+ */
+export function getColorAvailabilityInfo(
+  availabilityMap: BrickColorAvailabilityMap,
+  useBricks: boolean = false
+): Map<string, ColorAvailabilityInfo> {
+  const prefix = useBricks ? 'BRICK' : 'PLATE';
+  const colorInfo = new Map<string, ColorAvailabilityInfo>();
+  
+  for (const [key, isAvailable] of availabilityMap) {
+    if (!isAvailable) {
+      // Parse the key: "BRICK 2X4-Bright Green"
+      const [brickType, colorName] = key.split('-');
+      if (!brickType.startsWith(prefix)) continue;
+      
+      // Extract size from brick type (e.g., "BRICK 2X4" -> "2X4")
+      const size = brickType.replace(`${prefix} `, '');
+      
+      if (!colorInfo.has(colorName)) {
+        colorInfo.set(colorName, {
+          colorName,
+          unavailableSizes: [],
+        });
+      }
+      
+      const info = colorInfo.get(colorName)!;
+      // Convert "2X4" to "2×4" for display
+      const displaySize = size.replace('X', '×');
+      if (!info.unavailableSizes.includes(displaySize)) {
+        info.unavailableSizes.push(displaySize);
+      }
+    }
+  }
+  
+  return colorInfo;
+}
+
 
 
 

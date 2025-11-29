@@ -1,5 +1,5 @@
 import { useState, useMemo, useEffect } from 'react';
-import { Download, Check, AlertCircle } from 'lucide-react';
+import { Download, Check, AlertCircle, Info } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -33,9 +33,11 @@ interface PartsListProps {
   placements?: BrickPlacement[];
   showOptimized?: boolean;
   showBricks?: boolean;
+  /** Colors that had limited brick size availability (used smaller bricks) */
+  colorsWithLimitedSizes?: Set<string>;
 }
 
-export function PartsList({ mosaicData, placements, showOptimized = false, showBricks = false }: PartsListProps) {
+export function PartsList({ mosaicData, placements, showOptimized = false, showBricks = false, colorsWithLimitedSizes }: PartsListProps) {
   const totalCells = mosaicData.width * mosaicData.height;
   
   // Generate both lists for comparison
@@ -323,6 +325,11 @@ export function PartsList({ mosaicData, placements, showOptimized = false, showB
                 <span className="ml-2 text-xs italic">Loading element IDs...</span>
               )}
             </p>
+            {colorsWithLimitedSizes && colorsWithLimitedSizes.size > 0 && (
+              <p className="text-xs text-muted-foreground/70 mt-0.5">
+                {colorsWithLimitedSizes.size} color{colorsWithLimitedSizes.size !== 1 ? 's' : ''} optimized for available sizes
+              </p>
+            )}
           </div>
           <div className="flex gap-2 items-center">
             <TooltipProvider>
@@ -392,7 +399,21 @@ export function PartsList({ mosaicData, placements, showOptimized = false, showB
                     className="shrink-0"
                   />
                   <div className="flex-1 min-w-0">
-                    <div className="font-medium">{part.colorName}</div>
+                    <div className="font-medium flex items-center gap-1.5">
+                      {part.colorName}
+                      {colorsWithLimitedSizes?.has(part.colorName) && (
+                        <TooltipProvider>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <Info className="h-3.5 w-3.5 text-muted-foreground/70 cursor-help" />
+                            </TooltipTrigger>
+                            <TooltipContent side="top" className="max-w-[200px]">
+                              <p className="text-xs">Larger brick sizes not available in this color</p>
+                            </TooltipContent>
+                          </Tooltip>
+                        </TooltipProvider>
+                      )}
+                    </div>
                     <div className="text-xs text-muted-foreground space-y-1">
                       {(() => {
                         const colorInfo = getColorInfo(part.brickTypeName, part.colorName, showBricks);

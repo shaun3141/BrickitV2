@@ -15,6 +15,7 @@ import type { MosaicData, FilterOptions } from '@/types/mosaic.types';
 import { MOSAIC_SIZES } from '@/constants/mosaic.constants';
 import type { MosaicSize, BrickPlacement, Creation } from '@/types';
 import { optimizeBrickPlacement } from '@/utils/bricks/optimizer';
+import { buildBrickColorAvailabilityMap, type BrickColorAvailabilityMap } from '@/services/bricks.service';
 import { saveCreation, uploadOriginalImage } from '@/services/creation.service';
 import { useAuth } from '@/features/auth/AuthContext';
 import { trackEvent, posthog } from '@/services/analytics.service';
@@ -30,6 +31,8 @@ export function Home() {
   }, []);
   const [mosaicData, setMosaicData] = useState<MosaicData | null>(null);
   const [placements, setPlacements] = useState<BrickPlacement[]>([]);
+  const [optimizationStats, setOptimizationStats] = useState<{ colorsWithLimitedSizes: Set<string>; availabilityConstrainedCount: number } | null>(null);
+  const [availabilityMap, setAvailabilityMap] = useState<BrickColorAvailabilityMap | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
   const [selectedSize, setSelectedSize] = useState<MosaicSize>('medium');
   const [customWidth, setCustomWidth] = useState(64);
@@ -83,15 +86,35 @@ export function Home() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Run optimization whenever mosaicData changes
+  // Load availability map when showBricks changes
   useEffect(() => {
-    if (mosaicData) {
-      const optimizedPlacements = optimizeBrickPlacement(mosaicData);
-      setPlacements(optimizedPlacements);
+    buildBrickColorAvailabilityMap(showBricks)
+      .then(map => setAvailabilityMap(map))
+      .catch(error => console.error('Failed to load availability map:', error));
+  }, [showBricks]);
+
+  // Run optimization whenever mosaicData or availability changes
+  useEffect(() => {
+    if (mosaicData && availabilityMap) {
+      const result = optimizeBrickPlacement(mosaicData, {
+        availabilityMap,
+        useBricks: showBricks,
+      });
+      setPlacements(result.placements);
+      setOptimizationStats({
+        colorsWithLimitedSizes: result.colorsWithLimitedSizes,
+        availabilityConstrainedCount: result.availabilityConstrainedCount,
+      });
+    } else if (mosaicData) {
+      // Fallback: run without availability checking while map loads
+      const result = optimizeBrickPlacement(mosaicData);
+      setPlacements(result.placements);
+      setOptimizationStats(null);
     } else {
       setPlacements([]);
+      setOptimizationStats(null);
     }
-  }, [mosaicData]);
+  }, [mosaicData, availabilityMap, showBricks]);
 
   const handleImageSelect = async (file: File) => {
     setUploadedImage(file);
@@ -394,7 +417,7 @@ export function Home() {
 
           <TabsContent value="parts-list" id="parts-list-panel" className="mt-0" role="tabpanel" aria-labelledby="parts-list-tab">
             {mosaicData && (
-              <PartsListTab mosaicData={mosaicData} placements={placements} showBricks={showBricks} />
+              <PartsListTab mosaicData={mosaicData} placements={placements} showBricks={showBricks} colorsWithLimitedSizes={optimizationStats?.colorsWithLimitedSizes} />
             )}
           </TabsContent>
 

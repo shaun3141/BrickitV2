@@ -264,29 +264,68 @@ export function BuyItTab({ mosaicData, placements, showBricks = false }: BuyItTa
             </div>
 
             {/* Note about missing element IDs */}
-            {optimizedParts.some(part => {
-              const key = `${part.brickTypeId}-${part.colorId}`;
-              const owned = ownedQuantities.get(key) || 0;
-              const needed = Math.max(0, part.count - owned);
-              if (needed > 0) {
-                const brickTypeName = showBricks ? part.brickTypeName.replace(/\s+Plate$/i, ' Brick') : part.brickTypeName;
-                const colorInfo = getColorInfo(brickTypeName, part.colorName, showBricks);
-                return !colorInfo?.element_id;
-              }
-              return false;
-            }) && (
-              <div className="bg-amber-50 border border-amber-200 rounded-lg p-4">
-                <div className="flex items-start gap-3">
-                  <AlertCircle className="h-5 w-5 text-amber-600 mt-0.5 shrink-0" />
-                  <div className="flex-1">
-                    <p className="text-sm text-amber-800">
-                      Some parts don't have element IDs available. These parts are not included in the CSV file. 
-                      You may need to search for them manually on the Pick a Brick website.
-                    </p>
+            {(() => {
+              const missingParts = optimizedParts
+                .map(part => {
+                  const key = `${part.brickTypeId}-${part.colorId}`;
+                  const owned = ownedQuantities.get(key) || 0;
+                  const needed = Math.max(0, part.count - owned);
+                  if (needed > 0) {
+                    const brickTypeName = showBricks ? part.brickTypeName.replace(/\s+Plate$/i, ' Brick') : part.brickTypeName;
+                    const colorInfo = getColorInfo(brickTypeName, part.colorName, showBricks);
+                    
+                    // Debug: log what we're looking for
+                    const serviceFormat = brickTypeName.includes(' ') && (brickTypeName.startsWith('PLATE') || brickTypeName.startsWith('BRICK'))
+                      ? brickTypeName
+                      : convertDisplayNameToServiceFormat(brickTypeName, showBricks);
+                    
+                    if (!colorInfo?.element_id) {
+                      return {
+                        brickTypeName,
+                        serviceFormat,
+                        colorName: part.colorName,
+                        needed,
+                        found: !!colorInfo,
+                        hasSubstitute: colorInfo?.is_substitute || false,
+                      };
+                    }
+                  }
+                  return null;
+                })
+                .filter((part): part is NonNullable<typeof part> => part !== null);
+              
+              if (missingParts.length > 0) {
+                return (
+                  <div className="bg-amber-50 border border-amber-200 rounded-lg p-4">
+                    <div className="flex items-start gap-3">
+                      <AlertCircle className="h-5 w-5 text-amber-600 mt-0.5 shrink-0" />
+                      <div className="flex-1">
+                        <p className="text-sm text-amber-800 font-semibold mb-2">
+                          Some parts don't have element IDs available. These parts are not included in the CSV file. 
+                          You may need to search for them manually on the Pick a Brick website.
+                        </p>
+                        <details className="mt-3">
+                          <summary className="text-sm text-amber-700 cursor-pointer hover:text-amber-900 font-medium">
+                            Show missing parts ({missingParts.length})
+                          </summary>
+                          <ul className="mt-2 space-y-1 text-xs text-amber-700">
+                            {missingParts.map((part, idx) => (
+                              <li key={idx} className="pl-2">
+                                <span className="font-medium">{part.brickTypeName}</span> • {part.colorName} (needed: {part.needed})
+                                <span className="text-amber-600 ml-2">
+                                  [Looked up: {part.serviceFormat}, Found: {part.found ? 'Yes' : 'No'}{part.hasSubstitute ? ', Has substitute' : ''}]
+                                </span>
+                              </li>
+                            ))}
+                          </ul>
+                        </details>
+                      </div>
+                    </div>
                   </div>
-                </div>
-              </div>
-            )}
+                );
+              }
+              return null;
+            })()}
           </div>
         </CardContent>
       </Card>

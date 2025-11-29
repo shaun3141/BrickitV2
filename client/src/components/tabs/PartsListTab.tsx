@@ -7,9 +7,11 @@ interface PartsListTabProps {
   mosaicData: MosaicData;
   placements: BrickPlacement[];
   showBricks?: boolean;
+  /** Colors that had limited brick size availability */
+  colorsWithLimitedSizes?: Set<string>;
 }
 
-export function PartsListTab({ mosaicData, placements, showBricks = false }: PartsListTabProps) {
+export function PartsListTab({ mosaicData, placements, showBricks = false, colorsWithLimitedSizes }: PartsListTabProps) {
   return (
     <div className="space-y-6">
       {/* Preview and Parts List */}
@@ -27,6 +29,7 @@ export function PartsListTab({ mosaicData, placements, showBricks = false }: Par
             placements={placements}
             showOptimized={true}
             showBricks={showBricks}
+            colorsWithLimitedSizes={colorsWithLimitedSizes}
           />
         </div>
       </div>

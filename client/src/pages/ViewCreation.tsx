@@ -9,6 +9,7 @@ import { ArrowLeft, Download, Share2 } from 'lucide-react';
 import { toast } from '@/lib/toast';
 import { loadPixelDataFromPng } from '@/utils/image/pngToPixelData';
 import { optimizeBrickPlacement } from '@/utils/bricks/optimizer';
+import { buildBrickColorAvailabilityMap } from '@/services/bricks.service';
 import { PartsListTab } from '@/components/tabs/PartsListTab';
 import { InstructionsTab } from '@/components/tabs/InstructionsTab';
 import { updateCanonicalTag } from '@/utils/seo';
@@ -62,9 +63,20 @@ export function ViewCreation() {
                 
                 setMosaicData(mosaic);
                 
-                // Generate placements
-                const optimizedPlacements = optimizeBrickPlacement(mosaic);
-                setPlacements(optimizedPlacements);
+                // Load availability map and generate placements
+                try {
+                  const availabilityMap = await buildBrickColorAvailabilityMap(true); // Default to bricks
+                  const result = optimizeBrickPlacement(mosaic, {
+                    availabilityMap,
+                    useBricks: true,
+                  });
+                  setPlacements(result.placements);
+                } catch (availError) {
+                  // Fallback: run without availability checking
+                  console.warn('[ViewCreation] Failed to load availability map, using fallback:', availError);
+                  const result = optimizeBrickPlacement(mosaic);
+                  setPlacements(result.placements);
+                }
               } else {
                 console.warn('[ViewCreation] Failed to reconstruct pixel data - invalid data');
               }
