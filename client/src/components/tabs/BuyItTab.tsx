@@ -2,6 +2,7 @@ import { useState, useMemo, useEffect } from 'react';
 import { Download, ExternalLink, AlertCircle } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { BrickSwatch } from '@/components/bricks/BrickSwatch';
 import { generateOptimizedPartsList } from '@/utils/image/processor';
 import { fetchAllBricks } from '@/services/bricks.service';
 import type { MosaicData } from '@/types/mosaic.types';
@@ -138,6 +139,10 @@ export function BuyItTab({ mosaicData, placements, showBricks = false }: BuyItTa
           quantity: needed,
           colorName: part.colorName,
           brickTypeName: brickTypeName,
+          hex: part.hex,
+          brickWidth: part.brickWidth,
+          brickHeight: part.brickHeight,
+          price: colorInfo.price || 0,
         };
       })
       .filter((part): part is NonNullable<typeof part> => part !== null && part.quantity > 0)
@@ -146,6 +151,10 @@ export function BuyItTab({ mosaicData, placements, showBricks = false }: BuyItTa
 
   const totalNeeded = useMemo(() => {
     return neededParts.reduce((sum, part) => sum + part.quantity, 0);
+  }, [neededParts]);
+
+  const totalPrice = useMemo(() => {
+    return neededParts.reduce((sum, part) => sum + (part.price * part.quantity), 0);
   }, [neededParts]);
 
   const handleDownloadCSV = () => {
@@ -203,6 +212,11 @@ export function BuyItTab({ mosaicData, placements, showBricks = false }: BuyItTa
               <CardTitle>Buy It</CardTitle>
               <p className="text-sm text-muted-foreground mt-1">
                 {totalNeeded.toLocaleString()} piece{totalNeeded !== 1 ? 's' : ''} needed across {neededParts.length} unique part{neededParts.length !== 1 ? 's' : ''}
+                {totalPrice > 0 && (
+                  <span className="ml-2 font-semibold text-foreground">
+                    • Estimated: ${totalPrice.toFixed(2)}
+                  </span>
+                )}
               </p>
             </div>
             <Button onClick={handleDownloadCSV} disabled={neededParts.length === 0}>
@@ -240,22 +254,36 @@ export function BuyItTab({ mosaicData, placements, showBricks = false }: BuyItTa
               </div>
             </div>
 
-            {/* Parts summary */}
+            {/* Parts grid - 4 columns */}
             <div className="space-y-2">
               <h3 className="font-semibold text-sm">Parts to purchase:</h3>
-              <div className="max-h-[400px] overflow-auto space-y-2">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
                 {neededParts.map((part, index) => (
                   <div
                     key={`${part.elementId}-${index}`}
-                    className="flex items-center justify-between p-3 rounded-md border bg-card"
+                    className="flex items-center gap-3 p-3 rounded-lg border bg-card hover:bg-accent/50 transition-colors"
                   >
+                    <BrickSwatch
+                      hex={part.hex}
+                      brickWidth={part.brickWidth}
+                      brickHeight={part.brickHeight}
+                      className="shrink-0"
+                    />
                     <div className="flex-1 min-w-0">
-                      <div className="font-medium">{part.colorName}</div>
-                      <div className="text-xs text-muted-foreground">
-                        {part.brickTypeName} • Element ID: {part.elementId}
+                      <div className="font-medium text-sm truncate">{part.colorName}</div>
+                      <div className="text-xs text-muted-foreground truncate">
+                        {part.brickTypeName}
                       </div>
+                      <div className="text-xs text-muted-foreground">
+                        ID: {part.elementId}
+                      </div>
+                      {part.price > 0 && (
+                        <div className="text-xs text-emerald-600 font-medium">
+                          ${part.price.toFixed(2)} ea • ${(part.price * part.quantity).toFixed(2)} total
+                        </div>
+                      )}
                     </div>
-                    <div className="text-lg font-bold shrink-0 ml-4">
+                    <div className="text-xl font-bold shrink-0 text-right">
                       {part.quantity}
                     </div>
                   </div>

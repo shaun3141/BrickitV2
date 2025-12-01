@@ -354,7 +354,7 @@ export function Home() {
             3. Parts List
           </TabsTrigger>
           <TabsTrigger value="buy-it" disabled={!mosaicData} role="tab" aria-controls="buy-it-panel">
-            4. Buy It
+            4. Buy it
           </TabsTrigger>
           <TabsTrigger value="instructions" disabled={!mosaicData} role="tab" aria-controls="instructions-panel">
             5. Build it

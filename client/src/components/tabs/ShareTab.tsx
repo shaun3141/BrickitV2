@@ -135,21 +135,13 @@ export function ShareTab({ mosaicData, creationId, onSave }: ShareTabProps) {
         </p>
       </div>
 
-      <div className="grid md:grid-cols-2 gap-6">
-        {/* Preview Card */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Your Mosaic</CardTitle>
-            <CardDescription>
-              {mosaicData.width} × {mosaicData.height} studs ({mosaicData.width * mosaicData.height} bricks)
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <MosaicPreview mosaicData={mosaicData} />
-          </CardContent>
-        </Card>
+      <div className="grid lg:grid-cols-3 gap-6">
+        {/* Preview - takes up 2/3 */}
+        <div className="lg:col-span-2">
+          <MosaicPreview mosaicData={mosaicData} />
+        </div>
 
-        {/* Share Options Card */}
+        {/* Share Options - takes up 1/3 */}
         <div className="space-y-6">
           {/* Copy Link */}
           <Card>
