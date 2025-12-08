@@ -335,3 +335,4 @@ export function generatePieceSummary(placements: BrickPlacement[]): PieceSummary
   });
 }
 
+

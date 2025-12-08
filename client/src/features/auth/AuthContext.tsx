@@ -17,6 +17,20 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
+/**
+ * Determines if a user is newly signed up vs a returning user.
+ * For new users, created_at and last_sign_in_at are nearly identical.
+ * For returning users, last_sign_in_at is significantly later than created_at.
+ */
+function isNewUser(user: User): boolean {
+  const createdAt = new Date(user.created_at).getTime();
+  const lastSignIn = new Date(user.last_sign_in_at || user.created_at).getTime();
+  
+  // If created_at and last_sign_in_at are within 60 seconds, it's a new user
+  const timeDiff = Math.abs(lastSignIn - createdAt);
+  return timeDiff < 60 * 1000; // 60 seconds tolerance
+}
+
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session>(null);
@@ -95,25 +109,33 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             email: session.user.email,
           });
           
-          // Add user to Resend general audience (fire-and-forget)
-          supabase.functions.invoke('add-user-to-audience', {
-            headers: {
-              Authorization: `Bearer ${session.access_token}`,
-            },
-            body: {
-              email: session.user.email,
-            },
-          })
-            .then(({ error }) => {
-              if (error) {
-                console.warn('Failed to add user to audience (non-critical):', error);
-              } else {
-                console.log('✅ User added to audience');
-              }
+          // Only send welcome email for NEW users (not returning users)
+          // New users have created_at ≈ last_sign_in_at (within 60 seconds)
+          if (isNewUser(session.user)) {
+            console.log('[AuthContext] New user detected, triggering welcome flow');
+            
+            // Add user to Resend general audience and send welcome email
+            supabase.functions.invoke('add-user-to-audience', {
+              headers: {
+                Authorization: `Bearer ${session.access_token}`,
+              },
+              body: {
+                email: session.user.email,
+              },
             })
-            .catch((err) => {
-              console.warn('Error adding user to audience (non-critical):', err);
-            });
+              .then(({ error }) => {
+                if (error) {
+                  console.warn('Failed to add user to audience (non-critical):', error);
+                } else {
+                  console.log('✅ User added to audience and welcome email sent');
+                }
+              })
+              .catch((err) => {
+                console.warn('Error adding user to audience (non-critical):', err);
+              });
+          } else {
+            console.log('[AuthContext] Returning user detected, skipping welcome flow');
+          }
         } else if (event === 'SIGNED_OUT') {
           posthog.reset();
         } else if (event === 'TOKEN_REFRESHED') {

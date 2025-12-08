@@ -87,25 +87,7 @@ serve(async (req: Request) => {
 
     console.log('Processing user audience addition:', { userId, email: userEmail });
 
-    // Check if welcome email has already been sent
-    const { data: profile, error: profileError } = await supabase
-      .from('user_profiles')
-      .select('welcome_email_sent')
-      .eq('id', userId)
-      .single();
-
-    if (profileError && profileError.code !== 'PGRST116') {
-      // PGRST116 is "not found" - that's okay, we'll create the profile
-      console.error('Error checking user profile:', profileError);
-    }
-
-    const welcomeEmailAlreadySent = profile?.welcome_email_sent ?? false;
-
-    if (welcomeEmailAlreadySent) {
-      console.log('Welcome email already sent to user, skipping:', { userId, email: userEmail });
-    }
-
-    // Add to Resend general audience (idempotent operation)
+    // Add to Resend general audience (idempotent operation - always safe to call)
     const audienceResult = await addToGeneralAudience({
       email: userEmail,
       firstName,
@@ -118,10 +100,29 @@ serve(async (req: Request) => {
       console.log('✅ User added to audience:', { contactId: audienceResult.contactId });
     }
 
-    // Send welcome email only if not already sent
+    // Atomic "claim" pattern for welcome email - prevents race conditions
+    // This UPDATE only succeeds if welcome_email_sent is currently false
+    // If two requests race, only one will "claim" the email (get a row back)
     let welcomeEmailResult = { success: false, emailId: undefined as string | undefined };
+    let welcomeEmailClaimed = false;
     
-    if (!welcomeEmailAlreadySent) {
+    const { data: claimed, error: claimError } = await supabase
+      .from('user_profiles')
+      .update({ welcome_email_sent: true })
+      .eq('id', userId)
+      .eq('welcome_email_sent', false)
+      .select('id')
+      .maybeSingle();
+
+    if (claimError) {
+      console.error('Error claiming welcome email slot:', claimError);
+    }
+
+    if (claimed) {
+      // We successfully claimed the welcome email - send it
+      welcomeEmailClaimed = true;
+      console.log('✅ Claimed welcome email slot for user:', { userId, email: userEmail });
+      
       try {
         console.log('Sending welcome email to new user:', { userId, email: userEmail });
         const welcomeHtml = generateWelcomeEmail({ userName: firstName });
@@ -142,30 +143,17 @@ serve(async (req: Request) => {
             userId,
             email: userEmail 
           });
-
-          // Update user profile to mark welcome email as sent
-          const { error: updateError } = await supabase
-            .from('user_profiles')
-            .upsert({
-              id: userId,
-              welcome_email_sent: true,
-            }, {
-              onConflict: 'id',
-            });
-
-          if (updateError) {
-            console.error('Failed to update welcome_email_sent flag (non-critical):', updateError);
-          } else {
-            console.log('✅ Marked welcome email as sent in user profile:', { userId });
-          }
         } else {
           console.warn('Failed to send welcome email (non-critical)');
+          // Note: Flag is already set to true, so we won't retry automatically
+          // This prevents spam if there's a temporary email issue
         }
       } catch (err) {
         console.error('Error sending welcome email (non-critical):', err);
       }
     } else {
-      console.log('⏭️ Skipping welcome email - already sent previously');
+      // Either already sent OR claimed by a concurrent request - skip
+      console.log('⏭️ Welcome email already sent or claimed by another request:', { userId });
     }
 
     return corsResponse(
@@ -174,10 +162,10 @@ serve(async (req: Request) => {
         contactId: audienceResult.contactId,
         welcomeEmailSent: welcomeEmailResult.success,
         welcomeEmailId: welcomeEmailResult.emailId,
-        welcomeEmailSkipped: welcomeEmailAlreadySent,
-        message: welcomeEmailAlreadySent 
-          ? 'User already in audience, welcome email skipped' 
-          : 'User onboarding completed',
+        welcomeEmailSkipped: !welcomeEmailClaimed,
+        message: welcomeEmailClaimed 
+          ? 'User onboarding completed' 
+          : 'User already in audience, welcome email skipped',
       },
       200,
       origin

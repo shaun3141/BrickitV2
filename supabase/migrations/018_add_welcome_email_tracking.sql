@@ -17,3 +17,4 @@ SET welcome_email_sent = TRUE
 WHERE welcome_email_sent = FALSE;
 
 
+
