@@ -4,6 +4,15 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     
+    <!-- Google Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-DFLT45574R"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-DFLT45574R');
+    </script>
+    
     <!-- Favicons -->
     <link rel="icon" type="image/x-icon" href="/favicon.ico" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
@@ -12,30 +21,34 @@
     <link rel="manifest" href="/site.webmanifest" />
     
     <!-- Primary Meta Tags -->
-    <title>BrickIt - Turn Photos into LEGO Mosaics</title>
-    <meta name="title" content="BrickIt - Turn Photos into LEGO Mosaics" />
-    <meta name="description" content="Convert your photos into buildable LEGO mosaics with a complete parts list. Free, client-side processing, with interactive pixel editor and export options." />
+    <title>BrickIt - Free LEGO Mosaic Maker | Photo to Brick Converter with Pick a Brick Export</title>
+    <meta name="title" content="BrickIt - Free LEGO Mosaic Maker | Photo to Brick Converter with Pick a Brick Export" />
+    <meta name="description" content="Turn any photo into a buildable LEGO mosaic. Free online tool with Pick a Brick CSV export, smart part substitutions, step-by-step building instructions, and pixel editor. No account required." />
+    <meta name="keywords" content="LEGO mosaic maker, photo to LEGO, LEGO mosaic generator free, custom LEGO portrait, Pick a Brick CSV upload, turn picture into LEGO, LEGO brick art creator, LEGO mosaic instructions" />
     <meta name="author" content="Shaun van Weelden" />
     <meta name="theme-color" content="#dc2626" />
     
     <!-- Open Graph / Facebook -->
     <meta property="og:type" content="website" />
     <meta property="og:url" content="https://brickit.build/" />
-    <meta property="og:title" content="BrickIt - Turn Photos into LEGO Mosaics" />
-    <meta property="og:description" content="Convert your photos into buildable LEGO mosaics with a complete parts list. Free, client-side processing, with interactive pixel editor and export options." />
+    <meta property="og:title" content="BrickIt - Free LEGO Mosaic Maker with Pick a Brick Export" />
+    <meta property="og:description" content="Turn any photo into a buildable LEGO mosaic. Free tool with Pick a Brick CSV export, smart part substitutions, and step-by-step instructions. No account required." />
     <meta property="og:image" content="https://brickit.build/brickit_logo.png" />
+    <meta property="og:image:width" content="500" />
+    <meta property="og:image:height" content="499" />
+    <meta property="og:image:type" content="image/png" />
     <meta property="og:image:alt" content="BrickIt - Photo to LEGO Mosaic Converter" />
     <meta property="og:site_name" content="BrickIt" />
     <meta property="og:locale" content="en_US" />
     
     <!-- Twitter -->
-    <meta property="twitter:card" content="summary_large_image" />
-    <meta property="twitter:url" content="https://brickit.build/" />
-    <meta property="twitter:title" content="BrickIt - Turn Photos into LEGO Mosaics" />
-    <meta property="twitter:description" content="Convert your photos into buildable LEGO mosaics with a complete parts list. Free, client-side processing, with interactive pixel editor and export options." />
-    <meta property="twitter:image" content="https://brickit.build/brickit_logo.png" />
-    <meta property="twitter:image:alt" content="BrickIt - Photo to LEGO Mosaic Converter" />
-    <meta property="twitter:creator" content="@Shaun3141" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:url" content="https://brickit.build/" />
+    <meta name="twitter:title" content="BrickIt - Free LEGO Mosaic Maker with Pick a Brick Export" />
+    <meta name="twitter:description" content="Turn any photo into a buildable LEGO mosaic. Free tool with Pick a Brick CSV export, smart part substitutions, and step-by-step instructions." />
+    <meta name="twitter:image" content="https://brickit.build/brickit_logo.png" />
+    <meta name="twitter:image:alt" content="BrickIt - Photo to LEGO Mosaic Converter" />
+    <meta name="twitter:creator" content="@Shaun3141" />
     
     <!-- Additional SEO -->
     <link rel="canonical" href="https://brickit.build/" />
@@ -48,6 +61,7 @@
       "@context": "https://schema.org",
       "@type": "WebApplication",
       "name": "BrickIt",
+      "alternateName": "LEGO Mosaic Maker",
       "applicationCategory": "DesignApplication",
       "operatingSystem": "Any",
       "offers": {
@@ -55,7 +69,7 @@
         "price": "0",
         "priceCurrency": "USD"
       },
-      "description": "Convert your photos into buildable LEGO mosaics with a complete parts list. Free, client-side processing, with interactive pixel editor and export options.",
+      "description": "Turn any photo into a buildable LEGO mosaic. Free online tool with Pick a Brick CSV export, smart part substitutions, step-by-step building instructions, and pixel editor.",
       "url": "https://brickit.build/",
       "screenshot": "https://brickit.build/brickit_logo.png",
       "browserRequirements": "Requires JavaScript. Requires HTML5.",
@@ -66,14 +80,66 @@
         "url": "https://github.com/Shaun3141"
       },
       "featureList": [
-        "Upload photos via drag-and-drop",
-        "Client-side image processing",
-        "LEGO color matching",
-        "Interactive pixel editor",
-        "Eyedropper tool",
-        "Zoom and grid controls",
-        "Parts list generation",
-        "Export as JSON or CSV"
+        "Pick a Brick CSV export for one-click ordering",
+        "Smart part substitutions for unavailable brick/color combinations",
+        "Step-by-step building instructions with region-based assembly",
+        "Interactive pixel editor with eyedropper tool",
+        "Real-time price estimates from Pick a Brick",
+        "31 official LEGO colors",
+        "Client-side processing (photos never uploaded)",
+        "Export parts list as JSON or CSV",
+        "Drag-and-drop photo upload",
+        "Community gallery"
+      ]
+    }
+    </script>
+    
+    <!-- FAQ Schema -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "FAQPage",
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "How do I turn a photo into a LEGO mosaic?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Upload your photo to brickit.build, choose your mosaic size, and BrickIt automatically converts each pixel to the closest matching LEGO color. You can then edit individual pixels, download a parts list CSV for LEGO Pick a Brick, and export building instructions."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "What is the best free LEGO mosaic maker?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "BrickIt is the only free online LEGO mosaic maker that includes Pick a Brick CSV export, automatic part substitutions for unavailable brick/color combinations, and step-by-step building instructions. Other tools either require downloads, lack ordering integration, or ignore part availability."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "How do I order LEGO bricks for a custom mosaic?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "BrickIt generates a CSV file with LEGO element IDs and quantities that uploads directly to LEGO's Pick a Brick website. Click 'Upload list,' select your file, and all parts are added to your cart automatically—no manual searching required."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "How many LEGO colors are available for mosaics?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "BrickIt supports 31 official LEGO colors that are actually available from Pick a Brick. When a color/brick combination doesn't exist, BrickIt automatically substitutes equivalent available parts—so you never design a mosaic you can't actually build."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Are my photos private when using BrickIt?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Yes. BrickIt processes all images client-side in your browser. Your photos are never uploaded to any server. Privacy-first architecture means your images stay on your device."
+          }
+        }
       ]
     }
     </script>

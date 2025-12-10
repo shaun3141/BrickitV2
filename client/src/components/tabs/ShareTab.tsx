@@ -12,6 +12,7 @@ import {
   TooltipTrigger,
 } from '@/components/ui/tooltip';
 import type { MosaicData, BrickPlacement } from '@/types';
+import { downloadMosaicAsPng } from '@/utils/image/canvasExport';
 
 interface ShareTabProps {
   mosaicData: MosaicData;
@@ -20,7 +21,7 @@ interface ShareTabProps {
   onSave?: () => void;
 }
 
-export function ShareTab({ mosaicData, creationId, onSave }: ShareTabProps) {
+export function ShareTab({ mosaicData, placements, creationId, onSave }: ShareTabProps) {
   const { user } = useAuth();
   const [copied, setCopied] = useState(false);
   
@@ -40,33 +41,11 @@ export function ShareTab({ mosaicData, creationId, onSave }: ShareTabProps) {
   };
 
   const handleDownloadImage = () => {
-    // Create a canvas from the mosaic data
-    const canvas = document.createElement('canvas');
-    const ctx = canvas.getContext('2d');
-    if (!ctx) return;
-
-    const pixelSize = 20;
-    canvas.width = mosaicData.width * pixelSize;
-    canvas.height = mosaicData.height * pixelSize;
-
-    // Draw the mosaic
-    for (let y = 0; y < mosaicData.height; y++) {
-      for (let x = 0; x < mosaicData.width; x++) {
-        const colorData = mosaicData.pixels[y][x];
-        ctx.fillStyle = colorData.getHex();
-        ctx.fillRect(x * pixelSize, y * pixelSize, pixelSize, pixelSize);
-      }
-    }
-
-    // Download the canvas as PNG
-    canvas.toBlob((blob) => {
-      if (!blob) return;
-      const url = URL.createObjectURL(blob);
-      const link = document.createElement('a');
-      link.href = url;
-      link.download = 'brickit-mosaic.png';
-      link.click();
-      URL.revokeObjectURL(url);
+    // Download with LEGO-style 3D studs and brick boundaries
+    downloadMosaicAsPng(mosaicData, 'brickit-mosaic.png', {
+      pixelSize: 20,
+      showBrickBoundaries: placements && placements.length > 0,
+      placements,
     });
   };
 

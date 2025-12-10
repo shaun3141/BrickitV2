@@ -1,9 +1,10 @@
 import { useState, useEffect, useRef } from 'react';
-import { ZoomIn, ZoomOut } from 'lucide-react';
+import { ZoomIn, ZoomOut, Download } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import type { MosaicData } from '@/types/mosaic.types';
 import type { BrickPlacement } from '@/types';
+import { downloadMosaicAsPng } from '@/utils/image/canvasExport';
 
 interface MosaicPreviewProps {
   mosaicData: MosaicData;
@@ -167,12 +168,29 @@ export function MosaicPreview({ mosaicData, placements, showOptimized = false, i
     setPixelSize((prev) => Math.max(prev - 4, 4));
   };
 
+  const handleDownload = () => {
+    downloadMosaicAsPng(mosaicData, 'brickit-mosaic.png', {
+      pixelSize: 20, // Use consistent size for downloads
+      showBrickBoundaries: showOptimized,
+      placements,
+    });
+  };
+
   return (
     <Card>
       <CardHeader>
         <div className="flex items-center justify-between">
           <CardTitle>LEGO Mosaic Preview</CardTitle>
           <div className="flex gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleDownload}
+              aria-label="Download mosaic as PNG"
+            >
+              <Download className="h-4 w-4 mr-2" aria-hidden="true" />
+              Download
+            </Button>
             <Button
               variant="outline"
               size="sm"

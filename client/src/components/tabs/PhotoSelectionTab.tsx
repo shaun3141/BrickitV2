@@ -66,21 +66,39 @@ export function PhotoSelectionTab({
         {/* Right Column - Information */}
         <div className="space-y-6">
           <div>
-            <h3 className="text-2xl font-semibold mb-4">How It Works</h3>
-            <ol className="space-y-3 text-muted-foreground">
-              <li className="flex gap-3">
-                <span className="font-semibold text-foreground">1.</span>
-                <span>Upload your photo using drag-and-drop or click to browse</span>
-              </li>
-              <li className="flex gap-3">
-                <span className="font-semibold text-foreground">2.</span>
-                <span>Adjust filters and mosaic size to get the perfect look</span>
-              </li>
-              <li className="flex gap-3">
-                <span className="font-semibold text-foreground">3.</span>
-                <span>Get your complete parts list and build instructions</span>
-              </li>
-            </ol>
+            <h3 className="text-2xl font-semibold mb-4">✨ Tips & Tricks</h3>
+            <p className="text-muted-foreground mb-4">
+              Get better results by converting your photos to LEGO-friendly art styles first! Use <strong className="text-foreground">ChatGPT</strong> or <strong className="text-foreground">Google's Gemini</strong> to transform your images.
+            </p>
+            <div className="space-y-3">
+              <h4 className="font-semibold text-foreground text-sm uppercase tracking-wide">Art styles that work great:</h4>
+              <ul className="space-y-2 text-muted-foreground">
+                <li className="flex gap-3 items-start">
+                  <span className="text-orange-500 font-bold">1.</span>
+                  <div>
+                    <span className="font-medium text-foreground">Flat Vector / Minimalist Vector Art</span>
+                    <p className="text-sm mt-0.5">Clean lines and solid colors translate perfectly to LEGO bricks</p>
+                  </div>
+                </li>
+                <li className="flex gap-3 items-start">
+                  <span className="text-orange-500 font-bold">2.</span>
+                  <div>
+                    <span className="font-medium text-foreground">Wedha's Pop Art Portraits (WPAP)</span>
+                    <p className="text-sm mt-0.5">Bold geometric shapes with vibrant color blocks</p>
+                  </div>
+                </li>
+                <li className="flex gap-3 items-start">
+                  <span className="text-orange-500 font-bold">3.</span>
+                  <div>
+                    <span className="font-medium text-foreground">Pop Art Vector Style (Roy Lichtenstein)</span>
+                    <p className="text-sm mt-0.5">High contrast with Ben-Day dots creates iconic mosaics</p>
+                  </div>
+                </li>
+              </ul>
+            </div>
+            <p className="text-sm text-muted-foreground mt-4 bg-orange-50 dark:bg-orange-950/30 p-3 rounded-lg border border-orange-200 dark:border-orange-900">
+              💡 <strong className="text-foreground">Pro tip:</strong> Ask AI to "convert this photo to [style name] with limited colors" for best results!
+            </p>
           </div>
 
           <div>

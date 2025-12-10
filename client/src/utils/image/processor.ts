@@ -228,6 +228,7 @@ function applySaturation(
 /**
  * Samples a single pixel color from the center of a region
  * This preserves exact colors instead of creating blended intermediate colors
+ * Transparent pixels (alpha < 128) are converted to white
  */
 function sampleCenterPixel(
   imageData: ImageData,
@@ -246,11 +247,17 @@ function sampleCenterPixel(
   
   const i = (y * imageData.width + x) * 4;
   
-  return [
-    imageData.data[i],
-    imageData.data[i + 1],
-    imageData.data[i + 2],
-  ];
+  const r = imageData.data[i];
+  const g = imageData.data[i + 1];
+  const b = imageData.data[i + 2];
+  const a = imageData.data[i + 3];
+  
+  // If pixel is transparent (alpha < 128), return white
+  if (a < 128) {
+    return [255, 255, 255];
+  }
+  
+  return [r, g, b];
 }
 
 /**
@@ -284,7 +291,11 @@ export async function processImage(
     throw new Error('Could not get canvas context');
   }
 
-  // Draw the original image
+  // Fill canvas with white first so transparent pixels become white (not black)
+  ctx.fillStyle = '#FFFFFF';
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+  // Draw the original image on top of the white background
   ctx.drawImage(img, 0, 0);
 
   // Apply basic filters if specified (order matters: brightness -> contrast -> saturation)
