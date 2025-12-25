@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { PhotoSelectionTab } from '@/components/tabs/PhotoSelectionTab';
@@ -23,6 +23,7 @@ import { toast } from '@/lib/toast';
 import { Button } from '@/components/ui/button';
 import { Monitor, Sparkles } from 'lucide-react';
 import { useCanonical } from '@/hooks/useCanonical';
+import { LegoColor } from '@/utils/bricks/colors';
 
 export function AppPage() {
   const { user } = useAuth();
@@ -62,6 +63,77 @@ export function AppPage() {
   const [currentCreationId, setCurrentCreationId] = useState<string | null>(null);
   const [currentCreationTitle, setCurrentCreationTitle] = useState<string>('');
   const [showSaveDialog, setShowSaveDialog] = useState(false);
+  
+  // Track if we've already processed location state to prevent double-execution
+  const hasProcessedLocationState = useRef(false);
+
+  // Define handleLoadCreation early so it can be used in useEffect hooks
+  const handleLoadCreation = useCallback((creation: Creation) => {
+    // Validate that pixel_data has been reconstructed
+    if (!creation.pixel_data) {
+      console.error('[handleLoadCreation] Creation has no pixel_data:', creation);
+      toast.error('Failed to load creation: pixel data is missing. This should not happen.');
+      return;
+    }
+    
+    // Check if there's unsaved work
+    if (mosaicData) {
+      const confirmed = window.confirm(
+        'You have unsaved work. Loading this creation will replace it. Do you want to continue?'
+      );
+      
+      if (!confirmed) {
+        return; // User cancelled, don't load
+      }
+    }
+    
+    // Ensure pixel_data has proper LegoColor structure
+    // React Router's location state serialization can strip class prototypes
+    const ensuredPixelData = creation.pixel_data.map(row =>
+      row.map(pixel => {
+        // If pixel already is a proper LegoColor instance with hex getter, use it
+        if (pixel && typeof pixel === 'object' && 'hex' in pixel && pixel.hex) {
+          return pixel;
+        }
+        // If pixel has name and rgb, reconstruct as LegoColor
+        if (pixel && typeof pixel === 'object' && 'name' in pixel && 'rgb' in pixel) {
+          return new LegoColor(
+            (pixel as any).name,
+            (pixel as any).rgb as [number, number, number]
+          );
+        }
+        // Fallback to black if something is wrong
+        console.warn('[handleLoadCreation] Invalid pixel data, using fallback:', pixel);
+        return new LegoColor('Black', [0, 0, 0]);
+      })
+    );
+    
+    // Load the creation data into the editor
+    setMosaicData({
+      width: creation.width,
+      height: creation.height,
+      pixels: ensuredPixelData,
+      originalImage: creation.original_image_url || '',
+    });
+    
+    setCurrentCreationId(creation.id);
+    setCurrentCreationTitle(creation.title);
+    setFilterOptions(creation.filter_options || {
+      brightness: 0,
+      contrast: 0,
+      saturation: 0,
+      selectedFilter: undefined,
+    });
+    
+    // Track load event
+    trackEvent('creation_loaded', {
+      creation_id: creation.id,
+      sharing_status: creation.sharing_status,
+    });
+    
+    // Navigate to edit tab
+    setActiveTab('edit');
+  }, [mosaicData, trackEvent]);
 
   // Handle Stripe donation redirect
   useEffect(() => {
@@ -123,13 +195,24 @@ export function AppPage() {
   // Handle creation loaded from location state (e.g., from ProfileDialog or Gallery)
   useEffect(() => {
     const creationToLoad = (location.state as { creationToLoad?: Creation })?.creationToLoad;
-    if (creationToLoad) {
+    if (creationToLoad && !hasProcessedLocationState.current) {
       console.log('[AppPage] Detected creation in location state, loading...');
+      hasProcessedLocationState.current = true;
       handleLoadCreation(creationToLoad);
-      // Clear location state to prevent re-loading on re-renders
-      window.history.replaceState({}, '', window.location.pathname);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [location.state, handleLoadCreation]);
+
+  // Clear location state after it's been processed to prevent re-loading on navigation
+  useEffect(() => {
+    if (hasProcessedLocationState.current && location.state) {
+      // Defer clearing to ensure all state updates have completed
+      const timeoutId = setTimeout(() => {
+        window.history.replaceState({}, '', window.location.pathname);
+        console.log('[AppPage] Cleared location state');
+      }, 100);
+      
+      return () => clearTimeout(timeoutId);
+    }
   }, [location.state]);
 
   const handleImageSelect = async (file: File) => {
@@ -310,52 +393,6 @@ export function AppPage() {
       console.error('Error saving creation:', error);
       throw error;
     }
-  };
-
-  const handleLoadCreation = (creation: Creation) => {
-    // Validate that pixel_data has been reconstructed
-    if (!creation.pixel_data) {
-      console.error('[handleLoadCreation] Creation has no pixel_data:', creation);
-      toast.error('Failed to load creation: pixel data is missing. This should not happen.');
-      return;
-    }
-    
-    // Check if there's unsaved work
-    if (mosaicData) {
-      const confirmed = window.confirm(
-        'You have unsaved work. Loading this creation will replace it. Do you want to continue?'
-      );
-      
-      if (!confirmed) {
-        return; // User cancelled, don't load
-      }
-    }
-    
-    // Load the creation data into the editor
-    setMosaicData({
-      width: creation.width,
-      height: creation.height,
-      pixels: creation.pixel_data,
-      originalImage: creation.original_image_url || '',
-    });
-    
-    setCurrentCreationId(creation.id);
-    setCurrentCreationTitle(creation.title);
-    setFilterOptions(creation.filter_options || {
-      brightness: 0,
-      contrast: 0,
-      saturation: 0,
-      selectedFilter: undefined,
-    });
-    
-    // Track load event
-    trackEvent('creation_loaded', {
-      creation_id: creation.id,
-      sharing_status: creation.sharing_status,
-    });
-    
-    // Navigate to edit tab
-    setActiveTab('edit');
   };
 
   return (

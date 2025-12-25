@@ -66,10 +66,6 @@ export async function loadPixelDataFromPng(
         canvas.width = img.width;
         canvas.height = img.height;
         
-        // Fill canvas with white first so any transparent pixels become white (not black)
-        ctx.fillStyle = '#FFFFFF';
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
-        
         // Draw the image to the canvas
         ctx.drawImage(img, 0, 0);
         
@@ -93,15 +89,9 @@ export async function loadPixelDataFromPng(
             const r = data[index];
             const g = data[index + 1];
             const b = data[index + 2];
-            const a = data[index + 3];
-            
-            // If pixel is transparent (alpha < 128), treat as white
-            const finalR = a < 128 ? 255 : r;
-            const finalG = a < 128 ? 255 : g;
-            const finalB = a < 128 ? 255 : b;
             
             // Find the closest LEGO color
-            const legoColor = findClosestLegoColor([finalR, finalG, finalB]);
+            const legoColor = findClosestLegoColor([r, g, b]);
             rowData.push(legoColor);
           }
           

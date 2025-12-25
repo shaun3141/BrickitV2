@@ -1,9 +1,7 @@
 import { ImageUploader } from '@/components/editor/ImageUploader';
 import { MosaicPreview } from '@/components/editor/MosaicPreview';
 import { FilterSelector } from '@/components/editor/FilterSelector';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Upload } from 'lucide-react';
 import type { MosaicSize } from '@/types';
 import type { MosaicData, FilterOptions } from '@/types/mosaic.types';
 
@@ -130,42 +128,11 @@ export function PhotoSelectionTab({
     );
   }
 
-  // Show 3-column layout with filters in the middle
+  // Show layout with filters and large preview
   return (
     <div className="space-y-6">
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Left Column - Original Image */}
-        <div className="space-y-4">
-          <Card>
-            <CardHeader>
-              <div className="flex items-center justify-between">
-                <CardTitle>Original Image</CardTitle>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={handleUploadDifferentImage}
-                  disabled={isProcessing}
-                  aria-label="Upload a different image"
-                >
-                  <Upload className="mr-2 h-4 w-4" aria-hidden="true" />
-                  Upload Different
-                </Button>
-              </div>
-            </CardHeader>
-            <CardContent>
-              <div className="border rounded-md overflow-hidden bg-muted/20">
-                <img
-                  src={mosaicData.filteredImage || mosaicData.originalImage}
-                  alt="Original image with filters applied for LEGO mosaic conversion"
-                  className="w-full h-auto"
-                  style={{ maxHeight: '400px', objectFit: 'contain' }}
-                />
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Middle Column - Settings & Filters */}
+        {/* Left Column - Settings & Filters (1/3 width) */}
         <div className="space-y-4">
           <FilterSelector
             filterOptions={filterOptions}
@@ -177,9 +144,14 @@ export function PhotoSelectionTab({
           />
         </div>
 
-        {/* Right Column - LEGO Preview */}
-        <div className="space-y-4">
-          <MosaicPreview mosaicData={mosaicData} initialPixelSize={6} />
+        {/* Right Column - LEGO Preview (2/3 width) */}
+        <div className="lg:col-span-2 space-y-4">
+          <MosaicPreview 
+            mosaicData={mosaicData} 
+            initialPixelSize={8} 
+            onUploadDifferent={handleUploadDifferentImage}
+            isProcessing={isProcessing}
+          />
           
           <div className="flex justify-end">
             <Button
@@ -192,7 +164,6 @@ export function PhotoSelectionTab({
           </div>
         </div>
       </div>
-
     </div>
   );
 }

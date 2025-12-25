@@ -12,6 +12,7 @@ import { optimizeBrickPlacement } from '@/utils/bricks/optimizer';
 import { buildBrickColorAvailabilityMap } from '@/services/bricks.service';
 import { PartsListTab } from '@/components/tabs/PartsListTab';
 import { InstructionsTab } from '@/components/tabs/InstructionsTab';
+import { BuyItTab } from '@/components/tabs/BuyItTab';
 import { updateCanonicalTag } from '@/utils/seo';
 
 export function ViewCreation() {
@@ -21,7 +22,7 @@ export function ViewCreation() {
   const [placements, setPlacements] = useState<BrickPlacement[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState('images');
+  const [activeTab, setActiveTab] = useState('parts-list');
 
   useEffect(() => {
     if (!creationId) {
@@ -267,11 +268,22 @@ export function ViewCreation() {
 
         {/* Tabs */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-3 mb-6">
-            <TabsTrigger value="images">Images</TabsTrigger>
+          <TabsList className="grid w-full grid-cols-4 mb-6">
             <TabsTrigger value="parts-list" disabled={!mosaicData}>Parts List</TabsTrigger>
+            <TabsTrigger value="images">Preview</TabsTrigger>
+            <TabsTrigger value="buy-it" disabled={!mosaicData}>Buy It</TabsTrigger>
             <TabsTrigger value="instructions" disabled={!mosaicData}>Instructions</TabsTrigger>
           </TabsList>
+
+          <TabsContent value="parts-list">
+            {mosaicData ? (
+              <PartsListTab mosaicData={mosaicData} placements={placements} />
+            ) : (
+              <div className="text-center py-12">
+                <p className="text-muted-foreground">Parts list not available for this creation.</p>
+              </div>
+            )}
+          </TabsContent>
 
           <TabsContent value="images" className="space-y-6">
             {/* Images Grid */}
@@ -326,12 +338,12 @@ export function ViewCreation() {
             </div>
           </TabsContent>
 
-          <TabsContent value="parts-list">
+          <TabsContent value="buy-it">
             {mosaicData ? (
-              <PartsListTab mosaicData={mosaicData} placements={placements} />
+              <BuyItTab mosaicData={mosaicData} placements={placements} showBricks={true} />
             ) : (
               <div className="text-center py-12">
-                <p className="text-muted-foreground">Parts list not available for this creation.</p>
+                <p className="text-muted-foreground">Shopping list not available for this creation.</p>
               </div>
             )}
           </TabsContent>

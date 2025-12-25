@@ -31,7 +31,24 @@ interface EditTabProps {
 export function EditTab({ mosaicData, onMosaicUpdate, onSave, showBricks, onShowBricksChange }: EditTabProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const previewCanvasRef = useRef<HTMLCanvasElement>(null);
-  const [pixelSize, setPixelSize] = useState(16);
+  
+  // Calculate initial pixel size to fit the canvas width in the container
+  const calculateInitialPixelSize = () => {
+    // The canvas container is lg:col-span-3 (75% width in a 4-column grid)
+    // Assuming a reasonable container width of ~900px for the larger edit canvas area
+    const estimatedContainerWidth = 900;
+    const padding = 32; // p-4 = 16px on each side
+    const border = 2;
+    const availableWidth = estimatedContainerWidth - padding - border;
+    
+    // Calculate pixel size that fits the full mosaic width
+    const calculatedPixelSize = Math.floor(availableWidth / mosaicData.width);
+    
+    // Clamp between 8 and 32 (the zoom limits for edit canvas)
+    return Math.max(8, Math.min(32, calculatedPixelSize));
+  };
+  
+  const [pixelSize, setPixelSize] = useState(calculateInitialPixelSize());
   const [showGrid, setShowGrid] = useState(true);
   const [selectedColor, setSelectedColor] = useState<LegoColor>(LEGO_COLORS[0]);
   const [activeTool, setActiveTool] = useState<Tool>('pencil');
@@ -395,6 +412,13 @@ export function EditTab({ mosaicData, onMosaicUpdate, onSave, showBricks, onShow
     for (let row = 0; row < mosaicData.height; row++) {
       for (let col = 0; col < mosaicData.width; col++) {
         const color = mosaicData.pixels[row][col];
+        
+        // Skip if color is undefined or doesn't have hex property
+        if (!color || !color.hex) {
+          console.warn(`[EditTab] Invalid color at [${row}][${col}]:`, color);
+          continue;
+        }
+        
         const x = col * pixelSize;
         const y = row * pixelSize;
         

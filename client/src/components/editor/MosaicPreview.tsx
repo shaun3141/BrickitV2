@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { ZoomIn, ZoomOut, Download } from 'lucide-react';
+import { ZoomIn, ZoomOut, Download, Upload } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import type { MosaicData } from '@/types/mosaic.types';
@@ -11,11 +11,42 @@ interface MosaicPreviewProps {
   placements?: BrickPlacement[];
   showOptimized?: boolean;
   initialPixelSize?: number;
+  onUploadDifferent?: () => void;
+  isProcessing?: boolean;
 }
 
-export function MosaicPreview({ mosaicData, placements, showOptimized = false, initialPixelSize = 12 }: MosaicPreviewProps) {
+export function MosaicPreview({ 
+  mosaicData, 
+  placements, 
+  showOptimized = false, 
+  initialPixelSize,
+  onUploadDifferent,
+  isProcessing = false
+}: MosaicPreviewProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const [pixelSize, setPixelSize] = useState(initialPixelSize);
+  const containerRef = useRef<HTMLDivElement>(null);
+  
+  // Calculate initial pixel size to fit the image width in the container
+  const calculateInitialPixelSize = () => {
+    if (initialPixelSize !== undefined) {
+      return initialPixelSize;
+    }
+    
+    // Container width minus padding (p-4 = 1rem = 16px on each side) and borders (2px total)
+    // Assuming a reasonable container width of ~450px for lg:grid-cols-2 layout
+    const estimatedContainerWidth = 450;
+    const padding = 32; // 16px on each side
+    const border = 2;
+    const availableWidth = estimatedContainerWidth - padding - border;
+    
+    // Calculate pixel size that fits the full mosaic width
+    const calculatedPixelSize = Math.floor(availableWidth / mosaicData.width);
+    
+    // Clamp between 4 and 32 (the zoom limits)
+    return Math.max(4, Math.min(32, calculatedPixelSize));
+  };
+  
+  const [pixelSize, setPixelSize] = useState(calculateInitialPixelSize());
   const [showGrid, setShowGrid] = useState(true);
 
   // Helper function to draw a LEGO stud with 3D shading effect
@@ -179,9 +210,26 @@ export function MosaicPreview({ mosaicData, placements, showOptimized = false, i
   return (
     <Card>
       <CardHeader>
-        <div className="flex items-center justify-between">
-          <CardTitle>LEGO Mosaic Preview</CardTitle>
-          <div className="flex gap-2">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div className="space-y-1">
+            <CardTitle>LEGO Mosaic Preview</CardTitle>
+            <p className="text-sm text-muted-foreground">
+              Dimensions: {mosaicData.width} × {mosaicData.height} studs
+            </p>
+          </div>
+          <div className="flex flex-wrap gap-2">
+            {onUploadDifferent && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={onUploadDifferent}
+                disabled={isProcessing}
+                aria-label="Upload a different image"
+              >
+                <Upload className="mr-2 h-4 w-4" aria-hidden="true" />
+                Upload Different
+              </Button>
+            )}
             <Button
               variant="outline"
               size="sm"
@@ -199,32 +247,31 @@ export function MosaicPreview({ mosaicData, placements, showOptimized = false, i
             >
               {showGrid ? 'Hide' : 'Show'} Grid
             </Button>
-            <Button
-              variant="outline"
-              size="icon"
-              onClick={handleZoomOut}
-              disabled={pixelSize <= 4}
-              aria-label="Zoom out"
-            >
-              <ZoomOut className="h-4 w-4" aria-hidden="true" />
-            </Button>
-            <Button
-              variant="outline"
-              size="icon"
-              onClick={handleZoomIn}
-              disabled={pixelSize >= 32}
-              aria-label="Zoom in"
-            >
-              <ZoomIn className="h-4 w-4" aria-hidden="true" />
-            </Button>
+            <div className="flex gap-1">
+              <Button
+                variant="outline"
+                size="icon"
+                onClick={handleZoomOut}
+                disabled={pixelSize <= 4}
+                aria-label="Zoom out"
+              >
+                <ZoomOut className="h-4 w-4" aria-hidden="true" />
+              </Button>
+              <Button
+                variant="outline"
+                size="icon"
+                onClick={handleZoomIn}
+                disabled={pixelSize >= 32}
+                aria-label="Zoom in"
+              >
+                <ZoomIn className="h-4 w-4" aria-hidden="true" />
+              </Button>
+            </div>
           </div>
         </div>
-        <p className="text-sm text-muted-foreground">
-          Dimensions: {mosaicData.width} × {mosaicData.height} studs
-        </p>
       </CardHeader>
       <CardContent>
-        <div className="overflow-auto max-h-[600px] border rounded-md bg-muted/20 p-4">
+        <div ref={containerRef} className="overflow-auto max-h-[600px] border rounded-md bg-muted/20 p-4">
           <canvas
             ref={canvasRef}
             className="mx-auto"
