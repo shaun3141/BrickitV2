@@ -277,7 +277,7 @@ export function ViewCreation() {
 
           <TabsContent value="parts-list">
             {mosaicData ? (
-              <PartsListTab mosaicData={mosaicData} placements={placements} />
+              <PartsListTab mosaicData={mosaicData} placements={placements} showBricks={true} />
             ) : (
               <div className="text-center py-12">
                 <p className="text-muted-foreground">Parts list not available for this creation.</p>
